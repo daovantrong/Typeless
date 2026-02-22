@@ -1,0 +1,110 @@
+TypeLess - Auto Form Filler is the ultimate productivity extension that revolutionizes how you interact with web forms. Designed for developers, testers, shoppers, and anyone who frequently fills out forms online, TypeLess combines intelligent automation with privacy-first design to deliver a seamless form-filling experience.
+
+## 🚀 Core Features
+
+**One-Click Form Filling**
+Fill entire web forms instantly with pre-saved profiles. No more repetitive typing or manual data entry. Simply select a profile and watch as TypeLess intelligently populates every field with perfect accuracy.
+
+**Unlimited Profile Management**
+Create and manage unlimited profiles for different scenarios - work, personal, shopping, testing, or any context you need. Switch between profiles effortlessly and keep your data organized.
+
+**Smart Fill Technology**
+Our revolutionary Smart Fill engine automatically detects form field types and generates realistic mock data on demand. Perfect for developers and testers who need placeholder data quickly. Generates unique names, emails, phone numbers, addresses, and more.
+
+## 🌍 Global Accessibility
+
+**Multi-Language Support**
+- 🇺🇸 English
+- 🇻🇳 Vietnamese  
+- 🇨🇳 Simplified Chinese
+- 🇹🇼 Traditional Chinese
+- 🇯🇵 Japanese
+- 🇰🇷 Korean
+
+The entire interface, including field labels and tooltips, dynamically translates to your preferred language, making TypeLess truly global.
+
+## 🛠️ Advanced Toolkit
+
+**Form Utilities**
+- Save HTML: Export current form state for debugging and documentation
+- Unlock Right-Click: Bypass websites that disable context menus
+- Screenshot Capture: Full page or visible area screenshots
+
+**Mobile Emulation**
+- Simulate Android/iOS devices with accurate user agents
+- Test mobile forms without switching devices
+- Platform-aware form filling
+
+**Data Management**
+- Export profiles to JSON for backup
+- Import profiles from backup files
+- Copy/paste profiles between tabs or machines
+- Granular delete options
+
+## ⌨️ Productivity Shortcuts
+
+Speed up your workflow with keyboard shortcuts:
+- Ctrl+Shift+H (Command+Shift+H on Mac): Toggle toolbar visibility
+
+## 🎨 User Experience
+
+**Modern Interface**
+Clean, intuitive design with Material Design icons. The floating toolbar provides instant access without cluttering your workspace. Responsive design works perfectly on desktop and mobile browsers.
+
+**Smart Detection**
+TypeLess intelligently identifies form fields - text inputs, dropdowns, checkboxes, radio buttons, and textareas. It understands field context and matches them with the right data from your profiles.
+
+## 🔒 Privacy & Security
+
+**100% Local Storage**
+All your profiles and data are stored exclusively on your device using the browser's secure storage API. No cloud servers, no data mining, no tracking. Your information never leaves your browser.
+
+**Minimal Permissions**
+We only request permissions essential for functionality:
+- Storage: Save profiles locally
+- ActiveTab: Interact with current forms
+- Scripting: Inject toolbar and fill functionality
+- Clipboard: Copy/paste profile data
+- ContextMenus: Quick access shortcuts
+- DeclarativeNetRequest: Modify network requests for user agent switching
+- DeclarativeNetRequestWithHostAccess: Extended network request handling
+- Downloads: Save HTML exports and screenshots
+
+**Transparent Operations**
+No background activity, no remote connections, no analytics. TypeLess only works when you explicitly interact with it.
+
+## 💡 Use Cases
+
+**For Developers**
+- Test forms with realistic data quickly
+- Debug form states with HTML export
+- Mobile emulation for responsive testing
+
+**For Testers**
+- Generate test data on demand
+- Multiple test profiles for different scenarios
+- Screenshot documentation for bug reports
+
+**For Shoppers**
+- Instant checkout with saved profiles
+- Multiple shipping/billing addresses
+- Quick form filling across shopping sites
+
+**For Professionals**
+- Job applications with saved personal data
+- Registration forms for conferences/events
+- Account creation across multiple platforms
+
+## 🚀 Getting Started
+
+1. Install TypeLess from the extension store
+2. Pin it to your toolbar for quick access
+3. Create your first profile by filling a form and clicking "Save Form"
+4. Experience one-click form filling on any website
+
+TypeLess transforms repetitive form filling into a fast, secure, and enjoyable experience. Join thousands of users who've reclaimed their time from tedious data entry.
+
+**Version 1.0.2** - Latest features include mobile emulation, screenshot capture, and enhanced Smart Fill technology.
+
+---
+Privacy: No personal data collected. Your profiles remain securely stored on your device and are never transmitted to external servers.

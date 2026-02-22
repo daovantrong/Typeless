@@ -1,0 +1,702 @@
+/**
+ * ╔════╗─────────────╔╗───────────────╔╗──────╔════╗╔═══╗╔═══╗╔═╗─╔╗╔═══╗──╔═══╗╔═══╗╔═══╗
+ * ║╔╗╔╗║─────────────║║───────────────║║──────║╔╗╔╗║║╔═╗║║╔═╗║║║╚╗║║║╔═╗║──║╔═╗║║╔═╗║║╔═╗║
+ * ╚╝║║╚╝╔╗─╔╗╔══╗╔══╗║║───╔══╗╔══╗╔══╗║╚═╦╗─╔╗╚╝║║╚╝║╚═╝║║║─║║║╔╗╚╝║║║─╚╝──║╚═╝║║╚═╝║║║─║║
+ * ──║║──║║─║║║╔╗║║║═╣║║─╔╗║║═╣║══╣║══╣║╔╗║║─║║──║║──║╔╗╔╝║║─║║║║╚╗║║║║╔═╗──║╔══╝║╔╗╔╝║║─║║
+ * ──║║──║╚═╝║║╚╝║║║═╣║╚═╝║║║═╣╠══║╠══║║╚╝║╚═╝║──║║──║║║╚╗║╚═╝║║║─║║║║╚╩═║╔╗║║───║║║╚╗║╚═╝║
+ * ──╚╝──╚═╗╔╝║╔═╝╚══╝╚═══╝╚══╝╚══╝╚══╝╚══╩═╗╔╝──╚╝──╚╝╚═╝╚═══╝╚╝─╚═╝╚═══╝╚╝╚╝───╚╝╚═╝╚═══╝
+ * ──────╔═╝║─║║──────────────────────────╔═╝║
+ * ──────╚══╝─╚╝──────────────────────────╚══╝
+ * 
+ * TypeLess - Auto Form Filler
+ * v1.0.2 by TRONG.PRO
+ */
+
+/* Auto Form Filler Toolbar Styles */
+
+/* Main Toolbar - Always visible at bottom */
+#auto-form-filler-toolbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3);
+  z-index: 2147483640;
+  /* Max 32-bit integer to stay on top of everything, but below modal */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  animation: slideUp 0.3s ease-out;
+  margin-right: 0;
+  padding-bottom: 0;
+  /* Force cursor visibility with extreme specificity to override 'html body *' rules */
+  cursor: default !important;
+}
+
+/* Global override for extension elements */
+html body #auto-form-filler-toolbar,
+html body #auto-form-filler-toolbar *,
+html body .auto-filler-modal,
+html body .auto-filler-modal *,
+html body #auto-filler-floating-btn,
+html body #auto-filler-floating-btn * {
+  cursor: default !important;
+}
+
+/* Pointer overrides */
+html body #auto-form-filler-toolbar .toolbar-btn,
+html body #auto-form-filler-toolbar .profile-btn,
+html body #auto-form-filler-toolbar button,
+html body .auto-filler-modal button,
+html body .auto-filler-modal .field-item,
+html body .auto-filler-modal .modal-close,
+html body #auto-filler-floating-btn {
+  cursor: pointer !important;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.toolbar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 15px;
+  /* Reduced from 10px 20px */
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  height: 40px;
+  /* Force fixed height */
+  box-sizing: border-box;
+}
+
+.toolbar-title {
+  font-size: 14px;
+  /* Slightly smaller */
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.toolbar-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 4px 10px;
+  /* Reduced from 8px 16px */
+  border-radius: 4px;
+  cursor: pointer !important;
+  /* Force pointer cursor */
+  font-size: 13px;
+  /* Slightly smaller */
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  /* Fixed height for buttons */
+}
+
+.toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.toolbar-btn:active {
+  transform: translateY(0);
+}
+
+.toolbar-btn-icon {
+  width: 28px;
+  padding: 0;
+  justify-content: center;
+}
+
+.toolbar-content {
+  padding: 15px 20px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.toolbar-profiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.profile-btn-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.toolbar-loading,
+.toolbar-empty {
+  text-align: center;
+  padding: 10px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  white-space: nowrap;
+  /* Prevent wrapping */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.toolbar-empty img {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  margin: 0 4px !important;
+}
+
+.profile-btn {
+  background: rgba(255, 255, 255, 0.95);
+  color: #667eea;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 20px;
+  padding-right: 35px;
+  /* Make room for delete button */
+  border-radius: 8px;
+  cursor: pointer !important;
+  /* Force pointer cursor */
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 150px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: #667eea;
+}
+
+.profile-btn:active {
+  transform: translateY(0);
+}
+
+.profile-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer !important;
+  /* Force pointer cursor */
+  transition: all 0.2s;
+  opacity: 0.7;
+}
+
+.profile-delete-btn:hover {
+  background: #ff3b30;
+  color: white;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.profile-delete-btn:active {
+  transform: scale(0.95);
+}
+
+.profile-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.profile-count {
+  font-size: 12px;
+  color: #764ba2;
+  opacity: 0.8;
+}
+
+/* Notification styles */
+.auto-form-filler-notification {
+  animation: fadeInRight 0.3s ease-out;
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scrollbar styles for toolbar */
+.toolbar-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.toolbar-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.toolbar-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.toolbar-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive design */
+@media (max-width: 800px) {
+  .btn-text {
+    display: none;
+  }
+
+  .toolbar-btn {
+    padding: 8px 10px;
+  }
+
+  .toolbar-btn img {
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .toolbar-header {
+    padding: 8px 10px;
+  }
+
+  .toolbar-title {
+    font-size: 14px;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .title-text {
+    display: none;
+  }
+
+  .toolbar-btn {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .toolbar-controls {
+    overflow-x: auto;
+    max-width: calc(100vw - 60px);
+    padding-bottom: 4px;
+    /* Space for scrollbar */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .toolbar-controls::-webkit-scrollbar {
+    height: 4px;
+    display: block;
+  }
+
+  .toolbar-controls::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
+
+  .toolbar-content {
+    padding: 10px 15px;
+  }
+
+  .profile-btn {
+    min-width: 120px;
+    padding: 10px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar-title {
+    display: none;
+    /* Hide title on very small screens to save space */
+  }
+
+  .toolbar-header {
+    padding: 6px;
+  }
+
+  .toolbar-controls {
+    max-width: 100%;
+  }
+}
+
+/* Modal Styles for Field Selection */
+.auto-filler-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Max 32-bit integer to stay on top of everything */
+  z-index: 2147483647;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.auto-filler-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease-out;
+  cursor: default !important;
+  /* Force cursor visibility */
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 2px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #667eea;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer !important;
+  /* Force pointer cursor */
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-section {
+  margin-bottom: 20px;
+}
+
+.modal-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modal-label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-btn-small {
+  padding: 6px 12px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer !important;
+  /* Force pointer cursor */
+  transition: background 0.2s;
+  font-weight: 500;
+}
+
+.modal-btn-small:hover {
+  background: #e0e0e0;
+}
+
+.field-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 2px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.field-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer !important;
+  /* Force pointer cursor */
+  transition: background 0.2s;
+  margin-bottom: 4px;
+}
+
+.field-item:hover {
+  background: #f9f9f9;
+}
+
+.field-checkbox {
+  margin-right: 12px;
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer !important;
+  /* Force pointer cursor */
+  flex-shrink: 0;
+}
+
+.field-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.field-label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.field-value {
+  font-size: 12px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.field-value:empty::before {
+  content: '(trống)';
+  color: #999;
+  font-style: italic;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 2px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer !important;
+  /* Force pointer cursor */
+  transition: all 0.2s;
+}
+
+.modal-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.modal-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.modal-btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.modal-btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+/* Scrollbar for field list */
+.field-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.field-list::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.field-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.field-list::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Floating Restore Button */
+#auto-filler-floating-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  font-size: 28px;
+  cursor: pointer !important;
+  /* Force pointer cursor */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 2147483640;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#auto-filler-floating-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+#auto-filler-floating-btn:active {
+  transform: scale(0.95);
+}
+
+/**
+ * End of styles.css
+* ╔══╗─────────╔╗────╔═╗╔═╗╔╗───╔══╗╔═╗╔═╗╔═╦╗╔══╗──╔═╗╔═╗╔═╗
+* ╚╗╔╝╔╦╗╔═╗╔═╗║║─╔═╗║═╣║═╣║╚╦╦╗╚╗╔╝║╬║║║║║║║║║╔═╣──║╬║║╬║║║║
+* ─║║─║║║║╬║║╩╣║╚╗║╩╣╠═║╠═║║╬║║║─║║─║╗╣║║║║║║║║╚╗║╔╗║╔╝║╗╣║║║
+* ─╚╝─╠╗║║╔╝╚═╝╚═╝╚═╝╚═╝╚═╝╚═╬╗║─╚╝─╚╩╝╚═╝╚╩═╝╚══╝╚╝╚╝─╚╩╝╚═╝
+* ────╚═╝╚╝──────────────────╚═╝
+ */
+
+/* ─── Shadow DOM scoping ─────────────────────────────────────────────────────
+ * The toolbar, modal, and notifications are rendered inside Shadow DOM roots.
+ * The class-based rules above (.toolbar-*, .modal-*, etc.) work unchanged
+ * inside shadow roots because shadow DOM inherits nothing from the page but
+ * DOES apply stylesheets that are explicitly linked/injected inside the shadow.
+ *
+ * The :host { } rule for positioning is injected as a <style> element directly
+ * inside each shadow root (in content.js) so it cannot be overridden by the
+ * page's CSS selectors.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/* Floating restore button — lives in light DOM, uses high-specificity rule */
+html body #auto-filler-floating-btn {
+  all: initial;
+  display: flex !important;
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border: 3px solid rgba(255,255,255,0.3) !important;
+  font-size: 28px !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+  z-index: 2147483640 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s !important;
+  font-family: -apple-system, sans-serif !important;
+  box-sizing: border-box !important;
+}
+html body #auto-filler-floating-btn:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 30px rgba(0,0,0,0.4) !important;
+}

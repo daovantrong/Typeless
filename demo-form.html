@@ -1,0 +1,366 @@
+<!--
+    ╔════╗─────────────╔╗───────────────╔╗──────╔════╗╔═══╗╔═══╗╔═╗─╔╗╔═══╗──╔═══╗╔═══╗╔═══╗
+    ║╔╗╔╗║─────────────║║───────────────║║──────║╔╗╔╗║║╔═╗║║╔═╗║║║╚╗║║║╔═╗║──║╔═╗║║╔═╗║║╔═╗║
+    ╚╝║║╚╝╔╗─╔╗╔══╗╔══╗║║───╔══╗╔══╗╔══╗║╚═╦╗─╔╗╚╝║║╚╝║╚═╝║║║─║║║╔╗╚╝║║║─╚╝──║╚═╝║║╚═╝║║║─║║
+    ──║║──║║─║║║╔╗║║║═╣║║─╔╗║║═╣║══╣║══╣║╔╗║║─║║──║║──║╔╗╔╝║║─║║║║╚╗║║║║╔═╗──║╔══╝║╔╗╔╝║║─║║
+    ──║║──║╚═╝║║╚╝║║║═╣║╚═╝║║║═╣╠══║╠══║║╚╝║╚═╝║──║║──║║║╚╗║╚═╝║║║─║║║║╚╩═║╔╗║║───║║║╚╗║╚═╝║
+    ──╚╝──╚═╗╔╝║╔═╝╚══╝╚═══╝╚══╝╚══╝╚══╝╚══╩═╗╔╝──╚╝──╚╝╚═╝╚═══╝╚╝─╚═╝╚═══╝╚╝╚╝───╚╝╚═╝╚═══╝
+    ──────╔═╝║─║║──────────────────────────╔═╝║
+    ──────╚══╝─╚╝──────────────────────────╚══╝
+
+    TypeLess - Auto Form Filler
+    v1.0.2 by TRONG.PRO
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Registration Form - Auto Form Filler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .checkbox-group,
+        .radio-group {
+            margin-top: 8px;
+        }
+
+        .checkbox-item,
+        .radio-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-item input,
+        .radio-item input {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label,
+        .radio-item label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .info-banner {
+            background: #f0f7ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .info-banner h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .info-banner p {
+            color: #555;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="info-banner">
+            <h3>📸 Demo Form for Auto Form Filler Screenshots</h3>
+            <p>Use this form to capture professional screenshots. Fill it out, save a profile, then take screenshots!
+            </p>
+        </div>
+
+        <div class="header">
+            <h1>✨ Registration Form</h1>
+            <p>Complete your profile information</p>
+        </div>
+
+        <form id="demoForm">
+            <!-- Personal Information -->
+            <h3 style="color: #667eea; margin-bottom: 16px;">Personal Information</h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name *</label>
+                    <input type="text" id="firstName" name="firstName" placeholder="John" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name *</label>
+                    <input type="text" id="lastName" name="lastName" placeholder="Doe" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" placeholder="john.doe@example.com" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567">
+                </div>
+                <div class="form-group">
+                    <label for="birthdate">Date of Birth</label>
+                    <input type="date" id="birthdate" name="birthdate">
+                </div>
+            </div>
+
+            <!-- Address -->
+            <h3 style="color: #667eea; margin: 24px 0 16px;">Address</h3>
+
+            <div class="form-group">
+                <label for="address">Street Address</label>
+                <input type="text" id="address" name="address" placeholder="123 Main Street">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" name="city" placeholder="New York">
+                </div>
+                <div class="form-group">
+                    <label for="zipcode">ZIP Code</label>
+                    <input type="text" id="zipcode" name="zipcode" placeholder="10001">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="country">Country</label>
+                <select id="country" name="country">
+                    <option value="">Select Country</option>
+                    <option value="us">United States</option>
+                    <option value="vn">Vietnam</option>
+                    <option value="uk">United Kingdom</option>
+                    <option value="ca">Canada</option>
+                    <option value="au">Australia</option>
+                </select>
+            </div>
+
+            <!-- Preferences -->
+            <h3 style="color: #667eea; margin: 24px 0 16px;">Preferences</h3>
+
+            <div class="form-group">
+                <label>Account Type</label>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="personal" name="accountType" value="personal">
+                        <label for="personal">Personal</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="business" name="accountType" value="business">
+                        <label for="business">Business</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="enterprise" name="accountType" value="enterprise">
+                        <label for="enterprise">Enterprise</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Interests (select all that apply)</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="tech" name="interests" value="technology">
+                        <label for="tech">Technology</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="_business" name="interests" value="_business">
+                        <label for="_business">Business</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="design" name="interests" value="design">
+                        <label for="design">Design</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="marketing" name="interests" value="marketing">
+                        <label for="marketing">Marketing</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="comments">Additional Comments</label>
+                <textarea id="comments" name="comments" placeholder="Tell us more about yourself..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="newsletter" name="newsletter" value="yes">
+                    <label for="newsletter">Subscribe to newsletter</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="terms" name="terms" value="yes" required>
+                    <label for="terms">I agree to the Terms and Conditions *</label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Registration</button>
+        </form>
+    </div>
+
+    <script>
+        // Block right click
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Block selection
+        document.onselectstart = function () {
+            return false;
+        };
+
+        // Block copy, cut, paste
+        document.addEventListener('copy', function (e) {
+            e.preventDefault();
+            return false;
+        });
+        document.addEventListener('cut', function (e) {
+            e.preventDefault();
+            return false;
+        });
+        document.addEventListener('paste', function (e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Also add CSS via JS to ensure it overrides unless we remove it
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+        `;
+        document.head.appendChild(style);
+
+        document.getElementById('demoForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            alert('✅ Form submitted successfully!\n\n(This is a demo form for screenshot purposes)');
+        });
+    </script>
+</body>
+
+</html>
+
+<!--
+    End of demo-form.html
+    ╔══╗─────────╔╗────╔═╗╔═╗╔╗───╔══╗╔═╗╔═╗╔═╦╗╔══╗──╔═╗╔═╗╔═╗
+    ╚╗╔╝╔╦╗╔═╗╔═╗║║─╔═╗║═╣║═╣║╚╦╦╗╚╗╔╝║╬║║║║║║║║║╔═╣──║╬║║╬║║║║
+    ─║║─║║║║╬║║╩╣║╚╗║╩╣╠═║╠═║║╬║║║─║║─║╗╣║║║║║║║║╚╗║╔╗║╔╝║╗╣║║║
+    ─╚╝─╠╗║║╔╝╚═╝╚═╝╚═╝╚═╝╚═╝╚═╬╗║─╚╝─╚╩╝╚═╝╚╩═╝╚══╝╚╝╚╝─╚╩╝╚═╝
+    ────╚═╝╚╝──────────────────╚═╝
+-->

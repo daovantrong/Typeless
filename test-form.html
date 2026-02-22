@@ -1,0 +1,447 @@
+<!--
+    ╔════╗─────────────╔╗───────────────╔╗──────╔════╗╔═══╗╔═══╗╔═╗─╔╗╔═══╗──╔═══╗╔═══╗╔═══╗
+    ║╔╗╔╗║─────────────║║───────────────║║──────║╔╗╔╗║║╔═╗║║╔═╗║║║╚╗║║║╔═╗║──║╔═╗║║╔═╗║║╔═╗║
+    ╚╝║║╚╝╔╗─╔╗╔══╗╔══╗║║───╔══╗╔══╗╔══╗║╚═╦╗─╔╗╚╝║║╚╝║╚═╝║║║─║║║╔╗╚╝║║║─╚╝──║╚═╝║║╚═╝║║║─║║
+    ──║║──║║─║║║╔╗║║║═╣║║─╔╗║║═╣║══╣║══╣║╔╗║║─║║──║║──║╔╗╔╝║║─║║║║╚╗║║║║╔═╗──║╔══╝║╔╗╔╝║║─║║
+    ──║║──║╚═╝║║╚╝║║║═╣║╚═╝║║║═╣╠══║╠══║║╚╝║╚═╝║──║║──║║║╚╗║╚═╝║║║─║║║║╚╩═║╔╗║║───║║║╚╗║╚═╝║
+    ──╚╝──╚═╗╔╝║╔═╝╚══╝╚═══╝╚══╝╚══╝╚══╝╚══╩═╗╔╝──╚╝──╚╝╚═╝╚═══╝╚╝─╚═╝╚═══╝╚╝╚╝───╚╝╚═╝╚═══╝
+    ──────╔═╝║─║║──────────────────────────╔═╝║
+    ──────╚══╝─╚╝──────────────────────────╚══╝
+
+    TypeLess - Auto Form Filler
+    v1.0.2 by TRONG.PRO
+-->
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Form - Auto Form Filler Extension</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: #764ba2;
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        input[type="date"],
+        input[type="password"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group,
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-item,
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .inline-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 6px;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            margin-top: 10px;
+            margin-left: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📋 Test Form</h1>
+        <p class="subtitle">Form mẫu để test Auto Form Filler Extension</p>
+
+        <div class="info-box">
+            <h3>🎯 Hướng dẫn sử dụng</h3>
+            <p><strong>Để test extension:</strong></p>
+            <ul>
+                <li>Điền các trường bên dưới với thông tin mẫu</li>
+                <li>Nhấn nút 💾 <strong>Save</strong> trên toolbar để lưu profile</li>
+                <li>Nhấn F5 để refresh trang (form sẽ trống)</li>
+                <li>Click vào profile vừa lưu trên toolbar</li>
+                <li>✅ Form sẽ tự động điền lại!</li>
+            </ul>
+        </div>
+
+        <form id="testForm">
+            <!-- Personal Information -->
+            <div class="form-section">
+                <h2 class="section-title">👤 Thông tin cá nhân</h2>
+
+                <div class="inline-group">
+                    <div class="form-group">
+                        <label for="firstName">Họ:</label>
+                        <input type="text" id="firstName" name="firstName" placeholder="Nguyễn">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">Tên:</label>
+                        <input type="text" id="lastName" name="lastName" placeholder="Văn A">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" placeholder="example@email.com">
+                </div>
+
+                <div class="inline-group">
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại:</label>
+                        <input type="tel" id="phone" name="phone" placeholder="0123456789">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthdate">Ngày sinh:</label>
+                        <input type="date" id="birthdate" name="birthdate">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="form-section">
+                <h2 class="section-title">🏠 Địa chỉ</h2>
+
+                <div class="form-group">
+                    <label for="address">Địa chỉ:</label>
+                    <input type="text" id="address" name="address" placeholder="123 Đường ABC">
+                </div>
+
+                <div class="inline-group">
+                    <div class="form-group">
+                        <label for="city">Thành phố:</label>
+                        <select id="city" name="city">
+                            <option value="">-- Chọn thành phố --</option>
+                            <option value="hanoi">Hà Nội</option>
+                            <option value="hcm">TP. Hồ Chí Minh</option>
+                            <option value="danang">Đà Nẵng</option>
+                            <option value="haiphong">Hải Phòng</option>
+                            <option value="cantho">Cần Thơ</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="district">Quận/Huyện:</label>
+                        <select id="district" name="district">
+                            <option value="">-- Chọn quận/huyện --</option>
+                            <option value="district1">Quận 1</option>
+                            <option value="district2">Quận 2</option>
+                            <option value="district3">Quận 3</option>
+                            <option value="district4">Quận 4</option>
+                            <option value="district5">Quận 5</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Work Information -->
+            <div class="form-section">
+                <h2 class="section-title">💼 Thông tin công việc</h2>
+
+                <div class="form-group">
+                    <label for="company">Công ty:</label>
+                    <input type="text" id="company" name="company" placeholder="Tên công ty">
+                </div>
+
+                <div class="inline-group">
+                    <div class="form-group">
+                        <label for="position">Vị trí:</label>
+                        <select id="position" name="position">
+                            <option value="">-- Chọn vị trí --</option>
+                            <option value="developer">Developer</option>
+                            <option value="designer">Designer</option>
+                            <option value="manager">Manager</option>
+                            <option value="tester">Tester</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience">Kinh nghiệm (năm):</label>
+                        <input type="number" id="experience" name="experience" min="0" max="50" placeholder="5">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="skills">Kỹ năng:</label>
+                    <textarea id="skills" name="skills" placeholder="JavaScript, Python, React, Node.js..."></textarea>
+                </div>
+            </div>
+
+            <!-- Preferences -->
+            <div class="form-section">
+                <h2 class="section-title">⚙️ Tùy chọn</h2>
+
+                <div class="form-group">
+                    <label>Sở thích:</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="hobbies" value="reading">
+                            <span>Đọc sách</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="hobbies" value="sports">
+                            <span>Thể thao</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="hobbies" value="music">
+                            <span>Âm nhạc</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="hobbies" value="travel">
+                            <span>Du lịch</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Giới tính:</label>
+                    <div class="radio-group">
+                        <label class="radio-item">
+                            <input type="radio" name="gender" value="male">
+                            <span>Nam</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="gender" value="female">
+                            <span>Nữ</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="gender" value="other">
+                            <span>Khác</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ngôn ngữ:</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="languages" value="vietnamese">
+                            <span>Tiếng Việt</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="languages" value="english">
+                            <span>Tiếng Anh</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="languages" value="chinese">
+                            <span>Tiếng Trung</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="form-section">
+                <h2 class="section-title">📝 Ghi chú</h2>
+
+                <div class="form-group">
+                    <label for="notes">Ghi chú thêm:</label>
+                    <textarea id="notes" name="notes" placeholder="Nhập ghi chú của bạn tại đây..."></textarea>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+                <button type="submit" class="btn-primary">Gửi</button>
+                <button type="reset" class="btn-secondary">Xóa</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Prevent form submission
+        document.getElementById('testForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            alert('✅ Form submitted! (Demo only - không thực sự gửi đi)');
+        });
+
+        // Log form data to console
+        document.getElementById('testForm').addEventListener('submit', function (e) {
+            const formData = new FormData(this);
+            console.log('Form data:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+        });
+
+        // Reset confirmation
+        document.getElementById('testForm').addEventListener('reset', function (e) {
+            if (!confirm('Bạn có chắc muốn xóa tất cả dữ liệu?')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+
+</html>
+
+<!--
+    End of test-form.html
+    ╔══╗─────────╔╗────╔═╗╔═╗╔╗───╔══╗╔═╗╔═╗╔═╦╗╔══╗──╔═╗╔═╗╔═╗
+    ╚╗╔╝╔╦╗╔═╗╔═╗║║─╔═╗║═╣║═╣║╚╦╦╗╚╗╔╝║╬║║║║║║║║║╔═╣──║╬║║╬║║║║
+    ─║║─║║║║╬║║╩╣║╚╗║╩╣╠═║╠═║║╬║║║─║║─║╗╣║║║║║║║║╚╗║╔╗║╔╝║╗╣║║║
+    ─╚╝─╠╗║║╔╝╚═╝╚═╝╚═╝╚═╝╚═╝╚═╬╗║─╚╝─╚╩╝╚═╝╚╩═╝╚══╝╚╝╚╝─╚╩╝╚═╝
+    ────╚═╝╚╝──────────────────╚═╝
+-->

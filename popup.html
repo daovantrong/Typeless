@@ -1,0 +1,831 @@
+<!--
+╔════╗─────────────╔╗───────────────╔╗──────╔════╗╔═══╗╔═══╗╔═╗─╔╗╔═══╗──╔═══╗╔═══╗╔═══╗
+║╔╗╔╗║─────────────║║───────────────║║──────║╔╗╔╗║║╔═╗║║╔═╗║║║╚╗║║║╔═╗║──║╔═╗║║╔═╗║║╔═╗║
+╚╝║║╚╝╔╗─╔╗╔══╗╔══╗║║───╔══╗╔══╗╔══╗║╚═╦╗─╔╗╚╝║║╚╝║╚═╝║║║─║║║╔╗╚╝║║║─╚╝──║╚═╝║║╚═╝║║║─║║
+──║║──║║─║║║╔╗║║║═╣║║─╔╗║║═╣║══╣║══╣║╔╗║║─║║──║║──║╔╗╔╝║║─║║║║╚╗║║║║╔═╗──║╔══╝║╔╗╔╝║║─║║
+──║║──║╚═╝║║╚╝║║║═╣║╚═╝║║║═╣╠══║╠══║║╚╝║╚═╝║──║║──║║║╚╗║╚═╝║║║─║║║║╚╩═║╔╗║║───║║║╚╗║╚═╝║
+──╚╝──╚═╗╔╝║╔═╝╚══╝╚═══╝╚══╝╚══╝╚══╝╚══╩═╗╔╝──╚╝──╚╝╚═╝╚═══╝╚╝─╚═╝╚═══╝╚╝╚╝───╚╝╚═╝╚═══╝
+──────╔═╝║─║║──────────────────────────╔═╝║
+──────╚══╝─╚╝──────────────────────────╚══╝
+
+TypeLess - Auto Form Filler
+v1.0.2 by TRONG.PRO
+-->
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeLess - Auto Form Filler</title>
+    <style>
+        /* [Previous styles remain..., changing body and container for sticky footer] */
+        /* ... (I will keep existing styles but override/change specific parts or just replace the specific blocks if I can, but since I'm doing a big structural change, replacing specific blocks might be safer if I can target them well, or just replace the whole style block + body structure) */
+
+        /* ... Copied variables ... */
+        :root {
+            --primary-color: #3291B6;
+            --primary-dark: #2578A0;
+            --primary-light: #7BC0D9;
+            --secondary-color: #C9A0C9;
+            --tertiary-color: #D9B5A8;
+            --success-color: #48bb78;
+            --danger-color: #E57373;
+            --warning-color: #ed8936;
+            --text-primary: #2d3748;
+            --text-secondary: #5a6a7a;
+            --text-light: #94a3b8;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius-sm: 8px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --transition: all 0.2s ease;
+
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Font Setup */
+        @font-face {
+            font-family: 'Be Vietnam Pro';
+            src: url('fonts/BeVietnamPro-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Be Vietnam Pro';
+            src: url('fonts/BeVietnamPro-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Material Icons';
+            src: url('fonts/MaterialIcons-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: block;
+        }
+
+        /* CJK Fonts are loaded from system */
+
+        body {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            min-width: 400px;
+            /* Ensure min width for popup */
+            display: flex;
+            flex-direction: column;
+            height: 520px;
+            /* Fixed height for all tabs */
+            overflow: hidden;
+            /* Prevent body scroll */
+        }
+
+        /* Language-specific Fonts */
+        body.lang-zh-CN {
+            font-family: 'Noto Sans SC', "Microsoft YaHei", "SimHei", sans-serif;
+        }
+
+        body.lang-zh-TW {
+            font-family: 'Noto Sans TC', "Microsoft JhengHei", sans-serif;
+        }
+
+        body.lang-ko {
+            font-family: 'Noto Sans KR', "Malgun Gothic", sans-serif;
+        }
+
+        body.lang-ja {
+            font-family: 'Noto Sans JP', "Meiryo", "Yu Gothic", sans-serif;
+        }
+
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            /* Preferred icon size */
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+            /* Support for all WebKit browsers. */
+            -webkit-font-smoothing: antialiased;
+            /* Support for Safari and Chrome. */
+            text-rendering: optimizeLegibility;
+            /* Support for Firefox. */
+            -moz-osx-font-smoothing: grayscale;
+            /* Support for IE. */
+            font-feature-settings: 'liga';
+        }
+
+        /* Container */
+        .container {
+            background: var(--bg-primary);
+            flex: 1;
+            /* Take remaining space */
+            overflow-y: auto;
+            /* Scrollable if needed */
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* Custom Scrollbar */
+        .container::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 3px;
+        }
+
+        .container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* Header */
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            height: 44px;
+            /* Reduced from 50px */
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .logo svg {
+            flex-shrink: 0;
+        }
+
+        .logo h1 {
+            font-size: 15px;
+            /* Slightly reduced */
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            white-space: nowrap;
+        }
+
+        .version {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            /* More compact */
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            background: var(--bg-primary);
+            padding: 0 var(--spacing-md);
+            gap: var(--spacing-md);
+            /* Reduced from lg */
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 44px;
+            /* Match header height */
+            z-index: 90;
+        }
+
+        /* Wait, if header is sticky inside container, and tabs are sticky, they stack. */
+
+        .tab {
+            flex: 0 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: 8px 5px;
+            /* Reduced vertical padding */
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            /* Slightly reduced */
+            font-weight: 600;
+            border-radius: 0;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--primary-color);
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e2e8f0;
+            /* Inactive color */
+            border-radius: 3px 3px 0 0;
+            transition: background 0.2s;
+        }
+
+        .tab:hover::after {
+            background: #cbd5e0;
+        }
+
+        .tab.active::after {
+            background: var(--primary-color);
+        }
+
+        .tab svg {
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .tab.active svg {
+            opacity: 1;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: var(--spacing-md) var(--spacing-lg);
+            /* Reduced padding */
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+                /* Reduced from 8px */
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Info Summary (Fill Tab) and other content styles */
+        .info-summary {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-sm);
+            /* Reduced from md */
+            margin-bottom: var(--spacing-sm);
+            /* Reduced from lg */
+            border: 1px solid var(--border-color);
+        }
+
+        .settings-form {
+            padding: 0;
+            background: transparent;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 13px;
+            /* Reduced from 14px */
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+            /* Reduced from lg */
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-sm);
+            /* Reduced from md */
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 10px;
+            /* Reduced from 11px */
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 6px var(--spacing-md);
+            /* Reduced from spacing-sm */
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(50, 145, 182, 0.15);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: 8px var(--spacing-lg);
+            /* Reduced from spacing-md */
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            /* Reduced from 13px */
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid transparent;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        /* Specific Button Colors */
+        #btn-open-options {
+            background: #4f46e5;
+            color: white;
+            border: none;
+        }
+
+        #btn-open-options:hover {
+            background: #4338ca;
+        }
+
+        #showToolbar {
+            background: #7c3aed;
+            color: white;
+            border: none;
+        }
+
+        #showToolbar:hover {
+            background: #6d28d9;
+        }
+
+        .controls {
+            padding: 8px var(--spacing-lg);
+            /* Reduced from 15px 20px */
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls .btn {
+            font-size: 12px;
+            height: 32px;
+            /* Reduced from 36px */
+            padding: 0 10px;
+            border: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .icon-img {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-primary .icon-img {
+            filter: brightness(0) invert(1);
+        }
+
+        .btn-tool {
+            background: var(--text-primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-tool:hover {
+            background: #1a202c;
+            /* Darker shade of text-primary */
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-tool .icon-img {
+            filter: brightness(0) invert(1);
+            /* Force white icon */
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-tertiary);
+            padding: var(--spacing-md) var(--spacing-xl);
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+            /* Don't shrink */
+        }
+
+        /* Extra Tweaks */
+        .controls {
+            display: flex;
+            gap: 10px;
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: rgba(30, 30, 30, 0.95);
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 12px 16px;
+            position: fixed;
+            /* Stay in place */
+            z-index: 1000;
+            /* Sit on top */
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            /* Center */
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        /* Profile Items */
+        .profile-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            transition: var(--transition);
+        }
+
+        .profile-item:hover {
+            box-shadow: var(--shadow-sm);
+            border-color: var(--primary-light);
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: var(--spacing-sm);
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--text-light);
+        }
+
+        .icon-btn img {
+            width: 14px;
+            height: 14px;
+            opacity: 0.7;
+            filter: brightness(0);
+            /* Force black icon for visibility on light bg */
+        }
+
+        .icon-btn:hover img {
+            opacity: 1;
+        }
+
+        .icon-btn.apply-btn:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .icon-btn.apply-btn:hover img {
+            filter: brightness(0) invert(1);
+            opacity: 1;
+        }
+
+        .icon-btn.delete-btn:hover {
+            background: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .icon-btn.delete-btn:hover img {
+            filter: brightness(0) invert(1);
+            opacity: 1;
+        }
+
+        .profile-info {
+            display: flex;
+            gap: var(--spacing-md);
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .profile-info span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .profile-url {
+            font-size: 11px;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <img src="icons/clipboard.svg" alt="Logo" width="24" height="24"
+                    style="filter: brightness(0) invert(1);">
+                <h1 data-i18n="popup.title">Auto Form Filler</h1>
+            </div>
+            <button id="langBtn" class="version" style="border:none; cursor:pointer; color: white;"
+                data-i18n-title="btn.lang_tooltip">
+                <span data-i18n="btn.lang">EN</span>
+            </button>
+        </header>
+
+        <div class="controls">
+            <button class="btn btn-secondary" id="btn-open-options" style="padding: 8px; flex: 4;">
+                ⚙️ <span data-i18n="btn.open_options">Open Settings</span>
+            </button>
+            <button class="btn btn-secondary" id="showToolbar" style="padding: 8px; flex: 6;">
+                👁️/🚫 <span data-i18n="popup.show">Hiện/Ẩn</span>
+            </button>
+        </div>
+
+        <nav class="tabs">
+            <button class="tab active" data-tab="tools" data-i18n="tab.tools">Tools</button>
+            <button class="tab" data-tab="data" data-i18n="tab.data">Data Management</button>
+            <button class="tab" data-tab="profiles" data-i18n="tab.profiles">Profiles</button>
+        </nav>
+
+        <div id="tools-tab" class="tab-content active">
+            <div class="settings-form">
+                <div class="section">
+                    <h3 class="section-title" data-i18n="grp.actions">Utilities</h3>
+                    <div class="form-group" style="display: flex; gap: 10px;">
+                        <button id="btn-unlock-right-click" class="btn btn-primary" style="flex: 1;">
+                            <img src="icons/check.svg" class="icon-img"> <span data-i18n="btn.enable_right_click">Unlock
+                                Right Click</span>
+                        </button>
+                        <button id="btn-save-html" class="btn btn-primary" style="flex: 1;">
+                            <img src="icons/save.svg" class="icon-img"> <span data-i18n="btn.save_html">Save HTML</span>
+                        </button>
+                    </div>
+                    <div class="form-group" style="display: flex; gap: 10px; margin-top: 8px;">
+                        <button id="btn-screenshot-full" class="btn btn-primary" style="flex: 1;">
+                            <img src="icons/globe.svg" class="icon-img" style="filter: brightness(0) invert(1);"> <span
+                                data-i18n="btn.screenshot_full">Screenshot Full</span>
+                        </button>
+                        <button id="btn-screenshot" class="btn btn-primary" style="flex: 1;">
+                            <img src="icons/eye.svg" class="icon-img" style="filter: brightness(0) invert(1);">
+                            <span data-i18n="btn.screenshot_visible">Screenshot Visible</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 class="section-title" style="margin-bottom: 0;">User Agent</h3>
+                        <button id="btn-ua-settings" title="Settings"
+                            style="background:none; border:none; cursor:pointer;">
+                            <img src="icons/settings.svg" style="width: 16px; height: 16px; opacity: 0.6;">
+                        </button>
+                    </div>
+                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button class="btn btn-secondary ua-btn" data-ua="default"
+                            style="padding: 8px;">Default</button>
+                        <button class="btn btn-secondary ua-btn" data-ua="android"
+                            style="padding: 8px;">Android</button>
+                        <button class="btn btn-secondary ua-btn" data-ua="ios" style="padding: 8px;">iOS</button>
+                        <button class="btn btn-secondary ua-btn" data-ua="macos" style="padding: 8px;">MacOS</button>
+                        <button class="btn btn-secondary ua-btn" data-ua="windows"
+                            style="padding: 8px;">Windows</button>
+                        <button class="btn btn-secondary ua-btn" data-ua="linux" style="padding: 8px;">Linux</button>
+                    </div>
+                    <div id="ua-status"
+                        style="font-size: 11px; color: var(--text-secondary); margin-top: 5px; text-align: center;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="data-tab" class="tab-content">
+            <div class="settings-form">
+                <div class="section" style="border-bottom: none;">
+                    <h3 class="section-title" data-i18n="grp.backup">Data Management</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button id="btn-copy-profiles" class="btn btn-tool">
+                            <img src="icons/copy.svg" class="icon-img"> <span data-i18n="btn.copy">Copy</span>
+                        </button>
+                        <button id="btn-paste-profiles" class="btn btn-tool">
+                            <img src="icons/paste.svg" class="icon-img"> <span data-i18n="btn.paste">Paste</span>
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btn-export-profiles" class="btn btn-tool">
+                            <img src="icons/export.svg" class="icon-img"> <span data-i18n="btn.export">Export</span>
+                        </button>
+                        <button id="btn-import-profiles" class="btn btn-tool">
+                            <img src="icons/import.svg" class="icon-img"> <span data-i18n="btn.import">Import</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="profiles-tab" class="tab-content">
+            <div class="profiles-container" id="profilesContainer">
+                <!-- Profiles will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer moved outside container to be sticky -->
+    <div class="footer">
+        <div style="margin-bottom: 8px;">
+            <a href="https://chromewebstore.google.com" target="_blank"
+                style="text-decoration: none; color: var(--text-secondary);">
+                ⚡ TypeLess v1.0.2
+            </a>
+            <span style="color: #ccc; margin: 0 6px;">©</span>
+            <a href="https://trong.pro" target="_blank" style="text-decoration: none; color: var(--text-secondary);">
+                <span data-i18n="footer.by">by</span> TRONG.PRO
+            </a> <img src="icons/vn.svg" alt="Vietnam Flag"
+                style="height: 20px; vertical-align: sub; margin-left: 2px;">
+        </div>
+        <div style="margin-top: 8px; font-size: 11px; color: #888; line-height: 1.4;">
+            <span data-i18n="footer.enjoy">Enjoy my work?</span>
+            <a href="https://buymeacoffee.com/trong" target="_blank"
+                style="color: var(--primary-color); text-decoration: none;">
+                <span data-i18n="footer.buy">Buy me a 🍻</span>
+            </a>
+            <span data-i18n="footer.tip">or tip via</span>
+            <a href="https://paypal.me/DaoVanTrong" target="_blank"
+                style="color: var(--primary-color); text-decoration: none;">❤️
+                PayPal</a>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast" class="toast"></div>
+
+    <script src="i18n.js"></script>
+    <script src="storage.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>
+
+<!--
+    End of popup.html
+    ╔══╗─────────╔╗────╔═╗╔═╗╔╗───╔══╗╔═╗╔═╗╔═╦╗╔══╗──╔═╗╔═╗╔═╗
+    ╚╗╔╝╔╦╗╔═╗╔═╗║║─╔═╗║═╣║═╣║╚╦╦╗╚╗╔╝║╬║║║║║║║║║╔═╣──║╬║║╬║║║║
+    ─║║─║║║║╬║║╩╣║╚╗║╩╣╠═║╠═║║╬║║║─║║─║╗╣║║║║║║║║╚╗║╔╗║╔╝║╗╣║║║
+    ─╚╝─╠╗║║╔╝╚═╝╚═╝╚═╝╚═╝╚═╝╚═╬╗║─╚╝─╚╩╝╚═╝╚╩═╝╚══╝╚╝╚╝─╚╩╝╚═╝
+    ────╚═╝╚╝──────────────────╚═╝
+-->

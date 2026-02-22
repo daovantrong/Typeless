@@ -1,0 +1,132 @@
+{
+  "manifest_version": 3,
+  "name": "TypeLess - Auto Form Filler",
+  "version": "1.0.2",
+  "minimum_chrome_version": "102",
+  "description": "Auto-fill forms with pre-saved profiles",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "clipboardWrite",
+    "clipboardRead",
+    "contextMenus",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "downloads"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "i18n.js",
+        "storage.js",
+        "enhanced-utils.js",
+        "smart-fill.js",
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "styles.css",
+        "locales/*.json",
+        "demo-form.html",
+        "mobile-override.js",
+        "screenshot.js",
+        "icons/vn.svg",
+        "icons/uk.svg",
+        "icons/save.svg",
+        "icons/export.svg",
+        "icons/import.svg",
+        "icons/copy.svg",
+        "icons/paste.svg",
+        "icons/flash.svg",
+        "icons/reload.svg",
+        "icons/refresh.svg",
+        "icons/minimize.svg",
+        "icons/expand.svg",
+        "icons/close.svg",
+        "icons/eye.svg",
+        "icons/globe.svg",
+        "icons/delete.svg",
+        "icons/play.svg",
+        "icons/beer.svg",
+        "icons/heart.svg",
+        "icons/clipboard.svg",
+        "icons/calendar.svg",
+        "icons/link.svg",
+        "icons/description.svg",
+        "icons/check.svg",
+        "icons/warning.svg",
+        "icons/empty.svg",
+        "icons/empty.svg",
+        "fonts/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "options_page": "options.html",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none';"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "apply-last-profile": {
+      "description": "Fill form with last used profile"
+    },
+    "toggle-toolbar": {
+      "description": "Show/hide toolbar",
+      "suggested_key": {
+        "default": "Ctrl+Shift+H",
+        "mac": "Command+Shift+H"
+      }
+    },
+    "open-settings": {
+      "description": "Open Settings"
+    },
+    "unlock-right-click": {
+      "description": "Unlock Right Click"
+    },
+    "save-html": {
+      "description": "Save rendered HTML"
+    },
+    "screenshot-full": {
+      "description": "Capture Full Screenshot"
+    },
+    "screenshot-visible": {
+      "description": "Capture Visible Screenshot"
+    },
+    "reset-user-agent": {
+      "description": "Reset User Agent to Default"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

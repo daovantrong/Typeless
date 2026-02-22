@@ -1,0 +1,72 @@
+TypeLess - Auto Form Filler: Certification Notes for Reviewers
+
+Purpose:
+TypeLess is a comprehensive productivity extension designed to automate web form completion using locally stored profiles, smart data generation, and advanced form utilities. It serves developers, testers, shoppers, and professionals who frequently fill out forms online.
+
+Privacy & Security:
+- 100% Local Storage: All user-defined data and profiles are stored exclusively on the user's device using the chrome.storage API.
+- No External Servers: The extension does not communicate with any external servers, APIs, or cloud services.
+- No Accounts Required: Reviewers do not need any external credentials or social media accounts to test the extension.
+- No Background Activity: Extension only functions when explicitly activated by the user.
+
+Key Features & Testing Steps:
+
+1. Profile Management:
+   - To test: Navigate to any website with a form (e.g., https://getbootstrap.com/docs/5.0/forms/overview/), fill in some dummy data, click the extension icon, and select "Save Form".
+   - Result: You can then edit, rename, delete, export, or import these profiles in the "Profiles" tab of the popup.
+
+2. Auto-Fill Functionality:
+   - Method 1: Click the extension popup icon and select a profile from the list
+   - Method 2: Click the floating toolbar (bottom-right circle button) and select a profile
+   - Method 4: Right-click on any page and select profiles from the context menu
+
+3. Smart Fill (Mock Data):
+   - To test: Click the lightning bolt icon (⚡) in the floating toolbar or the "Tools" tab.
+   - Result: The extension will automatically detect empty fields and populate them with realistic placeholder data (Names, Emails, Phone numbers, Addresses, etc.).
+
+4. Advanced Tools:
+
+   Form Utilities:
+   - Save HTML: Click "Save HTML" in the Tools tab to download the current form's DOM state for offline debugging.
+   - Unlock Right-Click: Enable this in the Tools tab to bypass websites that disable the browser's context menu.
+   - Screenshot Capture: Use "Screenshot Visible" or "Screenshot Full" to capture the current form area.
+
+   Mobile Emulation:
+   - User Agent Switching: Change browser user agent to simulate mobile devices (Android/iOS)
+   - Mobile Simulation: Accurate platform detection and touch simulation
+
+   Data Management:
+   - Export/Import: Use buttons in the Tools tab to backup or restore profiles via JSON files.
+   - Copy/Paste: Copy profiles to clipboard for sharing between tabs or machines.
+
+5. Multi-Language Support:
+   - Test by changing language in the Settings tab
+   - Supported: English, Vietnamese, Chinese (Simplified), Traditional Chinese, Japanese, Korean
+   - Interface and field labels dynamically translate
+
+6. Keyboard Shortcuts:
+   - Ctrl+Shift+H (Command+Shift+H on Mac): Toggle toolbar visibility
+
+7. Accessibility:
+   - Toolbar Toggle: Use Alt+Shift+H to hide or show the floating toolbar
+   - Context Menu: Right-clicking any page allows access to profiles and tools
+   - Responsive Design: Works on desktop and mobile browsers
+
+8. Security Features:
+   - Local Storage Only: All data stays on device
+   - User-Initiated Actions: No automatic scanning or background processes
+   - Transparent Permissions: Each permission clearly justified and minimal
+   - No Data Transmission: Profiles never leave the browser
+
+Testing Websites (No Login Required):
+- https://getbootstrap.com/docs/5.0/forms/overview/ (comprehensive form examples)
+- https://mdbootstrap.com/docs/standard/forms/overview/ (modern form elements)
+- https://surveyjs.io/Examples/Library (survey forms)
+- https://formspree.io/forms/your-form-id (contact forms)
+
+Dependencies:
+- No external dependencies or hardware required.
+- Works completely offline once installed.
+- Compatible with Chrome 102+ and Edge 102+.
+
+Version: 1.0.2 - Includes mobile emulation, screenshot capture, and enhanced Smart Fill technology.
