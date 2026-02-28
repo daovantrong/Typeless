@@ -1,4 +1,18 @@
 /**
+ * ╔════╗─────────────╔╗───────────────╔╗──────╔════╗╔═══╗╔═══╗╔═╗─╔╗╔═══╗──╔═══╗╔═══╗╔═══╗
+ * ║╔╗╔╗║─────────────║║───────────────║║──────║╔╗╔╗║║╔═╗║║╔═╗║║║╚╗║║║╔═╗║──║╔═╗║║╔═╗║║╔═╗║
+ * ╚╝║║╚╝╔╗─╔╗╔══╗╔══╗║║───╔══╗╔══╗╔══╗║╚═╦╗─╔╗╚╝║║╚╝║╚═╝║║║─║║║╔╗╚╝║║║─╚╝──║╚═╝║║╚═╝║║║─║║
+ * ──║║──║║─║║║╔╗║║║═╣║║─╔╗║║═╣║══╣║══╣║╔╗║║─║║──║║──║╔╗╔╝║║─║║║║╚╗║║║║╔═╗──║╔══╝║╔╗╔╝║║─║║
+ * ──║║──║╚═╝║║╚╝║║║═╣║╚═╝║║║═╣╠══║╠══║║╚╝║╚═╝║──║║──║║║╚╗║╚═╝║║║─║║║║╚╩═║╔╗║║───║║║╚╗║╚═╝║
+ * ──╚╝──╚═╗╔╝║╔═╝╚══╝╚═══╝╚══╝╚══╝╚══╝╚══╩═╗╔╝──╚╝──╚╝╚═╝╚═══╝╚╝─╚═╝╚═══╝╚╝╚╝───╚╝╚═╝╚═══╝
+ * ──────╔═╝║─║║──────────────────────────╔═╝║
+ * ──────╚══╝─╚╝──────────────────────────╚══╝
+ * 
+ * TypeLess - Auto Form Filler
+ * v1.0.3 by TRONG.PRO
+ */
+
+/**
  * User Agent Manager using declarativeNetRequest
  */
 const UserAgentManager = {
@@ -88,12 +102,17 @@ const UserAgentManager = {
             if (userAgent.includes('Samsung')) device = 'samsung';
         }
 
+        // FIX: Use a randomised window key so page scripts cannot predict the
+        // property name and either read our config or pre-define it to tamper
+        // with the override values.  The key is generated fresh per-injection.
+        const configKey = '__TL_' + Math.random().toString(36).substring(2, 11);
+
         try {
             await chrome.scripting.executeScript({
                 target: { tabId },
                 world: 'MAIN',
-                func: (ua, plat, vend, dev, mobile) => {
-                    window.__TypeLess_UA_Config = {
+                func: (ua, plat, vend, dev, mobile, key) => {
+                    window[key] = {
                         userAgent: ua,
                         platform: plat,
                         vendor: vend,
@@ -101,7 +120,20 @@ const UserAgentManager = {
                         isMobile: mobile
                     };
                 },
-                args: [userAgent, platform, vendor, device, isMobile]
+                args: [userAgent, platform, vendor, device, isMobile, configKey]
+            });
+
+            await chrome.scripting.executeScript({
+                target: { tabId },
+                world: 'MAIN',
+                func: (key) => {
+                    // Alias to the fixed name that mobile-override.js reads,
+                    // then immediately delete it — mobile-override.js also deletes
+                    // __TypeLess_UA_Config on its first line, so this is belt-and-braces.
+                    window.__TypeLess_UA_Config = window[key];
+                    try { delete window[key]; } catch (_) { }
+                },
+                args: [configKey]
             });
 
             await chrome.scripting.executeScript({
@@ -126,7 +158,9 @@ const UserAgentManager = {
     },
 
     // ... (rest of methods: getRuleIdFromTabId, saveState, getState)
-    getRuleIdFromTabId(tabId) { return tabId; },
+    // FIX: Chrome declarativeNetRequest requires rule IDs to be integers >= 1.
+    // Tab ID 0 (uncommon but valid) would cause an error without this guard.
+    getRuleIdFromTabId(tabId) { return Math.max(1, tabId); },
     async saveState(tabId, ua) {
         const key = `ua_${tabId}`;
         if (ua) await chrome.storage.local.set({ [key]: ua });

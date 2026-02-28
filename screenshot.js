@@ -1,3 +1,17 @@
+/**
+ * ╔════╗─────────────╔╗───────────────╔╗──────╔════╗╔═══╗╔═══╗╔═╗─╔╗╔═══╗──╔═══╗╔═══╗╔═══╗
+ * ║╔╗╔╗║─────────────║║───────────────║║──────║╔╗╔╗║║╔═╗║║╔═╗║║║╚╗║║║╔═╗║──║╔═╗║║╔═╗║║╔═╗║
+ * ╚╝║║╚╝╔╗─╔╗╔══╗╔══╗║║───╔══╗╔══╗╔══╗║╚═╦╗─╔╗╚╝║║╚╝║╚═╝║║║─║║║╔╗╚╝║║║─╚╝──║╚═╝║║╚═╝║║║─║║
+ * ──║║──║║─║║║╔╗║║║═╣║║─╔╗║║═╣║══╣║══╣║╔╗║║─║║──║║──║╔╗╔╝║║─║║║║╚╗║║║║╔═╗──║╔══╝║╔╗╔╝║║─║║
+ * ──║║──║╚═╝║║╚╝║║║═╣║╚═╝║║║═╣╠══║╠══║║╚╝║╚═╝║──║║──║║║╚╗║╚═╝║║║─║║║║╚╩═║╔╗║║───║║║╚╗║╚═╝║
+ * ──╚╝──╚═╗╔╝║╔═╝╚══╝╚═══╝╚══╝╚══╝╚══╝╚══╩═╗╔╝──╚╝──╚╝╚═╝╚═══╝╚╝─╚═╝╚═══╝╚╝╚╝───╚╝╚═╝╚═══╝
+ * ──────╔═╝║─║║──────────────────────────╔═╝║
+ * ──────╚══╝─╚╝──────────────────────────╚══╝
+ * 
+ * TypeLess - Auto Form Filler
+ * v1.0.3 by TRONG.PRO
+ */
+
 // Screenshot Content Script
 (function () {
     if (window.hasTypeLessScreenshotListener) return;
@@ -21,7 +35,7 @@
             body::-webkit-scrollbar { display: none !important; }
             body { -ms-overflow-style: none !important; scrollbar-width: none !important; }
             #auto-form-filler-toolbar { display: none !important; }
-            .auto-form-filler-notification { display: none !important; }
+            .auto-form-filler-notification, .typeless-notification-host { display: none !important; }
             * {
                 transition: none !important;
                 animation: none !important;
@@ -54,20 +68,44 @@
             return;
         }
 
+        // Chrome allows ~2 captureVisibleTab calls/second.
+        // Use a minimum interval of 600 ms between captures plus retry-with-backoff
+        // so we never exceed the quota even on very tall pages.
+        const MIN_CAPTURE_INTERVAL_MS = 600;
+        const MAX_RETRIES = 4;
+
+        /**
+         * Capture with exponential back-off on quota errors.
+         * Returns the data URL string, or null on permanent failure.
+         */
+        async function captureWithRetry() {
+            let delay = MIN_CAPTURE_INTERVAL_MS;
+            for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+                await wait(attempt === 0 ? MIN_CAPTURE_INTERVAL_MS : delay);
+                const dataUrl = await new Promise(resolve => {
+                    chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (response) => {
+                        if (chrome.runtime.lastError) {
+                            resolve(null);
+                        } else {
+                            resolve(response && response.dataUrl);
+                        }
+                    });
+                });
+                if (dataUrl) return dataUrl;
+                // Back off exponentially before retrying (600 → 1200 → 2400 → 4800 ms)
+                delay = Math.min(delay * 2, 5000);
+                console.warn(`[TypeLess] captureVisibleTab attempt ${attempt + 1} failed, retrying in ${delay}ms…`);
+            }
+            console.error('[TypeLess] captureVisibleTab failed after all retries.');
+            return null;
+        }
+
         let finished = false;
         try {
             while (!finished) {
-                // Wait a bit for rendering after scroll
-                await wait(200);
-
                 const currentScrollY = window.scrollY;
 
-                // Capture current view via background
-                const dataUrl = await new Promise(resolve => {
-                    chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (response) => {
-                        resolve(response && response.dataUrl);
-                    });
-                });
+                const dataUrl = await captureWithRetry();
 
                 if (dataUrl) {
                     await drawImageToCanvas(ctx, dataUrl, 0, currentScrollY * devicePixelRatio);
@@ -77,6 +115,8 @@
                     finished = true;
                 } else {
                     window.scrollTo(0, currentScrollY + windowHeight);
+                    // Small extra pause for the page to re-paint after scroll
+                    await wait(100);
                 }
             }
 

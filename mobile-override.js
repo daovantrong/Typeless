@@ -1,9 +1,28 @@
 /**
+ * ╔════╗─────────────╔╗───────────────╔╗──────╔════╗╔═══╗╔═══╗╔═╗─╔╗╔═══╗──╔═══╗╔═══╗╔═══╗
+ * ║╔╗╔╗║─────────────║║───────────────║║──────║╔╗╔╗║║╔═╗║║╔═╗║║║╚╗║║║╔═╗║──║╔═╗║║╔═╗║║╔═╗║
+ * ╚╝║║╚╝╔╗─╔╗╔══╗╔══╗║║───╔══╗╔══╗╔══╗║╚═╦╗─╔╗╚╝║║╚╝║╚═╝║║║─║║║╔╗╚╝║║║─╚╝──║╚═╝║║╚═╝║║║─║║
+ * ──║║──║║─║║║╔╗║║║═╣║║─╔╗║║═╣║══╣║══╣║╔╗║║─║║──║║──║╔╗╔╝║║─║║║║╚╗║║║║╔═╗──║╔══╝║╔╗╔╝║║─║║
+ * ──║║──║╚═╝║║╚╝║║║═╣║╚═╝║║║═╣╠══║╠══║║╚╝║╚═╝║──║║──║║║╚╗║╚═╝║║║─║║║║╚╩═║╔╗║║───║║║╚╗║╚═╝║
+ * ──╚╝──╚═╗╔╝║╔═╝╚══╝╚═══╝╚══╝╚══╝╚══╝╚══╩═╗╔╝──╚╝──╚╝╚═╝╚═══╝╚╝─╚═╝╚═══╝╚╝╚╝───╚╝╚═╝╚═══╝
+ * ──────╔═╝║─║║──────────────────────────╔═╝║
+ * ──────╚══╝─╚╝──────────────────────────╚══╝
+ * 
+ * TypeLess - Auto Form Filler
+ * v1.0.3 by TRONG.PRO
+ */
+
+/**
  * Mobile Emulation Override Script
  * Injected into MAIN world to mock navigator and screen properties.
  */
 (function () {
     const config = window.__TypeLess_UA_Config;
+    // FIX: Delete the config key immediately so the host page cannot read or
+    // tamper with our UA settings. The window property is only needed for the
+    // brief moment between the two executeScript calls, so removing it here
+    // (inside the MAIN world script) is safe and prevents information leakage.
+    try { delete window.__TypeLess_UA_Config; } catch (_) { }
     if (!config) return;
 
     const { userAgent, platform, vendor, device, isMobile } = config;

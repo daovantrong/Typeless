@@ -28,6 +28,7 @@ Browser extension for Chrome/Edge to automatically fill forms with pre-saved pro
 - 🇯🇵 Japanese
 - 🇰🇷 Korean
 - 🔄 **Dynamic Translation**: Interface and field labels translate automatically
+- 🎨 **Optimized Fonts**: WOFF2 format with language-specific fonts for better performance
 
 ### 🛠️ Advanced Tools
 - 💾 **Save HTML**: Export current form state as HTML file for debugging
@@ -187,7 +188,21 @@ A: Try refreshing the page (F5). Some sites may block unknown scripts and requir
 
 ## 📝 Changelog
 
-### Version 1.0.2 (Latest)
+### Version 1.0.3 (Latest)
+- ✏️ **Inline Profile Rename**: Rename profiles directly from the popup with a pencil button — no need to delete and re-save.
+- 🎛️ **FineUI / ComboBox Support**: Detects and correctly fills FineUI DropDownList / ComboBox fields (inputs that look like text but behave as dropdowns). Saves both the display text and the hidden code value, and restores both on fill.
+- 📸 **Screenshot Fix**: Toolbar is now automatically hidden before a screenshot is taken and restored afterwards, eliminating toolbar overlap in captures.
+- 🔒 **Extension Context Guard**: Added `_extAlive()` safety check so content scripts no longer throw *"Extension context invalidated"* errors after the extension is reloaded/updated on an already-open tab.
+- 🎯 **Focus After Fill**: Added `focusAfterFill` field property — designate one field to receive focus (with cursor at end) after a profile is applied.
+- 📊 **Profile Manager in Settings**: New **Profiles** tab in the Options page to view, search, and edit all saved profiles without opening the popup.
+- 📤 **Export Format v1.2**: Exported JSON now includes metadata (`_version`, `_exportedAt`, `_count`) and supports the new `displayText` and `focusAfterFill` field properties for full round-trip fidelity.
+- 📥 **Improved Import Notification**: Import result now reports **added / updated / skipped** counts separately instead of a single total.
+- 🔢 **Persistent Profile Counter**: Auto-increment counter for default profile names is now persisted per day, preventing name collisions across sessions.
+- ♻️ **`saveProfile` API change**: Returns `{ success, isNew }` object instead of a plain boolean, enabling callers to distinguish between a new save and an overwrite.
+- 🌐 **Broader Browser Compatibility**: `minimum_chrome_version` lowered from **102** to **88**, supporting more Chrome/Edge installations.
+- 🧹 **Code Quality**: Delegated event listeners for profile action buttons (apply / copy / delete / rename) — a single listener now handles all profile cards instead of one per button. Options page code cleaned up and reorganised.
+
+### Version 1.0.2 
 - 📱 **Mobile Emulation**: Accurate Android/iOS simulation (User-Agent, Platform, Touch, Client Hints).
 - 📸 **Screenshot**: Capture full page or visible area of the form.
 

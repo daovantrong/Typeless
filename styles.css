@@ -9,7 +9,7 @@
  * ──────╚══╝─╚╝──────────────────────────╚══╝
  * 
  * TypeLess - Auto Form Filler
- * v1.0.2 by TRONG.PRO
+ * v1.0.3 by TRONG.PRO
  */
 
 /* Auto Form Filler Toolbar Styles */
@@ -25,7 +25,7 @@
   box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3);
   z-index: 2147483640;
   /* Max 32-bit integer to stay on top of everything, but below modal */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   animation: slideUp 0.3s ease-out;
   margin-right: 0;
   padding-bottom: 0;
@@ -229,10 +229,54 @@ html body #auto-filler-floating-btn {
   transform: scale(0.95);
 }
 
-.profile-name {
-  font-weight: 600;
-  font-size: 15px;
+/* ── Inline rename in popup profile list ───────────────────────────────────── */
+.profile-name-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  margin-right: 6px;
+  overflow: hidden;
 }
+
+/* the editable input that replaces the span during rename */
+.profile-name-edit {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #2d3748);
+  border: 1px solid var(--primary-color, #3291B6);
+  border-radius: 5px;
+  padding: 2px 6px;
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(50, 145, 182, 0.18);
+}
+
+/* rename button: pencil state */
+.icon-btn.rename-btn {
+  font-size: 13px;
+  line-height: 1;
+  border: 1px solid transparent;
+  background: transparent;
+}
+.icon-btn.rename-btn:hover {
+  background: #edf2ff;
+  border-color: #7bc0d9;
+}
+
+/* rename button: confirm (✔) state */
+.icon-btn.rename-confirm {
+  background: #e6fff4 !important;
+  border-color: #48bb78 !important;
+  color: #276749;
+}
+.icon-btn.rename-confirm:hover {
+  background: #48bb78 !important;
+  color: #fff;
+}
+
 
 .profile-count {
   font-size: 12px;
@@ -543,26 +587,57 @@ html body #auto-filler-floating-btn {
   min-width: 0;
 }
 
-.field-label {
+/* New semantic classes used by the updated modal template */
+.field-label-text {
   font-weight: 500;
   color: #333;
-  margin-bottom: 4px;
-  font-size: 14px;
+  margin-bottom: 3px;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.field-value {
-  font-size: 12px;
+.field-value-text {
+  font-size: 11px;
   color: #666;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
 }
 
-.field-value:empty::before {
-  content: '(trống)';
-  color: #999;
+.field-value-code {
+  display: inline-block;
+  background: #f0f4ff;
+  border: 1px solid #c5d0f0;
+  border-radius: 3px;
+  color: #667eea;
+  font-size: 10px;
+  font-family: 'Courier New', monospace;
+  padding: 0 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.field-type-icon {
+  margin-right: 10px;
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  line-height: 1;
+}
+
+/* Dim fields with no current value — still selectable but visually de-emphasized */
+.field-item--empty {
+  opacity: 0.6;
+}
+.field-item--empty .field-value-text {
   font-style: italic;
 }
+
+
 
 .modal-footer {
   padding: 16px 24px;
@@ -693,7 +768,7 @@ html body #auto-filler-floating-btn {
   align-items: center !important;
   justify-content: center !important;
   transition: all 0.3s !important;
-  font-family: -apple-system, sans-serif !important;
+  font-family: 'Be Vietnam Pro', -apple-system, sans-serif !important;
   box-sizing: border-box !important;
 }
 html body #auto-filler-floating-btn:hover {

@@ -9,7 +9,7 @@ console.log(`%c
 ──────╚══╝─╚╝──────────────────────────╚══╝
 
 TypeLess - Auto Form Filler
-v1.0.2 by TRONG.PRO
+v1.0.3 by TRONG.PRO
 `, 'color: #667eea; font-weight: bold;');
 
 // Background service worker
@@ -146,23 +146,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         (async () => {
             try {
-                // 1. Inject content script
+                // 0. Hide toolbar before capture
+                await new Promise(resolve => {
+                    chrome.tabs.sendMessage(tabId, { action: 'prepareForScreenshot' }, () => resolve());
+                });
+                await new Promise(r => setTimeout(r, 150));
+
+                // 1. Inject screenshot content script
                 await chrome.scripting.executeScript({
                     target: { tabId },
                     files: ['screenshot.js']
                 });
 
-                // 2. Start Capture
+                // 2. Start capture
                 chrome.tabs.sendMessage(tabId, { action: 'startCapture' }, (response) => {
+                    // 3. Restore toolbar whether capture succeeded or failed
+                    chrome.tabs.sendMessage(tabId, { action: 'cleanupAfterScreenshot' }, () => {});
                     if (chrome.runtime.lastError) {
                         sendResponse({ success: false, error: chrome.runtime.lastError.message });
                     } else {
-                        // Forward the final success/fail from content script
                         sendResponse(response);
                     }
                 });
 
             } catch (err) {
+                // Restore toolbar on error too
+                chrome.tabs.sendMessage(tabId, { action: 'cleanupAfterScreenshot' }, () => {});
                 console.error("Full Screenshot Error:", err);
                 sendResponse({ success: false, error: err.message });
             }
@@ -332,14 +341,33 @@ chrome.commands.onCommand.addListener(async (command) => {
                 }
             });
         } else if (command === 'screenshot-full') {
-            // Trigger captureFullScreenshot logic (same as message handler)
-            // Note: This matches the message listener logic at line 145
-            chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                files: ['screenshot.js']
-            }).then(() => {
-                chrome.tabs.sendMessage(tab.id, { action: 'startCapture' });
-            });
+            // Mirrors the captureFullScreenshot message handler — must hide toolbar
+            // before capture and restore it afterwards to avoid toolbar appearing in screenshot.
+            const tabId = tab.id;
+            (async () => {
+                try {
+                    // 1. Hide toolbar
+                    await new Promise(resolve => {
+                        chrome.tabs.sendMessage(tabId, { action: 'prepareForScreenshot' }, () => resolve());
+                    });
+                    await new Promise(r => setTimeout(r, 150));
+
+                    // 2. Inject screenshot script
+                    await chrome.scripting.executeScript({
+                        target: { tabId },
+                        files: ['screenshot.js']
+                    });
+
+                    // 3. Start capture; restore toolbar when done (success or failure)
+                    chrome.tabs.sendMessage(tabId, { action: 'startCapture' }, () => {
+                        chrome.tabs.sendMessage(tabId, { action: 'cleanupAfterScreenshot' }, () => {});
+                    });
+                } catch (err) {
+                    // Restore toolbar even on error
+                    chrome.tabs.sendMessage(tabId, { action: 'cleanupAfterScreenshot' }, () => {});
+                    console.error('screenshot-full command error:', err);
+                }
+            })();
         } else if (command === 'screenshot-visible') {
             const tabId = tab.id;
             // Proper async IIFE — avoids 'await inside non-async callback' bug

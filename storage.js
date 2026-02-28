@@ -9,7 +9,7 @@
  * ──────╚══╝─╚╝──────────────────────────╚══╝
  * 
  * TypeLess - Auto Form Filler
- * v1.0.2 by TRONG.PRO
+ * v1.0.3 by TRONG.PRO
  */
 
 // Storage management for profiles
@@ -33,7 +33,11 @@ const StorageManager = {
       return result.profiles || [];
     } catch (error) {
       if (error.message.includes('Extension context invalidated')) {
-        alert('⚠️ Extension đã được reload!\n\nVui lòng RELOAD trang này (F5) để tiếp tục sử dụng.');
+        // Cannot use alert() here — this code runs in both content scripts AND the
+        // Service Worker (via importScripts). alert() does not exist in SW context
+        // and would throw a ReferenceError, crashing the background worker.
+        // Content scripts will surface this via the UI when the next action is attempted.
+        console.error('[TypeLess] Extension context invalidated. Please reload the page.');
         return [];
       }
       console.error('Error getting profiles:', error);
@@ -68,7 +72,7 @@ const StorageManager = {
     }
   },
 
-  // Save a new profile
+  // Save a new profile — returns {success: bool, isNew: bool}
   async saveProfile(profile) {
     try {
       const profiles = await this.getProfiles();
@@ -79,31 +83,73 @@ const StorageManager = {
         p.name === profile.name && this.normalizeUrl(p.url) === normalizedUrl
       );
 
+      let isNew = true;
       if (existingIndex >= 0) {
-        // Update existing profile - keep the original ID and creation time
+        // Update existing profile — keep the original ID and creation time
         profiles[existingIndex] = {
           ...profile,
-          id: profiles[existingIndex].id, // Keep original ID
-          createdAt: profiles[existingIndex].createdAt, // Keep original creation time
+          id: profiles[existingIndex].id,
+          createdAt: profiles[existingIndex].createdAt,
           updatedAt: new Date().toISOString()
         };
-        // console.log('📝 Updated existing profile:', profile.name);
+        isNew = false;
       } else {
-        // Add new profile - ensure it has an ID
+        // Add new profile — ensure it has an ID
         const newProfile = {
           ...profile,
           id: profile.id || `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
           createdAt: profile.createdAt || new Date().toISOString()
         };
         profiles.push(newProfile);
-        // console.log('✅ Added new profile:', profile.name);
       }
 
       await chrome.storage.local.set({ profiles });
-      return true;
+      return { success: true, isNew };
     } catch (error) {
       console.error('Error saving profile:', error);
+      return { success: false, isNew: false };
+    }
+  },
+
+  // Rename a profile by ID
+  async renameProfile(profileId, newName) {
+    try {
+      newName = (newName || '').trim();
+      if (!newName) return false;
+      const profiles = await this.getProfiles();
+      const idx = profiles.findIndex(p => p.id === profileId);
+      if (idx < 0) return false;
+      profiles[idx] = { ...profiles[idx], name: newName, updatedAt: new Date().toISOString() };
+      await chrome.storage.local.set({ profiles });
+      return true;
+    } catch (error) {
+      console.error('Error renaming profile:', error);
       return false;
+    }
+  },
+
+  // ── Auto-increment counter for default profile name ──────────────────────
+  // Persists across sessions so consecutive saves never collide.
+  // Counter is keyed by date string so it resets on new days.
+  async getNextProfileCounter(dateKey) {
+    try {
+      const storageKey = `profileCounter_${dateKey}`;
+      const result = await chrome.storage.local.get(storageKey);
+      return (result[storageKey] || 0) + 1;
+    } catch (e) {
+      return 1;
+    }
+  },
+
+  async consumeProfileCounter(dateKey) {
+    try {
+      const storageKey = `profileCounter_${dateKey}`;
+      const result = await chrome.storage.local.get(storageKey);
+      const next = (result[storageKey] || 0) + 1;
+      await chrome.storage.local.set({ [storageKey]: next });
+      return next;
+    } catch (e) {
+      return 1;
     }
   },
 
@@ -202,44 +248,92 @@ const StorageManager = {
     }
   },
 
-  // Get full backup data (profiles + settings)
+  // Get full backup data (profiles + settings + metadata)
   async getBackupData() {
     try {
       const profiles = await this.getProfiles();
       const settings = (await this.getGlobalSettings()) || {};
-      return { profiles, settings };
+      return {
+        _version: '1.2',
+        _exportedAt: new Date().toISOString(),
+        _count: profiles.length,
+        // Field schema (v1.2): each field may contain:
+        //   { id, selector, label, value, displayText, type, name,
+        //     focusAfterFill: boolean }  ← NEW in v1.2
+        profiles,
+        settings
+      };
     } catch (error) {
       console.error('Error getting backup data:', error);
-      return { profiles: [], settings: {} };
+      return { _version: '1.2', profiles: [], settings: {} };
     }
   },
 
-  // Restore full backup data
+  // Validate a single profile object from import
+  _isValidProfile(profile) {
+    return (
+      profile &&
+      typeof profile === 'object' &&
+      !Array.isArray(profile) &&
+      typeof profile.name === 'string' &&
+      profile.name.trim() !== '' &&
+      Array.isArray(profile.fields)
+    );
+  },
+
+  // Restore full backup data — returns detailed stats
   async restoreBackupData(data) {
     try {
-      let restoredCount = 0;
+      let added   = 0;
+      let updated = 0;
+      let skipped = 0;
       let settingsRestored = false;
 
-      // Handle legacy format (array of profiles)
-      const profilesToRestore = Array.isArray(data) ? data : (data.profiles || []);
+      // Handle all import formats:
+      //   - plain array:          [{name, fields, ...}, ...]
+      //   - backup object:        {profiles: [...], settings: {...}, _version: ...}
+      //   - single profile copy:  {id, name, fields, url, ...}
+      //
+      // v1.2 compatibility: fields may include focusAfterFill (boolean).
+      // Older exports without this field are imported as-is (defaults to false).
+      const importVersion = (!Array.isArray(data) && data._version) ? data._version : null;
 
-      // Restore profiles
+      const profilesToRestore = Array.isArray(data) ? data
+        : Array.isArray(data.profiles) ? data.profiles
+        : this._isValidProfile(data) ? [data]   // single profile pasted from "copy" button
+        : [];
+
       for (const profile of profilesToRestore) {
-        if (await this.saveProfile(profile)) {
-          restoredCount++;
+        if (!this._isValidProfile(profile)) {
+          skipped++;
+          continue;
+        }
+        // Normalise fields: ensure focusAfterFill is always a boolean
+        if (Array.isArray(profile.fields)) {
+          profile.fields = profile.fields.map(f => ({
+            ...f,
+            focusAfterFill: f.focusAfterFill === true
+          }));
+        }
+        const result = await this.saveProfile(profile);
+        if (result.success) {
+          if (result.isNew) added++;
+          else updated++;
+        } else {
+          skipped++;
         }
       }
 
       // Restore settings if present
-      if (data.settings && typeof data.settings === 'object' && !Array.isArray(data)) {
+      if (!Array.isArray(data) && data.settings && typeof data.settings === 'object') {
         await this.setGlobalSettings(data.settings);
         settingsRestored = true;
       }
 
-      return { count: restoredCount, settingsRestored };
+      return { count: added + updated, added, updated, skipped, settingsRestored };
     } catch (error) {
       console.error('Error restoring backup data:', error);
-      return { count: 0, settingsRestored: false, error: error.message };
+      return { count: 0, added: 0, updated: 0, skipped: 0, settingsRestored: false, error: error.message };
     }
   }
 };

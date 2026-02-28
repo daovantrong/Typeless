@@ -9,7 +9,7 @@ console.log(`%c
 ──────╚══╝─╚╝──────────────────────────╚══╝
 
 TypeLess - Auto Form Filler
-v1.0.2 by TRONG.PRO
+v1.0.3 by TRONG.PRO
 `, 'color: #667eea; font-weight: bold;');
 
 // Popup script for profile management
@@ -102,10 +102,18 @@ async function loadProfiles() {
     }
 
     container.innerHTML = profiles.map(profile => `
-    <div class="profile-item">
+    <div class="profile-item" data-profile-id="${profile.id}">
       <div class="profile-header">
-        <div class="profile-name">${escapeHtml(profile.name)}</div>
+        <div class="profile-name-wrap">
+          <span class="profile-name" id="pname-${profile.id}">${escapeHtml(profile.name)}</span>
+          <input class="profile-name-edit" id="pedit-${profile.id}"
+                 value="${escapeHtml(profile.name)}" style="display:none"
+                 spellcheck="false" autocomplete="off">
+        </div>
         <div class="profile-actions">
+          <button class="icon-btn rename-btn" data-profile-id="${profile.id}" title="${t('btn.rename_tooltip') || 'Đổi tên'}">
+            ✏️
+          </button>
           <button class="icon-btn apply-btn" data-profile-id="${profile.id}" title="${t('btn.apply_tooltip')}">
             <img src="icons/play.svg" class="icon-img">
           </button>
@@ -125,19 +133,10 @@ async function loadProfiles() {
     </div>
   `).join('');
 
-    // Attach profile action listeners
-    container.querySelectorAll('.apply-btn').forEach(btn => {
-        btn.addEventListener('click', () => applyProfile(btn.dataset.profileId));
-    });
-
-    container.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', () => copyProfile(btn.dataset.profileId));
-    });
-
-    container.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => deleteProfile(btn.dataset.profileId));
-    });
+    // ── profile action buttons are handled by a single delegated listener
+    // attached once in attachEventListeners() — nothing to add here
 }
+
 
 // Copy a single profile
 async function copyProfile(profileId) {
@@ -154,8 +153,159 @@ async function copyProfile(profileId) {
     }
 }
 
+// ── Inline rename ─────────────────────────────────────────────────────────────
+// Switches the profile-name <span> to an <input>, saves on Enter or blur.
+
+let _activeRenameId = null;   // guard: only one rename active at a time
+
+function startRename(profileId, renameBtn) {
+    if (_activeRenameId && _activeRenameId !== profileId) {
+        cancelRename(_activeRenameId);
+    }
+    if (_activeRenameId === profileId) return; // already open
+    _activeRenameId = profileId;
+
+    const nameSpan = document.getElementById(`pname-${profileId}`);
+    const nameInput = document.getElementById(`pedit-${profileId}`);
+    if (!nameSpan || !nameInput) return;
+
+    // Switch to edit mode
+    nameSpan.style.display = 'none';
+    nameInput.style.display = 'block';
+    nameInput.value = nameSpan.textContent;
+    nameInput.focus();
+    nameInput.select();
+
+    // Change rename btn to ✔ confirm
+    renameBtn.textContent = '✔';
+    renameBtn.title = 'Lưu tên (Enter)';
+    renameBtn.classList.add('rename-confirm');
+
+    const onConfirm = (e) => {
+        // If blur fired because user clicked the rename/confirm button,
+        // skip here — the delegated 'click' handler will call confirmRename.
+        if (e.type === 'blur' && e.relatedTarget === renameBtn) return;
+        confirmRename(profileId, renameBtn);
+    };
+    const onKeydown = (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); onConfirm(e); }
+        if (e.key === 'Escape') { cancelRename(profileId, renameBtn); }
+    };
+
+    nameInput._onConfirm = onConfirm;
+    nameInput._onKeydown = onKeydown;
+    nameInput.addEventListener('blur', onConfirm);
+    nameInput.addEventListener('keydown', onKeydown);
+    // NOTE: no onclick override — delegation checks .rename-confirm class instead
+}
+
+function cancelRename(profileId, renameBtn) {
+    _activeRenameId = null;
+    const nameSpan = document.getElementById(`pname-${profileId}`);
+    const nameInput = document.getElementById(`pedit-${profileId}`);
+    if (!nameSpan || !nameInput) return;
+
+    nameInput.style.display = 'none';
+    nameSpan.style.display = '';
+    if (nameInput._onConfirm) nameInput.removeEventListener('blur', nameInput._onConfirm);
+    if (nameInput._onKeydown) nameInput.removeEventListener('keydown', nameInput._onKeydown);
+
+    if (renameBtn) {
+        renameBtn.textContent = '✏️';
+        renameBtn.title = i18n.t('btn.rename_tooltip') || 'Đổi tên';
+        renameBtn.classList.remove('rename-confirm');
+    }
+}
+
+async function confirmRename(profileId, renameBtn) {
+    if (_activeRenameId !== profileId) return; // already cancelled or different
+    _activeRenameId = null;
+
+    const nameSpan = document.getElementById(`pname-${profileId}`);
+    const nameInput = document.getElementById(`pedit-${profileId}`);
+    if (!nameSpan || !nameInput) return;
+
+    // Remove listeners before any await so they don't re-fire
+    if (nameInput._onConfirm) nameInput.removeEventListener('blur', nameInput._onConfirm);
+    if (nameInput._onKeydown) nameInput.removeEventListener('keydown', nameInput._onKeydown);
+
+    const newName = nameInput.value.trim();
+
+    if (newName && newName !== nameSpan.textContent) {
+        const ok = await StorageManager.renameProfile(profileId, newName);
+        if (ok) {
+            nameSpan.textContent = newName;
+            showNotification(`✏️ Đổi tên → "${newName}"`);
+            // Notify content script to refresh toolbar dropdown
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tab) safeMsg(tab.id, { action: 'refreshProfiles' });
+        } else {
+            showNotification(i18n.t('alert.error_save') || 'Lỗi lưu tên', 'error');
+        }
+    }
+
+    // Restore display
+    nameInput.style.display = 'none';
+    nameSpan.style.display = '';
+    if (renameBtn) {
+        renameBtn.textContent = '✏️';
+        renameBtn.title = i18n.t('btn.rename_tooltip') || 'Đổi tên';
+        renameBtn.classList.remove('rename-confirm');
+    }
+}
+
+/**
+ * Safe wrapper for chrome.tabs.sendMessage.
+ * Silently swallows "Receiving end does not exist" errors that occur on
+ * restricted pages (chrome://, edge://, about:, file://) where content
+ * scripts cannot run.
+ */
+function safeMsg(tabId, msg, callback) {
+    if (!tabId) return;
+    try {
+        chrome.tabs.sendMessage(tabId, msg, (response) => {
+            if (chrome.runtime.lastError) {
+                // Suppress connection errors on restricted pages
+                const err = chrome.runtime.lastError.message || '';
+                if (!err.includes('Receiving end does not exist') &&
+                    !err.includes('Could not establish connection') &&
+                    !err.includes('Extension context invalidated')) {
+                    console.warn('[TypeLess popup] sendMessage:', err);
+                }
+            }
+            if (callback) callback(response);
+        });
+    } catch (e) {
+        // chrome.tabs.sendMessage itself can throw on restricted tabs
+        if (callback) callback(undefined);
+    }
+}
+
 function attachEventListeners() {
     const t = (key, params) => i18n.t(key, params);
+
+    // ── Single delegated listener for ALL profile card buttons ────────────────
+    // Lives here (not in loadProfiles) so it is attached exactly once,
+    // regardless of how many times the profile list is re-rendered.
+    const profilesContainer = document.getElementById('profilesContainer');
+    if (profilesContainer) {
+        profilesContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.icon-btn[data-profile-id]');
+            if (!btn) return;
+            const id = btn.dataset.profileId;
+
+            if (btn.classList.contains('apply-btn')) { applyProfile(id); }
+            else if (btn.classList.contains('copy-btn')) { copyProfile(id); }
+            else if (btn.classList.contains('delete-btn')) { deleteProfile(id); }
+            else if (btn.classList.contains('rename-btn')) {
+                if (btn.classList.contains('rename-confirm')) {
+                    confirmRename(id, btn);
+                } else {
+                    startRename(id, btn);
+                }
+            }
+        });
+    }
 
     // Open Options Page
     document.getElementById('btn-open-options')?.addEventListener('click', () => {
@@ -193,7 +343,7 @@ function attachEventListeners() {
     // Show/Hide Toolbar button (Toggle visibility)
     document.getElementById('showToolbar')?.addEventListener('click', async () => {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        chrome.tabs.sendMessage(tab.id, { action: 'toggleHideToolbar' }, (response) => {
+        safeMsg(tab.id, { action: 'toggleHideToolbar' }, (response) => {
             if (chrome.runtime.lastError) {
                 showNotification('Error: ' + chrome.runtime.lastError.message, 'error');
             }
@@ -207,7 +357,7 @@ function attachEventListeners() {
     // Unlock Right Click
     document.getElementById('btn-unlock-right-click')?.addEventListener('click', async () => {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        chrome.tabs.sendMessage(tab.id, { action: 'triggerEnableRightClick' });
+        safeMsg(tab.id, { action: 'triggerEnableRightClick' });
         closeAndNotify(t('notify.right_click_enabled'));
     });
 
@@ -226,7 +376,6 @@ function attachEventListeners() {
     // Paste Profiles
     document.getElementById('btn-paste-profiles')?.addEventListener('click', async () => {
         try {
-            // Updated Logic for new backup format
             const text = await navigator.clipboard.readText();
             let importedData;
             try {
@@ -238,19 +387,19 @@ function attachEventListeners() {
             const result = await StorageManager.restoreBackupData(importedData);
 
             if (result.count > 0 || result.settingsRestored) {
-                showNotification(t('notify.pasted'));
+                const msg = [
+                    result.added > 0 ? `+${result.added} ${t('notify.added_new') || 'mới'}` : '',
+                    result.updated > 0 ? `↺${result.updated} ${t('notify.updated') || 'cập nhật'}` : '',
+                    result.skipped > 0 ? `⚠ ${result.skipped} ${t('notify.skipped') || 'bỏ qua'}` : '',
+                ].filter(Boolean).join('  ');
+                showNotification(`${t('notify.pasted')}${msg ? '  — ' + msg : ''}`);
                 await loadProfiles();
-                // If settings restored, reload settings form
-                if (result.settingsRestored) {
-                    await loadSettings();
-                }
 
-                // Also refresh toolbar
                 const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-                if (tab) chrome.tabs.sendMessage(tab.id, { action: 'refreshProfiles' });
+                if (tab) safeMsg(tab.id, { action: 'refreshProfiles' });
             } else {
                 if (result.error) throw new Error(result.error);
-                showNotification(t('alert.no_fields'), 'error'); // Fallback error
+                showNotification(t('alert.no_fields'), 'error');
             }
 
         } catch (e) {
@@ -265,11 +414,13 @@ function attachEventListeners() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `auto-form-filler-backup-${new Date().toISOString().split('T')[0]}.json`;
+        const stamp = new Date().toISOString().replace('T', '_').replace(/:/g, '-').substring(0, 19);
+        a.download = `typeless-backup-${stamp}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        showNotification(t('notify.exported', { count: backupData.profiles.length }));
+        URL.revokeObjectURL(url);
+        showNotification(t('notify.exported', { count: backupData.profiles?.length ?? 0 }));
     });
 
     // Save Rendered HTML
@@ -277,7 +428,7 @@ function attachEventListeners() {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (!tab) return;
 
-        chrome.tabs.sendMessage(tab.id, { action: 'getRenderedHTML' }, (response) => {
+        safeMsg(tab.id, { action: 'getRenderedHTML' }, (response) => {
             if (response && response.html) {
                 const blob = new Blob([response.html], { type: 'text/html' });
                 const url = URL.createObjectURL(blob);
@@ -311,16 +462,16 @@ function attachEventListeners() {
 
                 const result = await StorageManager.restoreBackupData(importedData);
 
-                showNotification(t('notify.imported', { added: result.count, skipped: 0 }));
+                showNotification(t('notify.imported', {
+                    added: result.added ?? result.count ?? 0,
+                    updated: result.updated ?? 0,
+                    skipped: result.skipped ?? 0
+                }));
 
                 await loadProfiles();
-                if (result.settingsRestored) {
-                    await loadSettings();
-                }
 
-                // Refresh toolbar
                 const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-                if (tab) chrome.tabs.sendMessage(tab.id, { action: 'refreshProfiles' });
+                if (tab) safeMsg(tab.id, { action: 'refreshProfiles' });
 
             } catch (error) {
                 console.error(error);
@@ -348,7 +499,7 @@ async function applyProfile(profileId) {
         return;
     }
 
-    chrome.tabs.sendMessage(tab.id, {
+    safeMsg(tab.id, {
         action: 'fillForm',
         profile: profile
     }, (response) => {
@@ -386,7 +537,7 @@ async function deleteProfile(profileId) {
         // Notify content script to refresh its list too
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tab) {
-            chrome.tabs.sendMessage(tab.id, { action: 'refreshProfiles' });
+            safeMsg(tab.id, { action: 'refreshProfiles' });
         }
     } else {
         showNotification(t('alert.error_delete'), 'error');
@@ -403,7 +554,7 @@ function showNotification(message, type = 'success') {
         document.body.appendChild(toast);
     }
 
-    toast.innerHTML = message;
+    toast.textContent = message; // Use textContent (not innerHTML) to prevent XSS
     toast.className = `toast show ${type}`;
 
     setTimeout(() => {
@@ -415,8 +566,7 @@ function showNotification(message, type = 'success') {
 function closeAndNotify(message) {
     chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
         if (tab && tab.id) {
-            chrome.tabs.sendMessage(tab.id, { action: 'showNotification', message })
-                .catch(() => {}); // ignore if content script not present
+            safeMsg(tab.id, { action: 'showNotification', message }); // fire-and-forget; safeMsg handles errors internally
         }
     });
     window.close();
@@ -439,7 +589,7 @@ function initUtilities() {
             const tab = tabs[0];
             if (tab) {
                 chrome.runtime.sendMessage({ action: 'captureFullScreenshot', tabId: tab.id });
-                closeAndNotify('Taking full page screenshot...');
+                window.close();
             }
         });
     });
@@ -450,7 +600,7 @@ function initUtilities() {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             if (tab) {
                 chrome.runtime.sendMessage({ action: 'captureVisibleScreenshotAndSave', tabId: tab.id });
-                closeAndNotify('Taking screenshot...');
+                window.close();
             }
         } catch (e) {
             console.error(e);
@@ -495,10 +645,10 @@ async function initUserAgent() {
     const uas = {
         'default': '', // Clear rule = use browser default
         'android': settings.ua_android || defaults.ua_android,
-        'ios':     settings.ua_ios     || defaults.ua_ios,
-        'macos':   settings.ua_macos   || defaults.ua_macos,
+        'ios': settings.ua_ios || defaults.ua_ios,
+        'macos': settings.ua_macos || defaults.ua_macos,
         'windows': settings.ua_windows || defaults.ua_windows,
-        'linux':   settings.ua_linux   || defaults.ua_linux
+        'linux': settings.ua_linux || defaults.ua_linux
     };
 
     // Get current tab
@@ -516,7 +666,7 @@ async function initUserAgent() {
                 : (!!currentUA && currentUA === uas[type]);
 
             btn.style.background = isActive ? 'var(--primary-color, #667eea)' : '';
-            btn.style.color      = isActive ? 'white' : '';
+            btn.style.color = isActive ? 'white' : '';
             if (isActive) {
                 anyActive = true;
                 if (uaStatus) {

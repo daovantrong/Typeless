@@ -5,3 +5,6 @@ mock data generator
 form automation
 privacy form filler
 productivity extension
+combobox form filler
+fineui form support
+profile manager extension

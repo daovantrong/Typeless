@@ -1,447 +1,1546 @@
-<!--
-    ╔════╗─────────────╔╗───────────────╔╗──────╔════╗╔═══╗╔═══╗╔═╗─╔╗╔═══╗──╔═══╗╔═══╗╔═══╗
-    ║╔╗╔╗║─────────────║║───────────────║║──────║╔╗╔╗║║╔═╗║║╔═╗║║║╚╗║║║╔═╗║──║╔═╗║║╔═╗║║╔═╗║
-    ╚╝║║╚╝╔╗─╔╗╔══╗╔══╗║║───╔══╗╔══╗╔══╗║╚═╦╗─╔╗╚╝║║╚╝║╚═╝║║║─║║║╔╗╚╝║║║─╚╝──║╚═╝║║╚═╝║║║─║║
-    ──║║──║║─║║║╔╗║║║═╣║║─╔╗║║═╣║══╣║══╣║╔╗║║─║║──║║──║╔╗╔╝║║─║║║║╚╗║║║║╔═╗──║╔══╝║╔╗╔╝║║─║║
-    ──║║──║╚═╝║║╚╝║║║═╣║╚═╝║║║═╣╠══║╠══║║╚╝║╚═╝║──║║──║║║╚╗║╚═╝║║║─║║║║╚╩═║╔╗║║───║║║╚╗║╚═╝║
-    ──╚╝──╚═╗╔╝║╔═╝╚══╝╚═══╝╚══╝╚══╝╚══╝╚══╩═╗╔╝──╚╝──╚╝╚═╝╚═══╝╚╝─╚═╝╚═══╝╚╝╚╝───╚╝╚═╝╚═══╝
-    ──────╔═╝║─║║──────────────────────────╔═╝║
-    ──────╚══╝─╚╝──────────────────────────╚══╝
-
-    TypeLess - Auto Form Filler
-    v1.0.2 by TRONG.PRO
--->
-
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Form - Auto Form Filler Extension</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autofill Extension Test Playground</title>
+<style>
+  @import url('data:text/css,');
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 40px 20px;
-            min-height: 100vh;
-        }
+  /* Font Setup */
+  @font-face {
+    font-family: 'Be Vietnam Pro';
+    src: url('fonts/BeVietnamPro-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
+  @font-face {
+    font-family: 'Be Vietnam Pro';
+    src: url('fonts/BeVietnamPro-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
 
-        h1 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 32px;
-        }
+  @font-face {
+    font-family: 'Noto Sans SC';
+    src: url('fonts/NotoSansSC-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
 
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
+  @font-face {
+    font-family: 'Noto Sans TC';
+    src: url('fonts/NotoSansTC-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
 
-        .form-section {
-            margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 2px solid #f0f0f0;
-        }
+  @font-face {
+    font-family: 'Noto Sans KR';
+    src: url('fonts/NotoSansKR-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
 
-        .form-section:last-child {
-            border-bottom: none;
-        }
+  @font-face {
+    font-family: 'Noto Sans JP';
+    src: url('fonts/NotoSansJP-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
 
-        .section-title {
-            color: #764ba2;
-            font-size: 20px;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
+  :root {
+    --bg: #0d0d0f;
+    --bg2: #141418;
+    --bg3: #1c1c22;
+    --border: #2a2a35;
+    --border-accent: #3d3d50;
+    --text: #e8e8f0;
+    --text-muted: #7878a0;
+    --accent: #5b5ef4;
+    --accent2: #00e5a0;
+    --accent3: #ff5f7e;
+    --accent4: #f0b429;
+    --success: #00c97a;
+    --error: #ff4d6d;
+    --radius: 8px;
+    --font-mono: 'Courier New', monospace;
+  }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Be Vietnam Pro', 'Trebuchet MS', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
 
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        input[type="number"],
-        input[type="date"],
-        input[type="password"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: border-color 0.3s;
-        }
+  /* ── Header ─────────────────────────────── */
+  .site-header {
+    background: linear-gradient(135deg, #12121a 0%, #1a1a2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 30px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .site-header .badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .site-header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text);
+  }
+  .site-header .sub {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
 
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+  /* ── Layout ──────────────────────────────── */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 0;
+    min-height: calc(100vh - 65px);
+  }
 
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
+  .main-col {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow-y: auto;
+  }
 
-        .checkbox-group,
-        .radio-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+  .side-col {
+    border-left: 1px solid var(--border);
+    background: var(--bg2);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 65px);
+    position: sticky;
+    top: 65px;
+  }
 
-        .checkbox-item,
-        .radio-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+  /* ── Cards ───────────────────────────────── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
 
-        input[type="checkbox"],
-        input[type="radio"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
+  .card-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-        .inline-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+  .card-header .tag {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--accent);
+    color: #fff;
+  }
+  .card-header .tag.green  { background: var(--accent2); color: #000; }
+  .card-header .tag.red    { background: var(--accent3); }
+  .card-header .tag.yellow { background: var(--accent4); color: #000; }
+  .card-header .tag.purple { background: #8b5cf6; }
+  .card-header .tag.teal   { background: #06b6d4; color: #000; }
 
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-        }
+  .card-header h2 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text);
+    flex: 1;
+  }
 
-        button {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+  .card-body { padding: 20px; }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
+  /* ── Form Elements ───────────────────────── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .form-grid .span2 { grid-column: span 2; }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
 
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  label .req { color: var(--accent3); margin-left: 2px; }
 
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  textarea,
+  select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 13px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    font-family: inherit;
+  }
 
-        .info-box {
-            background: #f0f4ff;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin-bottom: 30px;
-            border-radius: 6px;
-        }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,94,244,.15);
+  }
 
-        .info-box h3 {
-            color: #667eea;
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
+  input[disabled] {
+    opacity: .4;
+    cursor: not-allowed;
+  }
 
-        .info-box p {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-        }
+  input[readonly] {
+    border-color: var(--border-accent);
+    color: var(--text-muted);
+  }
 
-        .info-box ul {
-            margin-top: 10px;
-            margin-left: 20px;
-            color: #666;
-            font-size: 14px;
-        }
+  textarea { resize: vertical; min-height: 80px; }
+  select { cursor: pointer; }
+  select[multiple] { min-height: 90px; }
 
-        .info-box li {
-            margin-bottom: 5px;
-        }
-    </style>
+  .checkbox-group, .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .check-item, .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  input[type="checkbox"], input[type="radio"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  input[type="file"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px dashed var(--border-accent);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  .field-error {
+    font-size: 11px;
+    color: var(--error);
+    margin-top: 2px;
+    display: none;
+  }
+  .field-error.show { display: block; }
+
+  /* ── ComboBox ────────────────────────────── */
+  .combo-wrap {
+    position: relative;
+  }
+
+  .combo-wrap input[type="text"] {
+    padding-right: 32px;
+  }
+
+  .combo-arrow {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 10px;
+    pointer-events: none;
+    transition: transform .2s;
+  }
+
+  .combo-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg3);
+    border: 1px solid var(--border-accent);
+    border-radius: var(--radius);
+    z-index: 200;
+    max-height: 180px;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  }
+
+  .combo-dropdown.open { display: block; }
+
+  .combo-item {
+    padding: 9px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background .15s;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .combo-item:hover { background: var(--bg); }
+  .combo-item.selected { background: rgba(91,94,244,.2); color: var(--accent); }
+  .combo-item .combo-val { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
+  .combo-no-result { padding: 9px 12px; color: var(--text-muted); font-size: 12px; }
+
+  .combo-state {
+    margin-top: 4px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+  }
+  .combo-state span { color: var(--accent2); }
+
+  /* ── Buttons ─────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    transition: all .2s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #4648d8; transform: translateY(-1px); }
+
+  .btn-success {
+    background: var(--accent2);
+    color: #000;
+  }
+  .btn-success:hover { background: #00c98c; transform: translateY(-1px); }
+
+  .btn-danger {
+    background: var(--accent3);
+    color: #fff;
+  }
+  .btn-danger:hover { background: #e04060; }
+
+  .btn-sm {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Output ──────────────────────────────── */
+  .output-block {
+    margin-top: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .output-label {
+    background: var(--bg3);
+    padding: 6px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .output-label .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .3; }
+  }
+
+  .output-pre {
+    padding: 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent2);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 220px;
+    overflow-y: auto;
+    min-height: 40px;
+  }
+
+  /* ── Debug Panel ─────────────────────────── */
+  .debug-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .debug-header h3 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .debug-log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.8;
+  }
+
+  .log-entry {
+    display: flex;
+    gap: 8px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    transition: background .1s;
+  }
+
+  .log-entry:hover { background: var(--bg3); }
+  .log-time { color: var(--text-muted); flex-shrink: 0; }
+  .log-type { flex-shrink: 0; width: 60px; text-align: right; }
+  .log-type.change { color: var(--accent); }
+  .log-type.input  { color: var(--accent2); }
+  .log-type.hidden { color: var(--accent4); }
+  .log-type.submit { color: var(--accent3); }
+  .log-type.dom    { color: #8b5cf6; }
+  .log-msg { color: var(--text); flex: 1; word-break: break-all; }
+
+  /* ── Dynamic form loading ────────────────── */
+  .dynamic-placeholder {
+    background: var(--bg);
+    border: 2px dashed var(--border-accent);
+    border-radius: var(--radius);
+    padding: 30px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .timer-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+
+  .timer-fill {
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 2s linear;
+  }
+
+  /* ── iframe ──────────────────────────────── */
+  .iframe-container {
+    border: none;
+    width: 100%;
+    border-radius: var(--radius);
+    background: var(--bg);
+    min-height: 400px;
+  }
+
+  /* ── Shadow DOM host ─────────────────────── */
+  #shadowHost {
+    border: 1px solid var(--border-accent);
+    border-radius: var(--radius);
+    padding: 2px;
+    min-height: 100px;
+  }
+
+  /* ── Section heading ─────────────────────── */
+  .section-sep {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .section-sep::before, .section-sep::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Scrollbar ───────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-accent); border-radius: 3px; }
+
+  /* Status badges on card header */
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border-accent);
+    margin-left: auto;
+  }
+  .status-dot.live { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); animation: pulse 1.5s infinite; }
+
+  /* Hidden value observer badge */
+  .hidden-observer {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    background: rgba(240, 180, 41, .1);
+    border: 1px solid rgba(240, 180, 41, .3);
+    border-radius: 4px;
+    padding: 3px 8px;
+    color: var(--accent4);
+    margin-top: 4px;
+  }
+
+  .info-box {
+    background: rgba(91,94,244,.08);
+    border: 1px solid rgba(91,94,244,.2);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .info-box strong { color: var(--accent); }
+</style>
 </head>
-
 <body>
-    <div class="container">
-        <h1>📋 Test Form</h1>
-        <p class="subtitle">Form mẫu để test Auto Form Filler Extension</p>
 
-        <div class="info-box">
-            <h3>🎯 Hướng dẫn sử dụng</h3>
-            <p><strong>Để test extension:</strong></p>
-            <ul>
-                <li>Điền các trường bên dưới với thông tin mẫu</li>
-                <li>Nhấn nút 💾 <strong>Save</strong> trên toolbar để lưu profile</li>
-                <li>Nhấn F5 để refresh trang (form sẽ trống)</li>
-                <li>Click vào profile vừa lưu trên toolbar</li>
-                <li>✅ Form sẽ tự động điền lại!</li>
-            </ul>
-        </div>
+<!-- ═══════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════ -->
+<header class="site-header">
+  <span class="badge">DEV</span>
+  <h1>🧪 Autofill Extension Test Playground</h1>
+  <span class="sub">All forms · No backend · Pure HTML/JS</span>
+</header>
 
-        <form id="testForm">
-            <!-- Personal Information -->
-            <div class="form-section">
-                <h2 class="section-title">👤 Thông tin cá nhân</h2>
+<div class="layout">
 
-                <div class="inline-group">
-                    <div class="form-group">
-                        <label for="firstName">Họ:</label>
-                        <input type="text" id="firstName" name="firstName" placeholder="Nguyễn">
-                    </div>
+<!-- ═══════════════════════════════════════════
+     MAIN COLUMN
+═══════════════════════════════════════════ -->
+<div class="main-col">
 
-                    <div class="form-group">
-                        <label for="lastName">Tên:</label>
-                        <input type="text" id="lastName" name="lastName" placeholder="Văn A">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" placeholder="example@email.com">
-                </div>
-
-                <div class="inline-group">
-                    <div class="form-group">
-                        <label for="phone">Số điện thoại:</label>
-                        <input type="tel" id="phone" name="phone" placeholder="0123456789">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="birthdate">Ngày sinh:</label>
-                        <input type="date" id="birthdate" name="birthdate">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Address -->
-            <div class="form-section">
-                <h2 class="section-title">🏠 Địa chỉ</h2>
-
-                <div class="form-group">
-                    <label for="address">Địa chỉ:</label>
-                    <input type="text" id="address" name="address" placeholder="123 Đường ABC">
-                </div>
-
-                <div class="inline-group">
-                    <div class="form-group">
-                        <label for="city">Thành phố:</label>
-                        <select id="city" name="city">
-                            <option value="">-- Chọn thành phố --</option>
-                            <option value="hanoi">Hà Nội</option>
-                            <option value="hcm">TP. Hồ Chí Minh</option>
-                            <option value="danang">Đà Nẵng</option>
-                            <option value="haiphong">Hải Phòng</option>
-                            <option value="cantho">Cần Thơ</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="district">Quận/Huyện:</label>
-                        <select id="district" name="district">
-                            <option value="">-- Chọn quận/huyện --</option>
-                            <option value="district1">Quận 1</option>
-                            <option value="district2">Quận 2</option>
-                            <option value="district3">Quận 3</option>
-                            <option value="district4">Quận 4</option>
-                            <option value="district5">Quận 5</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Work Information -->
-            <div class="form-section">
-                <h2 class="section-title">💼 Thông tin công việc</h2>
-
-                <div class="form-group">
-                    <label for="company">Công ty:</label>
-                    <input type="text" id="company" name="company" placeholder="Tên công ty">
-                </div>
-
-                <div class="inline-group">
-                    <div class="form-group">
-                        <label for="position">Vị trí:</label>
-                        <select id="position" name="position">
-                            <option value="">-- Chọn vị trí --</option>
-                            <option value="developer">Developer</option>
-                            <option value="designer">Designer</option>
-                            <option value="manager">Manager</option>
-                            <option value="tester">Tester</option>
-                            <option value="other">Khác</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="experience">Kinh nghiệm (năm):</label>
-                        <input type="number" id="experience" name="experience" min="0" max="50" placeholder="5">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="skills">Kỹ năng:</label>
-                    <textarea id="skills" name="skills" placeholder="JavaScript, Python, React, Node.js..."></textarea>
-                </div>
-            </div>
-
-            <!-- Preferences -->
-            <div class="form-section">
-                <h2 class="section-title">⚙️ Tùy chọn</h2>
-
-                <div class="form-group">
-                    <label>Sở thích:</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="hobbies" value="reading">
-                            <span>Đọc sách</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="hobbies" value="sports">
-                            <span>Thể thao</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="hobbies" value="music">
-                            <span>Âm nhạc</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="hobbies" value="travel">
-                            <span>Du lịch</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Giới tính:</label>
-                    <div class="radio-group">
-                        <label class="radio-item">
-                            <input type="radio" name="gender" value="male">
-                            <span>Nam</span>
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="gender" value="female">
-                            <span>Nữ</span>
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="gender" value="other">
-                            <span>Khác</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Ngôn ngữ:</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="languages" value="vietnamese">
-                            <span>Tiếng Việt</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="languages" value="english">
-                            <span>Tiếng Anh</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="languages" value="chinese">
-                            <span>Tiếng Trung</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional Notes -->
-            <div class="form-section">
-                <h2 class="section-title">📝 Ghi chú</h2>
-
-                <div class="form-group">
-                    <label for="notes">Ghi chú thêm:</label>
-                    <textarea id="notes" name="notes" placeholder="Nhập ghi chú của bạn tại đây..."></textarea>
-                </div>
-            </div>
-
-            <!-- Buttons -->
-            <div class="button-group">
-                <button type="submit" class="btn-primary">Gửi</button>
-                <button type="reset" class="btn-secondary">Xóa</button>
-            </div>
-        </form>
+<!-- ╔══════════════════════════════════════════
+     MAIN FORM
+═════════════════════════════════════════════ -->
+<div class="card" id="card-main">
+  <div class="card-header">
+    <span class="tag">1</span>
+    <h2>MAIN FORM — Comprehensive Field Coverage</h2>
+    <div class="status-dot live"></div>
+  </div>
+  <div class="card-body">
+    <div class="info-box">
+      Tests: <strong>text, email, password, number, date, textarea, checkbox, radio, select, multi-select, complex names, disabled, readonly, hidden, file</strong>
     </div>
 
-    <script>
-        // Prevent form submission
-        document.getElementById('testForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            alert('✅ Form submitted! (Demo only - không thực sự gửi đi)');
-        });
+    <form id="mainForm" novalidate>
+      <!-- Hidden / token fields (Edge case) -->
+      <input type="hidden" name="__VIEWSTATE" value="dGhpcyBpcyBhIGZha2Ugdmlld3N0YXRlIHRva2Vu">
+      <input type="hidden" name="__RequestVerificationToken" value="FAKE_CSRF_TOKEN_12345">
 
-        // Log form data to console
-        document.getElementById('testForm').addEventListener('submit', function (e) {
-            const formData = new FormData(this);
-            console.log('Form data:');
-            for (let [key, value] of formData.entries()) {
-                console.log(`${key}: ${value}`);
-            }
-        });
+      <div class="form-grid">
 
-        // Reset confirmation
-        document.getElementById('testForm').addEventListener('reset', function (e) {
-            if (!confirm('Bạn có chắc muốn xóa tất cả dữ liệu?')) {
-                e.preventDefault();
-            }
-        });
-    </script>
+        <!-- Basic text fields -->
+        <div class="field-group">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" name="name" id="f-name" placeholder="John Doe" required autocomplete="name">
+          <span class="field-error" id="err-name">Name is required</span>
+        </div>
+
+        <div class="field-group">
+          <label>Username <span class="req">*</span></label>
+          <input type="text" name="username" id="f-username" placeholder="johndoe" required autocomplete="username">
+          <span class="field-error" id="err-username">Username is required</span>
+        </div>
+
+        <div class="field-group">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" name="email" id="f-email" placeholder="john@example.com" required autocomplete="email">
+          <span class="field-error" id="err-email">Valid email required</span>
+        </div>
+
+        <div class="field-group">
+          <label>Password <span class="req">*</span></label>
+          <input type="password" name="password" id="f-password" placeholder="••••••••" required autocomplete="current-password">
+          <span class="field-error" id="err-password">Password is required</span>
+        </div>
+
+        <div class="field-group">
+          <label>Age / Number</label>
+          <input type="number" name="age" id="f-age" placeholder="25" min="1" max="120">
+        </div>
+
+        <div class="field-group">
+          <label>Birth Date</label>
+          <input type="date" name="birthdate" id="f-birthdate">
+        </div>
+
+        <!-- Complex names (Edge case #8) -->
+        <div class="field-group">
+          <label>City <code style="font-size:9px;color:var(--accent4)">user[address][city]</code></label>
+          <input type="text" name="user[address][city]" id="f-city" placeholder="Ho Chi Minh City">
+        </div>
+
+        <div class="field-group">
+          <label>Order Item <code style="font-size:9px;color:var(--accent4)">order.item[0].name</code></label>
+          <input type="text" name="order.item[0].name" id="f-orderitem" placeholder="Laptop Pro">
+        </div>
+
+        <div class="field-group">
+          <label>Data Field <code style="font-size:9px;color:var(--accent4)">data.user-id</code></label>
+          <input type="text" name="data.user-id" id="f-datauserid" placeholder="USR-00123">
+        </div>
+
+        <!-- ID only, no name (Edge case) -->
+        <div class="field-group">
+          <label>No-Name Field <code style="font-size:9px;color:var(--accent4)">id only</code></label>
+          <input type="text" id="fieldWithIdOnly" placeholder="Has id, no name">
+        </div>
+
+        <!-- Disabled / Readonly -->
+        <div class="field-group">
+          <label>Disabled Field</label>
+          <input type="text" name="disabledField" id="f-disabled" value="Cannot change me" disabled>
+        </div>
+
+        <div class="field-group">
+          <label>Readonly Field</label>
+          <input type="text" name="readonlyField" id="f-readonly" value="Read only value" readonly>
+        </div>
+
+        <!-- Duplicate name edge case (same name different form tested below) -->
+        <div class="field-group">
+          <label>Phone <code style="font-size:9px;color:var(--accent4)">duplicate-name test</code></label>
+          <input type="text" name="sharedFieldName" id="f-phone" placeholder="+84 900 000 000">
+        </div>
+
+        <div class="field-group">
+          <label>Website</label>
+          <input type="text" name="website" id="f-website" placeholder="https://example.com">
+        </div>
+
+        <!-- Textarea -->
+        <div class="field-group span2">
+          <label>Bio / Notes</label>
+          <textarea name="bio" id="f-bio" placeholder="Write something about yourself..."></textarea>
+        </div>
+
+        <!-- File -->
+        <div class="field-group">
+          <label>Avatar Upload</label>
+          <input type="file" name="avatar" id="f-file" accept="image/*">
+        </div>
+
+        <!-- Select -->
+        <div class="field-group">
+          <label>Country <span class="req">*</span></label>
+          <select name="country" id="f-country" required>
+            <option value="">-- Select country --</option>
+            <option value="VN">🇻🇳 Vietnam</option>
+            <option value="US">🇺🇸 United States</option>
+            <option value="JP">🇯🇵 Japan</option>
+            <option value="SG">🇸🇬 Singapore</option>
+            <option value="DE">🇩🇪 Germany</option>
+          </select>
+          <span class="field-error" id="err-country">Country is required</span>
+        </div>
+
+        <!-- Multi-select -->
+        <div class="field-group">
+          <label>Skills (multi-select)</label>
+          <select name="skills[]" id="f-skills" multiple>
+            <option value="js">JavaScript</option>
+            <option value="py">Python</option>
+            <option value="go">Go</option>
+            <option value="rs">Rust</option>
+            <option value="ts">TypeScript</option>
+          </select>
+        </div>
+
+        <!-- Radio group -->
+        <div class="field-group">
+          <label>Gender</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="gender" value="male"> Male</label>
+            <label class="radio-item"><input type="radio" name="gender" value="female"> Female</label>
+            <label class="radio-item"><input type="radio" name="gender" value="other"> Other / Prefer not to say</label>
+          </div>
+        </div>
+
+        <!-- Checkbox group -->
+        <div class="field-group">
+          <label>Interests</label>
+          <div class="checkbox-group">
+            <label class="check-item"><input type="checkbox" name="interests[]" value="tech"> Technology</label>
+            <label class="check-item"><input type="checkbox" name="interests[]" value="music"> Music</label>
+            <label class="check-item"><input type="checkbox" name="interests[]" value="sports"> Sports</label>
+          </div>
+        </div>
+
+      </div><!-- /form-grid -->
+
+      <!-- ── Custom ComboBox (Main) ── -->
+      <div class="section-sep" style="margin: 20px 0 14px;">ComboBox — FineUI / ExtJS Style</div>
+
+      <div class="form-grid">
+        <div class="field-group span2">
+          <label>Department (Custom ComboBox) <code style="font-size:9px;color:var(--accent4)">hidden: demoCombo$Value</code></label>
+          <div id="mainComboWrap" class="combo-wrap">
+            <input type="text" id="mainComboText" placeholder="Type to filter...">
+            <span class="combo-arrow">▼</span>
+            <input type="hidden" name="demoCombo$Value" id="mainComboHidden" value="">
+            <div class="combo-dropdown" id="mainComboDropdown"></div>
+          </div>
+          <div class="combo-state">
+            text: <span id="mainComboTextDisplay">—</span> &nbsp;|&nbsp;
+            hidden: <span id="mainComboHiddenDisplay">—</span>
+          </div>
+          <div class="hidden-observer" id="mainHiddenBadge">hidden value: <strong>not set</strong></div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">▶ Submit Main Form</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="resetForm('mainForm')">↺ Reset</button>
+      </div>
+    </form>
+
+    <div class="output-block">
+      <div class="output-label"><span class="dot"></span> SUBMITTED PAYLOAD — MAIN FORM</div>
+      <pre class="output-pre" id="mainFormOutput">— Not submitted yet —</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════
+     DYNAMIC FORM
+═════════════════════════════════════════════ -->
+<div class="card" id="card-dynamic">
+  <div class="card-header">
+    <span class="tag green">2</span>
+    <h2>DYNAMIC FORM — Rendered After 2s Delay</h2>
+    <div class="status-dot" id="dynamicDot"></div>
+  </div>
+  <div class="card-body">
+    <div class="info-box">
+      Tests: <strong>extension detects forms injected into DOM after page load</strong>
+    </div>
+    <div id="dynamicPlaceholder" class="dynamic-placeholder">
+      <div>⏳ Form will render in <strong id="dynCountdown">2</strong>s...</div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+    </div>
+    <div id="dynamicFormContainer"></div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════
+     IFRAME FORM
+═════════════════════════════════════════════ -->
+<div class="card" id="card-iframe">
+  <div class="card-header">
+    <span class="tag red">3</span>
+    <h2>IFRAME FORM — Same-Origin Frame</h2>
+  </div>
+  <div class="card-body">
+    <div class="info-box">
+      Tests: <strong>extension crosses into iframe documents (same-origin)</strong>
+    </div>
+    <iframe id="iframeEl" class="iframe-container" src="about:blank"></iframe>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════
+     SHADOW DOM FORM
+═════════════════════════════════════════════ -->
+<div class="card" id="card-shadow">
+  <div class="card-header">
+    <span class="tag yellow">4</span>
+    <h2>SHADOW DOM FORM — Encapsulated in Shadow Root</h2>
+  </div>
+  <div class="card-body">
+    <div class="info-box">
+      Tests: <strong>extension accesses elements inside Shadow DOM (closed vs open)</strong>
+    </div>
+    <div id="shadowHost"></div>
+    <div class="output-block">
+      <div class="output-label"><span class="dot"></span> SUBMITTED PAYLOAD — SHADOW FORM</div>
+      <pre class="output-pre" id="shadowFormOutput">— Not submitted yet —</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════
+     EDGE CASES FORM
+═════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">
+    <span class="tag purple">5</span>
+    <h2>EDGE CASES — Duplicate Names, Special Characters</h2>
+  </div>
+  <div class="card-body">
+    <div class="info-box">
+      Contains: <strong>duplicate name across forms, same id in different contexts, special char names, ViewState, CSRF token</strong>
+    </div>
+    <form id="edgeForm" novalidate>
+      <input type="hidden" name="__VIEWSTATE" value="ANOTHER_FAKE_VIEWSTATE_XYZ">
+      <div class="form-grid">
+
+        <div class="field-group">
+          <label>Same name in different form <code style="font-size:9px;color:var(--accent4)">sharedFieldName</code></label>
+          <input type="text" name="sharedFieldName" id="f2-phone" placeholder="Edge: same name, diff form">
+        </div>
+
+        <div class="field-group">
+          <label>Same id, different context <code style="font-size:9px;color:var(--accent4)">fieldWithIdOnly</code></label>
+          <input type="text" id="fieldWithIdOnly2" name="altField" placeholder="Duplicate id scenario">
+        </div>
+
+        <div class="field-group">
+          <label>Special chars: <code style="font-size:9px;color:var(--accent4)">data.user-id</code></label>
+          <input type="text" name="data.user-id" id="edge-datauserid" placeholder="Special char name">
+        </div>
+
+        <div class="field-group">
+          <label>Array name: <code style="font-size:9px;color:var(--accent4)">order.item[0].name</code></label>
+          <input type="text" name="order.item[0].name" id="edge-orderitem" placeholder="Array-style name">
+        </div>
+
+        <div class="field-group span2">
+          <label>Nested: <code style="font-size:9px;color:var(--accent4)">user[address][street]</code></label>
+          <input type="text" name="user[address][street]" id="edge-street" placeholder="123 Main St">
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">▶ Submit Edge Cases</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="resetForm('edgeForm')">↺ Reset</button>
+      </div>
+    </form>
+
+    <div class="output-block">
+      <div class="output-label"><span class="dot"></span> SUBMITTED PAYLOAD — EDGE FORM</div>
+      <pre class="output-pre" id="edgeFormOutput">— Not submitted yet —</pre>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main-col -->
+
+<!-- ═══════════════════════════════════════════
+     SIDE COLUMN — DEBUG PANEL
+═══════════════════════════════════════════ -->
+<div class="side-col">
+  <div class="debug-header">
+    <h3>📡 Event Log</h3>
+    <button class="btn btn-danger btn-sm" onclick="clearLog()">Clear</button>
+  </div>
+  <div class="debug-log" id="debugLog">
+    <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-type dom">DOM</span><span class="log-msg">Page loaded. Listening for events...</span></div>
+  </div>
+</div>
+
+</div><!-- /layout -->
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════ -->
+<script>
+// ── Logging ───────────────────────────────────────────────────────────────────
+function addLog(type, msg) {
+  const log = document.getElementById('debugLog');
+  const now = new Date();
+  const time = now.toTimeString().slice(0,8);
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `<span class="log-time">${time}</span><span class="log-type ${type}">${type}</span><span class="log-msg">${msg}</span>`;
+  log.appendChild(entry);
+  log.scrollTop = log.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById('debugLog').innerHTML = '';
+  addLog('dom', 'Log cleared.');
+}
+
+// ── Global event listener for all change / input events ───────────────────────
+document.addEventListener('change', function(e) {
+  const t = e.target;
+  if (!t.tagName) return;
+  let val = t.type === 'checkbox' ? (t.checked ? '☑ '+t.value : '☐ '+t.value)
+          : t.type === 'file'     ? (t.files[0]?.name || 'none')
+          : t.value;
+  addLog('change', `[${t.tagName.toLowerCase()}] name="${t.name||''}" id="${t.id||''}" → "${val.substring(0,40)}"`);
+}, true);
+
+document.addEventListener('input', function(e) {
+  const t = e.target;
+  if (!t.tagName || t.type === 'hidden') return;
+  addLog('input', `[${t.tagName.toLowerCase()}] name="${t.name||''}" id="${t.id||''}" → "${t.value.substring(0,30)}"`);
+}, true);
+
+// ── Hidden value mutation observer factory ─────────────────────────────────────
+function observeHidden(hiddenInput, badgeEl, textDisplayEl, hiddenDisplayEl) {
+  const orig = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  // Use MutationObserver for attribute-level changes too
+  const obs = new MutationObserver(() => {
+    const v = hiddenInput.value;
+    if (badgeEl) badgeEl.innerHTML = `hidden value: <strong>${v || '(empty)'}</strong>`;
+    if (hiddenDisplayEl) hiddenDisplayEl.textContent = v || '—';
+    addLog('hidden', `[hidden] name="${hiddenInput.name}" value="${v}"`);
+  });
+  obs.observe(hiddenInput, { attributes: true, attributeFilter: ['value'] });
+
+  // Also intercept .value = '...' programmatic assignments
+  Object.defineProperty(hiddenInput, 'value', {
+    get() { return orig.get.call(this); },
+    set(v) {
+      orig.set.call(this, v);
+      if (badgeEl) badgeEl.innerHTML = `hidden value: <strong>${v || '(empty)'}</strong>`;
+      if (hiddenDisplayEl) hiddenDisplayEl.textContent = v || '—';
+      addLog('hidden', `[hidden] name="${hiddenInput.name}" set to "${v}"`);
+      // Dispatch change event so extension can react
+      hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  });
+}
+
+// ── ComboBox Factory ───────────────────────────────────────────────────────────
+const COMBO_DATA_MAIN = [
+  { label: 'Engineering',      value: 'ENG' },
+  { label: 'Product',          value: 'PRD' },
+  { label: 'Design',           value: 'DSN' },
+  { label: 'Marketing',        value: 'MKT' },
+  { label: 'Human Resources',  value: 'HR'  },
+  { label: 'Finance',          value: 'FIN' },
+  { label: 'Customer Support', value: 'CS'  },
+  { label: 'Legal',            value: 'LGL' },
+];
+
+function buildCombo(config) {
+  /**
+   * config = {
+   *   textId, hiddenId, dropdownId, wrapId,
+   *   data: [{label, value}],
+   *   textDisplay: el, hiddenDisplay: el,
+   *   badgeEl: el
+   * }
+   */
+  const textInput   = document.getElementById(config.textId);
+  const hiddenInput = document.getElementById(config.hiddenId);
+  const dropdown    = document.getElementById(config.dropdownId);
+
+  if (!textInput || !hiddenInput || !dropdown) return;
+
+  // Set up hidden observer
+  if (config.badgeEl || config.hiddenDisplay) {
+    observeHidden(hiddenInput, config.badgeEl, config.textDisplay, config.hiddenDisplay);
+  }
+
+  let selectedValue = '';
+  let selectedLabel = '';
+  let isOpen = false;
+
+  function renderDropdown(filter) {
+    dropdown.innerHTML = '';
+    const filtered = config.data.filter(d =>
+      d.label.toLowerCase().includes(filter.toLowerCase()) ||
+      d.value.toLowerCase().includes(filter.toLowerCase())
+    );
+    if (filtered.length === 0) {
+      dropdown.innerHTML = '<div class="combo-no-result">No results found</div>';
+      return;
+    }
+    filtered.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'combo-item' + (item.value === selectedValue ? ' selected' : '');
+      div.innerHTML = `${item.label}<span class="combo-val">${item.value}</span>`;
+      div.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        selectItem(item);
+      });
+      dropdown.appendChild(div);
+    });
+  }
+
+  function selectItem(item) {
+    selectedValue = item.value;
+    selectedLabel = item.label;
+    textInput.value = item.label;
+    hiddenInput.value = item.value; // triggers observer
+    // Dispatch events so extension can detect
+    textInput.dispatchEvent(new Event('input', { bubbles: true }));
+    textInput.dispatchEvent(new Event('change', { bubbles: true }));
+    if (config.textDisplay) config.textDisplay.textContent = item.label;
+    closeDropdown();
+    addLog('change', `[combo] selected "${item.label}" → hidden="${item.value}"`);
+  }
+
+  function openDropdown() {
+    renderDropdown(textInput.value);
+    dropdown.classList.add('open');
+    isOpen = true;
+  }
+
+  function closeDropdown() {
+    dropdown.classList.remove('open');
+    isOpen = false;
+    // If text changed but no selection made → hidden stays old
+    if (textInput.value !== selectedLabel) {
+      addLog('hidden', `[combo] text="${textInput.value}" but hidden="${hiddenInput.value}" (no click)`);
+    }
+  }
+
+  textInput.addEventListener('focus', () => openDropdown());
+  textInput.addEventListener('input', () => { renderDropdown(textInput.value); if (!isOpen) openDropdown(); });
+  textInput.addEventListener('blur', () => setTimeout(closeDropdown, 150));
+}
+
+// Init main combo
+buildCombo({
+  textId: 'mainComboText',
+  hiddenId: 'mainComboHidden',
+  dropdownId: 'mainComboDropdown',
+  wrapId: 'mainComboWrap',
+  data: COMBO_DATA_MAIN,
+  textDisplay:   document.getElementById('mainComboTextDisplay'),
+  hiddenDisplay: document.getElementById('mainComboHiddenDisplay'),
+  badgeEl:       document.getElementById('mainHiddenBadge'),
+});
+
+// ── Form Submission Handler ────────────────────────────────────────────────────
+function collectFormData(form) {
+  const data = {};
+  const fd = new FormData(form);
+  for (const [key, val] of fd.entries()) {
+    if (data[key] !== undefined) {
+      if (!Array.isArray(data[key])) data[key] = [data[key]];
+      data[key].push(val);
+    } else {
+      data[key] = val;
+    }
+  }
+  // Pick up checkboxes that are unchecked (won't appear in FormData)
+  form.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    if (!cb.checked) {
+      if (!data['__unchecked']) data['__unchecked'] = [];
+      if (!Array.isArray(data['__unchecked'])) data['__unchecked'] = [data['__unchecked']];
+      data['__unchecked'].push(cb.name + '=' + cb.value);
+    }
+  });
+  return data;
+}
+
+function validateMain(form) {
+  let ok = true;
+  const fields = [
+    { id: 'f-name',     errId: 'err-name',     check: v => v.trim().length > 0 },
+    { id: 'f-username', errId: 'err-username',  check: v => v.trim().length > 0 },
+    { id: 'f-email',    errId: 'err-email',     check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+    { id: 'f-password', errId: 'err-password',  check: v => v.length >= 4 },
+    { id: 'f-country',  errId: 'err-country',   check: v => v !== '' },
+  ];
+  fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    const err = document.getElementById(f.errId);
+    if (el && err) {
+      if (!f.check(el.value)) {
+        err.classList.add('show');
+        el.style.borderColor = 'var(--error)';
+        ok = false;
+      } else {
+        err.classList.remove('show');
+        el.style.borderColor = '';
+      }
+    }
+  });
+  return ok;
+}
+
+function resetForm(formId) {
+  const f = document.getElementById(formId);
+  if (f) {
+    f.reset();
+    f.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
+    f.querySelectorAll('input, select, textarea').forEach(e => e.style.borderColor = '');
+  }
+}
+
+document.getElementById('mainForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  addLog('submit', 'mainForm submitted');
+  if (!validateMain(this)) {
+    addLog('submit', '⚠ Validation failed');
+    return;
+  }
+  const data = collectFormData(this);
+  document.getElementById('mainFormOutput').textContent = JSON.stringify(data, null, 2);
+});
+
+document.getElementById('edgeForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  addLog('submit', 'edgeForm submitted');
+  const data = collectFormData(this);
+  document.getElementById('edgeFormOutput').textContent = JSON.stringify(data, null, 2);
+});
+
+// ── Dynamic Form (renders after 2s) ───────────────────────────────────────────
+const COMBO_DATA_DYN = [
+  { label: 'New York',    value: 'NYC' },
+  { label: 'Los Angeles', value: 'LAX' },
+  { label: 'Chicago',     value: 'CHI' },
+  { label: 'Houston',     value: 'HOU' },
+  { label: 'Phoenix',     value: 'PHX' },
+];
+
+// Countdown
+let dynCount = 2;
+const dynCountEl = document.getElementById('dynCountdown');
+const timerFill  = document.getElementById('timerFill');
+timerFill.style.width = '0%';
+setTimeout(() => { timerFill.style.width = '100%'; }, 50);
+
+const dynTimer = setInterval(() => {
+  dynCount--;
+  if (dynCountEl) dynCountEl.textContent = dynCount;
+  if (dynCount <= 0) {
+    clearInterval(dynTimer);
+    renderDynamicForm();
+  }
+}, 1000);
+
+function renderDynamicForm() {
+  const placeholder = document.getElementById('dynamicPlaceholder');
+  const container   = document.getElementById('dynamicFormContainer');
+  if (placeholder) placeholder.style.display = 'none';
+  document.getElementById('dynamicDot').classList.add('live');
+  addLog('dom', '✅ Dynamic form rendered into DOM');
+
+  container.innerHTML = `
+    <form id="dynamicForm" novalidate>
+      <div class="form-grid">
+        <div class="field-group">
+          <label>Dynamic Name</label>
+          <input type="text" name="dynName" id="dyn-name" placeholder="Auto-detected?">
+        </div>
+        <div class="field-group">
+          <label>Dynamic Email</label>
+          <input type="email" name="dynEmail" id="dyn-email" placeholder="dynamic@test.com">
+        </div>
+        <div class="field-group">
+          <label>City (Dropdown)</label>
+          <select name="dynCity" id="dyn-city">
+            <option value="">-- Select --</option>
+            <option value="hanoi">Hanoi</option>
+            <option value="hcm">Ho Chi Minh</option>
+            <option value="danang">Da Nang</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Status</label>
+          <div class="checkbox-group">
+            <label class="check-item"><input type="checkbox" name="dynStatus[]" value="active"> Active</label>
+            <label class="check-item"><input type="checkbox" name="dynStatus[]" value="verified"> Verified</label>
+          </div>
+        </div>
+        <div class="field-group span2">
+          <label>City (Custom ComboBox) <code style="font-size:9px;color:var(--accent4)">hidden: dynCombo$Value</code></label>
+          <div class="combo-wrap">
+            <input type="text" id="dynComboText" placeholder="Filter city...">
+            <span class="combo-arrow">▼</span>
+            <input type="hidden" name="dynCombo$Value" id="dynComboHidden" value="">
+            <div class="combo-dropdown" id="dynComboDropdown"></div>
+          </div>
+          <div class="combo-state">
+            hidden: <span id="dynComboHiddenDisplay">—</span>
+          </div>
+          <div class="hidden-observer" id="dynHiddenBadge">hidden value: <strong>not set</strong></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success">▶ Submit Dynamic Form</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="resetForm('dynamicForm')">↺ Reset</button>
+      </div>
+    </form>
+    <div class="output-block">
+      <div class="output-label"><span class="dot"></span> SUBMITTED PAYLOAD — DYNAMIC FORM</div>
+      <pre class="output-pre" id="dynamicFormOutput">— Not submitted yet —</pre>
+    </div>
+  `;
+
+  // Init combo
+  buildCombo({
+    textId: 'dynComboText',
+    hiddenId: 'dynComboHidden',
+    dropdownId: 'dynComboDropdown',
+    data: COMBO_DATA_DYN,
+    hiddenDisplay: document.getElementById('dynComboHiddenDisplay'),
+    badgeEl:       document.getElementById('dynHiddenBadge'),
+  });
+
+  document.getElementById('dynamicForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    addLog('submit', 'dynamicForm submitted');
+    const data = collectFormData(this);
+    document.getElementById('dynamicFormOutput').textContent = JSON.stringify(data, null, 2);
+  });
+}
+
+// ── Iframe Form ────────────────────────────────────────────────────────────────
+(function buildIframe() {
+  const COMBO_DATA_IFRAME = [
+    { label: 'Apple',   value: 'AAPL' },
+    { label: 'Google',  value: 'GOOG' },
+    { label: 'Amazon',  value: 'AMZN' },
+    { label: 'Meta',    value: 'META' },
+    { label: 'Netflix', value: 'NFLX' },
+  ];
+
+  const iframeDoc = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  :root{--bg:#0d0d0f;--bg2:#141418;--bg3:#1c1c22;--border:#2a2a35;--border-accent:#3d3d50;--text:#e8e8f0;--text-muted:#7878a0;--accent:#5b5ef4;--accent2:#00e5a0;--accent3:#ff5f7e;--accent4:#f0b429;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  
+  /* Font Setup */
+  @font-face {
+    font-family: 'Be Vietnam Pro';
+    src: url('../fonts/BeVietnamPro-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: 'Be Vietnam Pro';
+    src: url('../fonts/BeVietnamPro-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  body{background:var(--bg);color:var(--text);font-family:'Be Vietnam Pro','Trebuchet MS',sans-serif;font-size:13px;padding:20px;}
+  h3{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .span2{grid-column:span 2;}
+  .field-group{display:flex;flex-direction:column;gap:4px;}
+  label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;}
+  input[type=text],input[type=email],select{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:8px 10px;outline:none;transition:border-color .2s;}
+  input:focus,select:focus{border-color:var(--accent);}
+  .check-item{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;margin-top:4px;}
+  input[type=checkbox]{accent-color:var(--accent);}
+  .combo-wrap{position:relative;}
+  .combo-list{position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:6px;max-height:200px;overflow-y:auto;z-index:1000;}
+  .combo-item{padding:8px 10px;cursor:pointer;font-size:12px;display:flex;justify-content:space-between;}
+  .combo-item:hover{background:var(--bg);}
+  .combo-item.selected{background:rgba(91,94,244,.2);color:var(--accent);}
+  .combo-val{font-size:9px;color:var(--text-muted);font-family:monospace;}
+  .combo-state{margin-top:3px;font-size:10px;font-family:monospace;color:var(--text-muted);}
+  .combo-state span{color:var(--accent2);}
+  .btn{display:inline-flex;align-items:center;padding:8px 16px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;border:none;background:var(--accent);color:#fff;margin-top:14px;}
+  pre{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;font-family:monospace;color:var(--accent2);white-space:pre-wrap;word-break:break-all;margin-top:14px;max-height:150px;overflow-y:auto;}
+  .hidden-obs{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:monospace;background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.3);border-radius:4px;padding:2px 6px;color:var(--accent4);margin-top:3px;}
+</style>
+</head>
+<body>
+  <h3>📋 IFRAME FORM</h3>
+  <form id="iframeForm" novalidate>
+    <div class="grid">
+      <div class="field-group">
+        <label>Full Name</label>
+        <input type="text" name="iframeName" id="iframe-name" placeholder="Name in iframe">
+        <span class="combo-arrow">▼</span>
+        <input type="hidden" name="iframeCombo$Value" id="iframeComboHidden" value="">
+        <div class="combo-dropdown" id="iframeComboDropdown"></div>
+      </div>
+      <div class="combo-state">hidden: <span id="iframeHiddenDisplay">—</span></div>
+      <div class="hidden-obs" id="iframeBadge">hidden value: <strong>not set</strong></div>
+    </div>
+  </div>
+  <button type="submit" class="btn">▶ Submit Iframe Form</button>
+</form>
+<pre id="iframeOutput">— Not submitted yet —</pre>
+<script>
+  var COMBO_DATA=[{label:'Apple',value:'AAPL'},{label:'Google',value:'GOOG'},{label:'Amazon',value:'AMZN'},{label:'Meta',value:'META'},{label:'Netflix',value:'NFLX'}];
+  function buildCombo(textId,hiddenId,dropdownId,data,hiddenDisplay,badge){
+    var ti=document.getElementById(textId),hi=document.getElementById(hiddenId),dd=document.getElementById(dropdownId);
+    if(!ti||!hi||!dd)return;
+    var selVal='',selLabel='',isOpen=false;
+    // observe hidden
+    var origDesc=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');
+    Object.defineProperty(hi,'value',{get:function(){return origDesc.get.call(this);},set:function(v){origDesc.set.call(this,v);if(hiddenDisplay)document.getElementById(hiddenDisplay).textContent=v||'—';if(badge){var b=document.getElementById(badge);if(b)b.innerHTML='hidden value: <strong>'+v+'</strong>';}hi.dispatchEvent(new Event('change',{bubbles:true}));}});
+    function render(f){
+      dd.innerHTML='';
+      var res=data.filter(function(d){return d.label.toLowerCase().includes(f.toLowerCase())||d.value.toLowerCase().includes(f.toLowerCase());});
+      if(!res.length){dd.innerHTML='<div style="padding:8px 10px;color:#7878a0;font-size:11px">No results</div>';return;}
+      res.forEach(function(item){
+        var div=document.createElement('div');div.className='combo-item'+(item.value===selVal?' selected':'');
+        div.innerHTML=item.label+'<span class="combo-val">'+item.value+'</span>';
+        div.addEventListener('mousedown',function(e){e.preventDefault();selVal=item.value;selLabel=item.label;ti.value=item.label;hi.value=item.value;ti.dispatchEvent(new Event('input',{bubbles:true}));ti.dispatchEvent(new Event('change',{bubbles:true}));dd.classList.remove('open');isOpen=false;});
+        dd.appendChild(div);
+      });
+    }
+    ti.addEventListener('focus',function(){render(ti.value);dd.classList.add('open');isOpen=true;});
+    ti.addEventListener('input',function(){render(ti.value);if(!isOpen){dd.classList.add('open');isOpen=true;}});
+    ti.addEventListener('blur',function(){setTimeout(function(){dd.classList.remove('open');isOpen=false;},150);});
+  }
+  buildCombo('iframeComboText','iframeComboHidden','iframeComboDropdown',COMBO_DATA,'iframeHiddenDisplay','iframeBadge');
+  document.getElementById('iframeForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var data={};
+    var fd=new FormData(this);
+    for(var pair of fd.entries()){if(data[pair[0]]!==undefined){if(!Array.isArray(data[pair[0]]))data[pair[0]]=[data[pair[0]]];data[pair[0]].push(pair[1]);}else{data[pair[0]]=pair[1];}}
+    document.getElementById('iframeOutput').textContent=JSON.stringify(data,null,2);
+  });
+<\/script>
 </body>
+</html>`;
 
+  const iframe = document.getElementById('iframeEl');
+  const blob   = new Blob([iframeDoc], { type: 'text/html' });
+  const url    = URL.createObjectURL(blob);
+  iframe.src   = url;
+  iframe.onload = () => {
+    iframe.style.height = (iframe.contentDocument.body.scrollHeight + 40) + 'px';
+    addLog('dom', '✅ iframe loaded with form #iframeForm');
+  };
+})();
+
+// ── Shadow DOM Form ────────────────────────────────────────────────────────────
+(function buildShadow() {
+  const host   = document.getElementById('shadowHost');
+  const shadow  = host.attachShadow({ mode: 'open' });
+
+  const COMBO_SHADOW = [
+    { label: 'Red',    value: '#ff0000' },
+    { label: 'Green',  value: '#00ff00' },
+    { label: 'Blue',   value: '#0000ff' },
+    { label: 'Purple', value: '#800080' },
+    { label: 'Orange', value: '#ff8800' },
+  ];
+
+  shadow.innerHTML = `
+    <style>
+      :host { display: block; padding: 20px; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      .label { font-size: 10px; font-weight: 600; color: #7878a0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: block; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .span2 { grid-column: span 2; }
+      .field-group { display: flex; flex-direction: column; }
+      input[type=text], select {
+        width: 100%; background: #0d0d0f; border: 1px solid #2a2a35;
+        border-radius: 6px; color: #e8e8f0; font-size: 12px; padding: 8px 10px;
+        outline: none; font-family: inherit; transition: border-color .2s;
+      }
+      input:focus, select:focus { border-color: #5b5ef4; }
+      .combo-wrap { position: relative; }
+      .combo-arrow { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: #7878a0; font-size: 9px; pointer-events: none; }
+      .combo-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #1c1c22; border: 1px solid #3d3d50; border-radius: 6px; z-index: 200; max-height: 150px; overflow-y: auto; display: none; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+      .combo-dropdown.open { display: block; }
+      .combo-item { padding: 8px 10px; cursor: pointer; font-size: 12px; display: flex; gap: 8px; align-items: center; }
+      .combo-item:hover { background: #0d0d0f; }
+      .combo-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+      .check-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #e8e8f0; cursor: pointer; }
+      input[type=checkbox] { accent-color: #5b5ef4; }
+      .btn { display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; border: none; background: #f0b429; color: #000; margin-top: 14px; }
+      .state { font-size: 10px; font-family: monospace; color: #7878a0; margin-top: 3px; }
+      .state span { color: #00e5a0; }
+      .hidden-obs { display: inline-flex; font-size: 10px; font-family: monospace; background: rgba(240,180,41,.1); border: 1px solid rgba(240,180,41,.3); border-radius: 4px; padding: 2px 6px; color: #f0b429; margin-top: 3px; }
+    </style>
+    <form id="shadowForm">
+      <div class="grid">
+        <div class="field-group">
+          <span class="label">Shadow Name</span>
+          <input type="text" name="shadowName" id="shadow-name" placeholder="Inside Shadow DOM">
+        </div>
+        <div class="field-group">
+          <span class="label">Shadow Dropdown</span>
+          <select name="shadowSelect" id="shadow-select">
+            <option value="">-- Pick one --</option>
+            <option value="a">Alpha</option>
+            <option value="b">Beta</option>
+            <option value="c">Gamma</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <span class="label">Shadow Checkbox</span>
+          <label class="check-row" style="margin-top:6px"><input type="checkbox" name="shadowCheck" value="yes"> Enable shadow feature</label>
+        </div>
+        <div class="field-group span2">
+          <span class="label">Color (ComboBox) — hidden: shadowCombo$Value</span>
+          <div class="combo-wrap">
+            <input type="text" id="shadowComboText" placeholder="Filter color...">
+            <span class="combo-arrow">▼</span>
+            <input type="hidden" name="shadowCombo$Value" id="shadowComboHidden" value="">
+            <div class="combo-dropdown" id="shadowComboDropdown"></div>
+          </div>
+          <div class="state">hidden: <span id="shadowHiddenDisplay">—</span></div>
+          <div class="hidden-obs" id="shadowBadge">hidden value: <strong>not set</strong></div>
+        </div>
+      </div>
+      <button type="submit" class="btn">▶ Submit Shadow Form</button>
+    </form>
+  `;
+
+  // Build shadow combo (self-contained)
+  const sti = shadow.getElementById('shadowComboText');
+  const shi = shadow.getElementById('shadowComboHidden');
+  const sdd = shadow.getElementById('shadowComboDropdown');
+  const shd = shadow.getElementById('shadowHiddenDisplay');
+  const shb = shadow.getElementById('shadowBadge');
+
+  // Observe
+  const origDesc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  Object.defineProperty(shi, 'value', {
+    get() { return origDesc.get.call(this); },
+    set(v) {
+      origDesc.set.call(this, v);
+      if (shd) shd.textContent = v || '—';
+      if (shb) shb.innerHTML = `hidden value: <strong>${v}</strong>`;
+      shi.dispatchEvent(new Event('change', { bubbles: true }));
+      addLog('hidden', `[shadow-hidden] name="${shi.name}" = "${v}"`);
+    }
+  });
+
+  let selVal = '', selLabel = '', isOpen = false;
+
+  function renderShadow(f) {
+    sdd.innerHTML = '';
+    const filtered = COMBO_SHADOW.filter(d => d.label.toLowerCase().includes(f.toLowerCase()));
+    filtered.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'combo-item';
+      div.innerHTML = `<span class="combo-swatch" style="background:${item.value}"></span>${item.label}`;
+      div.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        selVal = item.value; selLabel = item.label;
+        sti.value = item.label;
+        shi.value = item.value;
+        sti.dispatchEvent(new Event('input', { bubbles: true }));
+        sti.dispatchEvent(new Event('change', { bubbles: true }));
+        sdd.classList.remove('open'); isOpen = false;
+        addLog('change', `[shadow-combo] selected "${item.label}" → "${item.value}"`);
+      });
+      sdd.appendChild(div);
+    });
+    if (!filtered.length) sdd.innerHTML = '<div style="padding:8px 10px;color:#7878a0">No results</div>';
+  }
+
+  sti.addEventListener('focus', () => { renderShadow(sti.value); sdd.classList.add('open'); isOpen = true; });
+  sti.addEventListener('input', () => { renderShadow(sti.value); if (!isOpen) { sdd.classList.add('open'); isOpen = true; } });
+  sti.addEventListener('blur', () => setTimeout(() => { sdd.classList.remove('open'); isOpen = false; }, 150));
+
+  shadow.getElementById('shadowForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    addLog('submit', 'shadowForm submitted');
+    const data = {
+      shadowName:          shadow.getElementById('shadow-name').value,
+      shadowSelect:        shadow.getElementById('shadow-select').value,
+      shadowCheck:         shadow.querySelector('input[name=shadowCheck]').checked,
+      'shadowCombo$Value': shi.value,
+    };
+    document.getElementById('shadowFormOutput').textContent = JSON.stringify(data, null, 2);
+  });
+
+  addLog('dom', '✅ Shadow DOM attached (mode: open) with form #shadowForm');
+})();
+
+// ── Initial log ───────────────────────────────────────────────────────────────
+addLog('dom', `All systems initialised. Date: ${new Date().toLocaleString()}`);
+addLog('dom', 'Watching: mainForm, edgeForm, dynamicForm (pending), iframeForm, shadowForm');
+</script>
+</body>
 </html>
-
-<!--
-    End of test-form.html
-    ╔══╗─────────╔╗────╔═╗╔═╗╔╗───╔══╗╔═╗╔═╗╔═╦╗╔══╗──╔═╗╔═╗╔═╗
-    ╚╗╔╝╔╦╗╔═╗╔═╗║║─╔═╗║═╣║═╣║╚╦╦╗╚╗╔╝║╬║║║║║║║║║╔═╣──║╬║║╬║║║║
-    ─║║─║║║║╬║║╩╣║╚╗║╩╣╠═║╠═║║╬║║║─║║─║╗╣║║║║║║║║╚╗║╔╗║╔╝║╗╣║║║
-    ─╚╝─╠╗║║╔╝╚═╝╚═╝╚═╝╚═╝╚═╝╚═╬╗║─╚╝─╚╩╝╚═╝╚╩═╝╚══╝╚╝╚╝─╚╩╝╚═╝
-    ────╚═╝╚╝──────────────────╚═╝
--->

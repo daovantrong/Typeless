@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "TypeLess - Auto Form Filler",
-  "version": "1.0.2",
-  "minimum_chrome_version": "102",
+  "version": "1.0.3",
+  "minimum_chrome_version": "88",
   "description": "Auto-fill forms with pre-saved profiles",
   "permissions": [
     "storage",

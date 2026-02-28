@@ -6,7 +6,7 @@ TypeLess - Auto Form Filler is the ultimate productivity extension that revoluti
 Fill entire web forms instantly with pre-saved profiles. No more repetitive typing or manual data entry. Simply select a profile and watch as TypeLess intelligently populates every field with perfect accuracy.
 
 **Unlimited Profile Management**
-Create and manage unlimited profiles for different scenarios - work, personal, shopping, testing, or any context you need. Switch between profiles effortlessly and keep your data organized.
+Create and manage unlimited profiles for different scenarios - work, personal, shopping, testing, or any context you need. Switch between profiles effortlessly and keep your data organized. Rename profiles inline with a single click (✏️) directly from the popup — no need to delete and re-save. The new **Profile Manager** in the Options page gives you a searchable, centralized view of all your profiles.
 
 **Smart Fill Technology**
 Our revolutionary Smart Fill engine automatically detects form field types and generates realistic mock data on demand. Perfect for developers and testers who need placeholder data quickly. Generates unique names, emails, phone numbers, addresses, and more.
@@ -28,7 +28,7 @@ The entire interface, including field labels and tooltips, dynamically translate
 **Form Utilities**
 - Save HTML: Export current form state for debugging and documentation
 - Unlock Right-Click: Bypass websites that disable context menus
-- Screenshot Capture: Full page or visible area screenshots
+- Screenshot Capture: Full page or visible area screenshots — toolbar automatically hidden before capture so it never appears in the image
 
 **Mobile Emulation**
 - Simulate Android/iOS devices with accurate user agents
@@ -36,8 +36,8 @@ The entire interface, including field labels and tooltips, dynamically translate
 - Platform-aware form filling
 
 **Data Management**
-- Export profiles to JSON for backup
-- Import profiles from backup files
+- Export profiles to JSON for backup (v1.2 format with metadata: version, export date, count)
+- Import profiles from backup files — result shows added / updated / skipped counts separately
 - Copy/paste profiles between tabs or machines
 - Granular delete options
 
@@ -52,7 +52,7 @@ Speed up your workflow with keyboard shortcuts:
 Clean, intuitive design with Material Design icons. The floating toolbar provides instant access without cluttering your workspace. Responsive design works perfectly on desktop and mobile browsers.
 
 **Smart Detection**
-TypeLess intelligently identifies form fields - text inputs, dropdowns, checkboxes, radio buttons, and textareas. It understands field context and matches them with the right data from your profiles.
+TypeLess intelligently identifies form fields - text inputs, dropdowns, checkboxes, radio buttons, and textareas. It also supports FineUI / ComboBox fields (inputs that look like text but behave as dropdowns), correctly saving both the display label and the hidden code value and restoring both on fill. It understands field context and matches them with the right data from your profiles.
 
 ## 🔒 Privacy & Security
 
@@ -102,9 +102,9 @@ No background activity, no remote connections, no analytics. TypeLess only works
 3. Create your first profile by filling a form and clicking "Save Form"
 4. Experience one-click form filling on any website
 
-TypeLess transforms repetitive form filling into a fast, secure, and enjoyable experience. Join thousands of users who've reclaimed their time from tedious data entry.
+TypeLess transforms repetitive form filling into a fast, secure, and enjoyable experience. Join thousands of users who've reclaimed their time from tedious data entry. Compatible with Chrome 88+ and Microsoft Edge 88+.
 
-**Version 1.0.2** - Latest features include mobile emulation, screenshot capture, and enhanced Smart Fill technology.
+**Version 1.0.3** - Latest features include inline profile rename, FineUI/ComboBox support, screenshot toolbar fix, Profile Manager in Settings, and improved export/import format.
 
 ---
 Privacy: No personal data collected. Your profiles remain securely stored on your device and are never transmitted to external servers.

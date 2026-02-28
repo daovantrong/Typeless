@@ -7,13 +7,62 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="libs/flatpickr/flatpickr.min.css">
     <style>
+        /* Font Setup */
+        @font-face {
+            font-family: 'Be Vietnam Pro';
+            src: url('fonts/BeVietnamPro-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Be Vietnam Pro';
+            src: url('fonts/BeVietnamPro-Medium.woff2') format('woff2');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Noto Sans SC';
+            src: url('fonts/NotoSansSC-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Noto Sans TC';
+            src: url('fonts/NotoSansTC-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Noto Sans KR';
+            src: url('fonts/NotoSansKR-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Noto Sans JP';
+            src: url('fonts/NotoSansJP-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
         body {
             background-color: #f7f9fc;
             padding: 40px;
-            max-width: 1000px;
-            /* Increased max-width */
+            max-width: 1100px;
             margin: 0 auto;
             transition: padding 0.3s;
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
         .options-container {
@@ -116,7 +165,6 @@
             border-radius: 8px;
             font-size: 14px;
             height: 42px;
-            /* Set fixed height for consistency */
             transition: border-color 0.2s;
             box-sizing: border-box;
         }
@@ -138,9 +186,7 @@
             transition: background 0.2s;
         }
 
-        .btn-save:hover {
-            background: #2578A0;
-        }
+        .btn-save:hover { background: #2578A0; }
 
         .status-msg {
             margin-top: 16px;
@@ -161,30 +207,143 @@
             margin-bottom: 20px;
         }
 
-        .welcome-hero h1 {
-            color: #2d3748;
-            margin-bottom: 10px;
-        }
+        .welcome-hero h1 { color: #2d3748; margin-bottom: 10px; }
 
-        .tab-panel {
-            display: none;
-        }
+        .tab-panel { display: none; }
 
+        /* ── Privacy Panel Styles ─────────────────────────── */
+        .privacy-section {
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .privacy-section:last-child { border-bottom: none; }
+        .privacy-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .privacy-sub-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #3291B6;
+            margin: 16px 0 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .privacy-text {
+            font-size: 13.5px;
+            color: #475569;
+            line-height: 1.65;
+            margin: 0 0 8px;
+        }
+        .privacy-list {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+            color: #475569;
+            font-size: 13.5px;
+            line-height: 1.7;
+        }
+        .privacy-list li { margin-bottom: 4px; }
+        .privacy-checklist {
+            list-style: none;
+            padding: 0;
+            margin: 6px 0 0;
+        }
+        .privacy-checklist li {
+            font-size: 13.5px;
+            color: #475569;
+            padding: 5px 0 5px 26px;
+            position: relative;
+            line-height: 1.5;
+        }
+        .privacy-checklist li::before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+            font-size: 13px;
+        }
+        /* Permission cards grid */
+        .perm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .perm-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 14px;
+        }
+        .perm-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .perm-name code {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .perm-row {
+            display: flex;
+            gap: 6px;
+            font-size: 12.5px;
+            color: #475569;
+            line-height: 1.5;
+            margin-bottom: 5px;
+        }
+        .perm-row.perm-privacy { color: #059669; }
+        .perm-label {
+            flex-shrink: 0;
+            font-weight: 600;
+            color: #64748b;
+            min-width: 52px;
+            font-size: 11px;
+            text-transform: uppercase;
+            padding-top: 1px;
+        }
+        .perm-row.perm-privacy .perm-label { color: #059669; }
+        /* Contact table */
+        .privacy-contact-table {
+            border-collapse: collapse;
+            font-size: 13.5px;
+            color: #475569;
+        }
+        .privacy-contact-table td { padding: 5px 16px 5px 0; vertical-align: top; }
+        .privacy-contact-table a { color: #3291B6; text-decoration: none; }
+        .privacy-contact-table a:hover { text-decoration: underline; }
+        .contact-label {
+            font-weight: 600;
+            color: #1e293b;
+            white-space: nowrap;
+        }
+        /* Consent box */
+        .privacy-consent {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #bae6fd;
+            border-bottom: none !important;
+        }
+        .privacy-consent .privacy-section-title { color: #0369a1; }
+        /* ── /Privacy Panel Styles ────────────────────────── */
         .tab-panel.active {
             display: block;
             animation: fadeIn 0.3s ease-out;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .footer {
@@ -196,30 +355,12 @@
             line-height: 1.6;
         }
 
-        .footer a {
-            color: #4a5568;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
+        .footer a { color: #4a5568; text-decoration: none; transition: color 0.2s; }
+        .footer a:hover { color: #3291B6; }
+        .footer .donate-links a { color: #3291B6; font-weight: 600; }
 
-        .footer a:hover {
-            color: #3291B6;
-        }
-
-        .footer .donate-links a {
-            color: #3291B6;
-            font-weight: 600;
-        }
-
-        /* Input Group with Icon */
-        .input-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .input-group .form-control {
-            flex: 1;
-        }
+        .input-group { display: flex; gap: 8px; }
+        .input-group .form-control { flex: 1; }
 
         .btn-icon {
             background: #f7fafc;
@@ -227,87 +368,588 @@
             border-radius: 8px;
             width: 42px;
             height: 42px;
-            /* Set height to match input exactly */
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
             box-sizing: border-box;
-            /* Ensure border and padding are included */
         }
 
-        .btn-icon:hover {
-            background: #edf2f7;
-            border-color: #cbd5e0;
+        .btn-icon:hover { background: #edf2f7; border-color: #cbd5e0; }
+        .btn-icon img { width: 20px; height: 20px; filter: brightness(0); opacity: 0.6; }
+
+        /* ── Profile Manager ── */
+        #profiles-view, #profile-editor { display: none; }
+        #profiles-view.visible, #profile-editor.visible { display: block; }
+
+        .profile-search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
         }
 
-        .btn-icon img {
-            width: 20px;
-            height: 20px;
-            filter: brightness(0);
-            opacity: 0.6;
+        .profile-search-bar .form-control { height: 38px; }
+
+        .profile-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fafcff;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        /* Responsive Design */
+        .profile-card:hover {
+            border-color: #3291B6;
+            background: #f0f8fc;
+            box-shadow: 0 2px 8px rgba(50,145,182,0.08);
+        }
+
+        .profile-card-info { flex: 1; min-width: 0; }
+        .profile-card-name {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-card-meta {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-card-badge {
+            background: #e0f2f1;
+            color: #3291B6;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .btn-edit-profile {
+            background: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-edit-profile:hover { background: #3291B6; color: white; border-color: #3291B6; }
+
+        /* ── Profile Editor ── */
+        .editor-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #3291B6;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .editor-back-btn:hover { text-decoration: underline; }
+
+        .editor-header-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .editor-header-row .form-group { flex: 1; min-width: 180px; margin: 0; }
+        .editor-header-row .form-group input { height: 38px; }
+
+        /* Fields table */
+        .fields-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .fields-table thead th {
+            text-align: left;
+            padding: 8px 10px;
+            background: #f1f5f9;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .fields-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s;
+        }
+
+        .fields-table tbody tr:hover { background: #fafcff; }
+
+        .fields-table td {
+            padding: 6px 6px;
+            vertical-align: middle;
+        }
+
+        .field-input {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 12px;
+            color: #2d3748;
+            background: white;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .field-input:focus {
+            border-color: #3291B6;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(50,145,182,0.12);
+        }
+
+        .field-type-badge {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #64748b;
+            border-radius: 5px;
+            padding: 2px 7px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .focus-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1.5px solid #e2e8f0;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .focus-btn:hover { border-color: #3291B6; background: #e0f2f1; }
+        .focus-btn.active { border-color: #3291B6; background: #3291B6; }
+        .focus-btn.active::after { content: '🎯'; filter: brightness(10); }
+        .focus-btn::after { content: '🎯'; }
+
+        .delete-field-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1.5px solid #fecaca;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .delete-field-btn:hover { background: #fee2e2; border-color: #f87171; }
+
+        .add-field-row {
+            display: flex;
+            gap: 8px;
+            padding: 10px 0;
+            border-top: 2px dashed #e2e8f0;
+            margin-top: 4px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .add-field-row input {
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            padding: 6px 10px;
+            font-size: 12px;
+            color: #2d3748;
+            background: white;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .add-field-row input:focus {
+            border-color: #3291B6;
+            outline: none;
+        }
+
+        .add-field-row input.inp-label { width: 140px; }
+        .add-field-row input.inp-selector { flex: 1; min-width: 160px; font-family: monospace; font-size: 11px; }
+        .add-field-row input.inp-value { width: 160px; }
+
+        .btn-add-field {
+            background: #3291B6;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-add-field:hover { background: #2578A0; }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+            flex-wrap: wrap;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-danger:hover { background: #dc2626; color: white; border-color: #dc2626; }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .empty-profiles {
+            text-align: center;
+            padding: 48px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-profiles p { font-size: 14px; margin: 8px 0 0; }
+
+        .col-label { width: 22%; }
+        .col-value { width: 30%; }
+        .col-selector { width: 32%; }
+        .col-type { width: 8%; }
+        .col-focus { width: 4%; text-align: center; }
+        .col-del { width: 4%; text-align: center; }
+
+        .tooltip-hint {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .profile-count-badge {
+            background: #3291B6;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 12px;
+            margin-left: 6px;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            .options-container {
-                min-height: 500px;
-            }
-
-            .sidebar {
-                width: 70px;
-            }
-
-            .menu-text {
-                display: none;
-            }
-
-            .menu-item {
-                justify-content: center;
-                padding: 15px 0;
-                gap: 0;
-            }
-
-            .menu-icon {
-                width: 24px;
-                height: 24px;
-            }
-
-            .content {
-                padding: 20px;
-            }
+            body { padding: 10px; }
+            .options-container { min-height: 500px; }
+            .sidebar { width: 70px; }
+            .menu-text { display: none; }
+            .menu-item { justify-content: center; padding: 15px 0; gap: 0; }
+            .menu-icon { width: 24px; height: 24px; }
+            .content { padding: 20px; }
         }
 
         @media (max-width: 480px) {
-            .options-container {
-                flex-direction: column;
-            }
+            .options-container { flex-direction: column; }
+            .sidebar { width: 100%; display: flex; padding: 0; border-right: none; border-bottom: 1px solid #e2e8f0; overflow-x: auto; }
+            .menu-item { flex: 1; min-width: 60px; border-right: none; border-bottom: 3px solid transparent; }
+            .menu-item.active { border-right: none; border-bottom: 3px solid #3291B6; }
+        }
 
-            .sidebar {
-                width: 100%;
-                display: flex;
-                padding: 0;
-                border-right: none;
-                border-bottom: 1px solid #e2e8f0;
-                overflow-x: auto;
-            }
+        /* ══════════════════════════════════════════════════════
+           WELCOME GUIDE STYLES
+        ══════════════════════════════════════════════════════ */
 
-            .menu-item {
-                flex: 1;
-                min-width: 60px;
-                border-right: none;
-                border-bottom: 3px solid transparent;
-            }
+        /* Chips row */
+        .guide-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 18px 0 28px;
+            justify-content: center;
+        }
+        .chip {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+        .chip-blue   { background: #dbeafe; color: #1d4ed8; }
+        .chip-green  { background: #d1fae5; color: #065f46; }
+        .chip-purple { background: #ede9fe; color: #5b21b6; }
+        .chip-orange { background: #ffedd5; color: #9a3412; }
+        .chip-teal   { background: #ccfbf1; color: #0f766e; }
+        .chip-red    { background: #fee2e2; color: #991b1b; }
 
-            .menu-item.active {
-                border-right: none;
-                border-bottom: 3px solid #3291B6;
-            }
+        /* Guide section card */
+        .guide-section {
+            background: #fafcff;
+            border: 1px solid #e8edf5;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .guide-section-last { margin-bottom: 0; }
+
+        .guide-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 17px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+        .guide-step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3291B6;
+            color: white;
+            font-size: 13px;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        .guide-desc {
+            font-size: 13.5px;
+            color: #475569;
+            line-height: 1.7;
+            margin: 0 0 16px;
+        }
+
+        /* Screenshot box */
+        .screenshot-box {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 12px 0;
+            text-align: center;
+        }
+        .screenshot-img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 8px 8px 0 0;
+            object-fit: cover;
+        }
+        .screenshot-img.screenshot-wide  { max-height: 160px; object-position: top; }
+        .screenshot-img.screenshot-medium { max-height: 220px; object-position: top; }
+        .screenshot-img.screenshot-tall  { max-height: 340px; object-position: top; }
+        .screenshot-img.screenshot-small { max-height: 80px;  object-position: top; }
+
+        /* Placeholder when image missing */
+        .screenshot-img[src$=".png"]:not([src^="icons"]) {
+            min-height: 80px;
+            background: repeating-linear-gradient(
+                -45deg,
+                #e8edf5,
+                #e8edf5 6px,
+                #f1f5f9 6px,
+                #f1f5f9 12px
+            );
+        }
+
+        .screenshot-caption {
+            font-size: 11px;
+            color: #94a3b8;
+            padding: 6px 12px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* Callout grid */
+        .guide-callout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .callout {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .callout-icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
+        .callout span { color: #64748b; font-size: 12px; }
+        .callout-blue   { background: #eff6ff; border: 1px solid #bfdbfe; }
+        .callout-purple { background: #f5f3ff; border: 1px solid #ddd6fe; }
+        .callout-green  { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .callout-orange { background: #fff7ed; border: 1px solid #fed7aa; }
+
+        /* Sub-steps */
+        .guide-substep { margin-top: 16px; }
+        .substep-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        /* Tip block */
+        .guide-tip {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #78350f;
+            margin-top: 12px;
+        }
+        .tip-icon { font-size: 18px; flex-shrink: 0; line-height: 1.2; }
+
+        /* Highlight box (for Focus Field explanation) */
+        .guide-highlight-box {
+            border: 2px solid #3291B6;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 14px;
+        }
+        .highlight-header {
+            background: #3291B6;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 8px 14px;
+        }
+        .highlight-body {
+            padding: 14px;
+            background: #f0f8fc;
+        }
+
+        /* Two-column layout */
+        .guide-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        /* Shortcut table */
+        .shortcut-table {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        .shortcut-row {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            padding: 9px 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .shortcut-row:last-child { border-bottom: none; }
+        .shortcut-header {
+            background: #f1f5f9;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+        kbd {
+            display: inline-block;
+            background: #f8fafc;
+            border: 1px solid #cbd5e0;
+            border-bottom: 2px solid #94a3b8;
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 11px;
+            font-family: monospace;
+            color: #334155;
+        }
+
+        /* Tips card grid */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .tip-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .tip-card-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
+        .tip-card-text { font-size: 12.5px; color: #475569; line-height: 1.5; }
+        .tip-card-text strong { color: #1e293b; }
+
+        @media (max-width: 700px) {
+            .guide-two-col,
+            .guide-callout-grid,
+            .tips-grid { grid-template-columns: 1fr; }
+            .shortcut-row { grid-template-columns: 180px 1fr; }
         }
     </style>
 </head>
@@ -318,6 +960,10 @@
             <div class="menu-item active" data-target="welcome">
                 <img src="icons/play.svg" class="menu-icon">
                 <span class="menu-text" data-i18n="options.menu_welcome">Welcome</span>
+            </div>
+            <div class="menu-item" data-target="profiles">
+                <img src="icons/clipboard.svg" class="menu-icon">
+                <span class="menu-text" data-i18n="options.menu_profiles">Profiles</span>
             </div>
             <div class="menu-item" data-target="personal">
                 <img src="icons/description.svg" class="menu-icon">
@@ -335,30 +981,415 @@
                 <img src="icons/flash.svg" class="menu-icon">
                 <span class="menu-text" data-i18n="options.menu_advanced">Advanced</span>
             </div>
+            <div class="menu-item" data-target="privacy">
+                <img src="icons/eye.svg" class="menu-icon">
+                <span class="menu-text" data-i18n="privacy.menu_label">Privacy Policy</span>
+            </div>
         </div>
 
         <div class="content">
             <!-- Welcome Panel -->
             <div id="welcome" class="tab-panel active">
+
+                <!-- ── Hero ─────────────────────────────────────────── -->
                 <div class="welcome-hero">
                     <img src="icons/icon.png" alt="Logo">
                     <h1 data-i18n="options.welcome_title">Welcome to TypeLess!</h1>
                     <p data-i18n="options.welcome_subtitle">Your ultimate auto-filling assistant.</p>
                 </div>
-                <div style="margin-top: 30px;">
-                    <h3 data-i18n="options.quick_start">🚀 Quick Start</h3>
-                    <ul style="line-height: 1.8; color: #4a5568;">
-                        <li><span data-i18n="options.step1">Navigate to any form you want to fill.</span></li>
-                        <li><span data-i18n="options.step2_pre">Click the </span><strong><img src="icons/save.svg"
-                                    width="14" style="vertical-align:middle; filter: brightness(0); opacity: 0.7;">
-                                Save</strong><span data-i18n="options.step2_post"> button on the toolbar to create a
-                                profile.</span></li>
-                        <li data-i18n="options.step3">Next time, just click the profile name to fill instantly!</li>
-                        <li><span data-i18n="options.step4_pre">Use </span><strong data-i18n="options.step4_mid">Smart
-                                Fill</strong> ⚡ <span data-i18n="options.step4_post">to auto-complete common fields like
-                                Name, Email, Address.</span>
-                        </li>
-                    </ul>
+
+                <!-- ── Overview chips ────────────────────────────────── -->
+                <div class="guide-chips">
+                    <span class="chip chip-blue">🖥️ Toolbar</span>
+                    <span class="chip chip-green">💾 Save Profile</span>
+                    <span class="chip chip-purple">▶️ Apply Profile</span>
+                    <span class="chip chip-orange">⚡ Smart Fill</span>
+                    <span class="chip chip-teal">🎯 Focus Field</span>
+                    <span class="chip chip-red">📱 User-Agent</span>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════
+                     SECTION 1 — Toolbar overview
+                ══════════════════════════════════════════════════════ -->
+                <div class="guide-section">
+                    <div class="guide-section-title">
+                        <span class="guide-step-num">1</span>
+                        <span data-i18n="guide.s1_title">🖥️ Toolbar</span>
+                    </div>
+                    <p class="guide-desc" data-i18n="guide.s1_desc">
+                        After installation, the TypeLess toolbar appears at the <strong>bottom of every web page</strong>. You can minimize, hide, or drag it to move.
+                    </p>
+
+                    <div class="screenshot-box">
+                        <img src="guide/toolbar-overview.png"
+                             alt="" data-i18n-alt="guide.alt_toolbar_overview"
+                             class="screenshot-img screenshot-wide">
+                        <div class="screenshot-caption" data-i18n="guide.s1_caption">TypeLess toolbar displayed at the bottom of a page</div>
+                    </div>
+
+                    <div class="guide-callout-grid">
+                        <div class="callout callout-blue">
+                            <div class="callout-icon">💾</div>
+                            <div>
+                                <strong>Save</strong><br>
+                                <span data-i18n="guide.s1_save_desc">Save current form as a profile</span>
+                            </div>
+                        </div>
+                        <div class="callout callout-purple">
+                            <div class="callout-icon">⚡</div>
+                            <div>
+                                <strong>Smart Fill</strong><br>
+                                <span data-i18n="guide.s1_smartfill_desc">Auto-fill from personal info</span>
+                            </div>
+                        </div>
+                        <div class="callout callout-green">
+                            <div class="callout-icon">📋</div>
+                            <div>
+                                <strong>Profile list</strong><br>
+                                <span data-i18n="guide.s1_profilelist_desc">Click profile name to fill instantly</span>
+                            </div>
+                        </div>
+                        <div class="callout callout-orange">
+                            <div class="callout-icon">🔧</div>
+                            <div>
+                                <strong data-i18n="guide.s1_utils">Utilities</strong><br>
+                                <span data-i18n="guide.s1_utils_desc">Screenshot, save HTML, switch UA</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════
+                     SECTION 2 — Save profile
+                ══════════════════════════════════════════════════════ -->
+                <div class="guide-section">
+                    <div class="guide-section-title">
+                        <span class="guide-step-num">2</span>
+                        <span data-i18n="guide.s2_title">💾 Save Profile</span>
+                    </div>
+                    <p class="guide-desc" data-i18n="guide.s2_desc">
+                        Fill in the form as usual, then click the <strong>Save</strong> button on the toolbar. A dialog will appear letting you choose which fields to save.
+                    </p>
+
+                    <!-- Step 2-A -->
+                    <div class="guide-substep">
+                        <div class="substep-label" data-i18n="guide.s2_step1_label">Step 2.1 — Click the Save button on the toolbar</div>
+                        <div class="screenshot-box">
+                            <img src="guide/toolbar-save-btn.png"
+                                 alt="" data-i18n-alt="guide.alt_toolbar_save_btn"
+                                 class="screenshot-img screenshot-medium">
+                            <div class="screenshot-caption" data-i18n="guide.s2_step1_caption">Save button at the left of the toolbar</div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2-B -->
+                    <div class="guide-substep">
+                        <div class="substep-label" data-i18n="guide.s2_step2_label">Step 2.2 — Save Profile dialog</div>
+                        <p class="guide-desc" style="margin-top:0;" data-i18n="guide.s2_step2_desc">
+                            The dialog shows all fields found on the page. Check the fields you want to save, name the profile, then click <strong>Save Profile</strong>.
+                        </p>
+                        <div class="screenshot-box">
+                            <img src="guide/modal-save-profile.png"
+                                 alt="" data-i18n-alt="guide.alt_modal_save_profile"
+                                 class="screenshot-img screenshot-tall">
+                            <div class="screenshot-caption" data-i18n="guide.s2_step2_caption">Save Profile dialog — select fields to save</div>
+                        </div>
+
+                        <div class="guide-tip">
+                            <span class="tip-icon">💡</span>
+                            <div data-i18n="guide.s2_tip">
+                                Fields <strong>without a value</strong> (empty) appear dimmed. Use <em>Select All / Deselect</em> to quickly toggle all.
+                            </div>
+                        </div>
+
+                        <!-- Focus field highlight -->
+                        <div class="guide-highlight-box">
+                            <div class="highlight-header" data-i18n="guide.s2_focus_title">🎯 Choose Focus Field (optional)</div>
+                            <div class="highlight-body">
+                                <div class="screenshot-box" style="margin:0 0 10px;">
+                                    <img src="guide/modal-focus-btn.png"
+                                         alt="" data-i18n-alt="guide.alt_modal_focus_btn"
+                                         class="screenshot-img screenshot-medium">
+                                    <div class="screenshot-caption" data-i18n="guide.s2_focus_caption">🎯 column — click to select the field focused after apply</div>
+                                </div>
+                                <p style="margin:0; font-size:13px; color:#4a5568;" data-i18n="guide.s2_focus_desc">
+                                    Click the <strong>🎯</strong> button at the end of a row to mark that field for <strong>auto-focus</strong> (cursor jumps there) right after applying the profile. Handy for continuing to type after auto-fill.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════
+                     SECTION 3 — Apply profile
+                ══════════════════════════════════════════════════════ -->
+                <div class="guide-section">
+                    <div class="guide-section-title">
+                        <span class="guide-step-num">3</span>
+                        <span data-i18n="guide.s3_title">▶️ Apply Profile</span>
+                    </div>
+                    <p class="guide-desc" data-i18n="guide.s3_desc">
+                        Next time you visit a page with a form, just click the profile name on the toolbar — all fields will be filled instantly.
+                    </p>
+
+                    <div class="screenshot-box">
+                        <img src="guide/toolbar-apply-profile.png"
+                             alt="" data-i18n-alt="guide.alt_toolbar_apply_profile"
+                             class="screenshot-img screenshot-wide">
+                        <div class="screenshot-caption" data-i18n="guide.s3_caption">Click the profile name to auto-fill the form</div>
+                    </div>
+
+                    <div class="guide-tip">
+                        <span class="tip-icon">⚡</span>
+                        <div data-i18n="guide.s3_tip">
+                            Use <kbd>Ctrl+Shift+H</kbd> to quickly show/hide the toolbar, and <kbd>Ctrl+Shift+F</kbd> (if set) to apply the last profile.
+                        </div>
+                    </div>
+
+                    <!-- After apply: notification -->
+                    <div class="guide-substep">
+                        <div class="substep-label" data-i18n="guide.s3_after_label">Notification after applying</div>
+                        <div class="screenshot-box">
+                            <img src="guide/notify-applied.png"
+                                 alt="" data-i18n-alt="guide.alt_notify_applied"
+                                 class="screenshot-img screenshot-small">
+                            <div class="screenshot-caption" data-i18n="guide.s3_after_caption">Confirmation notification that fill was successful</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════
+                     SECTION 4 — Smart Fill
+                ══════════════════════════════════════════════════════ -->
+                <div class="guide-section">
+                    <div class="guide-section-title">
+                        <span class="guide-step-num">4</span>
+                        <span data-i18n="guide.s4_title">⚡ Smart Fill</span>
+                    </div>
+                    <p class="guide-desc" data-i18n="guide.s4_desc">
+                        Smart Fill automatically detects and fills common fields (full name, email, phone, address…) based on the <strong>Personal Info</strong> you saved in the <em>Personal Info</em> tab.
+                    </p>
+
+                    <div class="guide-two-col">
+                        <div>
+                            <div class="substep-label" data-i18n="guide.s4_col1_label">Click ⚡ on the toolbar</div>
+                            <div class="screenshot-box">
+                                <img src="guide/toolbar-smart-fill.png"
+                                     alt="" data-i18n-alt="guide.alt_toolbar_smart_fill"
+                                     class="screenshot-img">
+                                <div class="screenshot-caption" data-i18n="guide.s4_col1_caption">Smart Fill button on the toolbar</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="substep-label" data-i18n="guide.s4_col2_label">Auto-fill result</div>
+                            <div class="screenshot-box">
+                                <img src="guide/smartfill-result.png"
+                                     alt="" data-i18n-alt="guide.alt_smartfill_result"
+                                     class="screenshot-img">
+                                <div class="screenshot-caption" data-i18n="guide.s4_col2_caption">Fields filled from personal info</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-tip">
+                        <span class="tip-icon">📝</span>
+                        <div data-i18n="guide.s4_tip">
+                            Set up your personal info in the <strong>Personal Info</strong> tab for Smart Fill to work more accurately. Includes: name, email, phone, date of birth, address.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════
+                     SECTION 5 — Manage profiles in Options
+                ══════════════════════════════════════════════════════ -->
+                <div class="guide-section">
+                    <div class="guide-section-title">
+                        <span class="guide-step-num">5</span>
+                        <span data-i18n="guide.s5_title">🗂️ Advanced Profile Management</span>
+                    </div>
+                    <p class="guide-desc" data-i18n="guide.s5_desc">
+                        The <strong>Profiles</strong> tab in this settings page lets you edit each profile in detail: rename, change field values, fix CSS selectors, add/remove fields, reset the focus field.
+                    </p>
+
+                    <div class="guide-two-col">
+                        <div>
+                            <div class="substep-label" data-i18n="guide.s5_col1_label">Profile list</div>
+                            <div class="screenshot-box">
+                                <img src="guide/options-profiles-list.png"
+                                     alt="" data-i18n-alt="guide.alt_profiles_list"
+                                     class="screenshot-img">
+                                <div class="screenshot-caption" data-i18n="guide.s5_col1_caption">Profile list — click Edit to modify</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="substep-label" data-i18n="guide.s5_col2_label">Edit profile</div>
+                            <div class="screenshot-box">
+                                <img src="guide/options-profile-editor.png"
+                                     alt="" data-i18n-alt="guide.alt_profile_editor"
+                                     class="screenshot-img">
+                                <div class="screenshot-caption" data-i18n="guide.s5_col2_caption">Editor — edit fields, add/remove</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════
+                     SECTION 6 — Tips & shortcuts
+                ══════════════════════════════════════════════════════ -->
+                <div class="guide-section guide-section-last">
+                    <div class="guide-section-title">
+                        <span class="guide-step-num">6</span>
+                        <span data-i18n="guide.s6_title">⌨️ Shortcuts & Tips</span>
+                    </div>
+
+                    <div class="shortcut-table">
+                        <div class="shortcut-row shortcut-header">
+                            <div data-i18n="guide.s6_shortcut_key">Shortcut</div>
+                            <div data-i18n="guide.s6_shortcut_fn">Function</div>
+                        </div>
+                        <div class="shortcut-row">
+                            <div><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd></div>
+                            <div data-i18n="guide.s6_shortcut1">Show / hide toolbar</div>
+                        </div>
+                        <div class="shortcut-row">
+                            <div><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></div>
+                            <div data-i18n="guide.s6_shortcut2">Apply last profile</div>
+                        </div>
+                        <div class="shortcut-row">
+                            <div><kbd>Esc</kbd></div>
+                            <div data-i18n="guide.s6_shortcut3">Close Save Profile dialog</div>
+                        </div>
+                        <div class="shortcut-row">
+                            <div><kbd>Enter</kbd> (in Add Field)</div>
+                            <div data-i18n="guide.s6_shortcut4">Quickly add a new field</div>
+                        </div>
+                    </div>
+
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <div class="tip-card-icon">📦</div>
+                            <div class="tip-card-text">
+                                <strong data-i18n="guide.s6_tip1_title">Export / Import data</strong><br>
+                                <span data-i18n="guide.s6_tip1_desc">Use the <em>Data Management</em> tab to back up and transfer profiles to another device.</span>
+                            </div>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-card-icon">📱</div>
+                            <div class="tip-card-text">
+                                <strong data-i18n="guide.s6_tip2_title">Mobile simulation</strong><br>
+                                <span data-i18n="guide.s6_tip2_desc">The <em>User Agents</em> tab lets you switch UA to view pages as on a phone.</span>
+                            </div>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-card-icon">📸</div>
+                            <div class="tip-card-text">
+                                <strong data-i18n="guide.s6_tip3_title">Full-page screenshot</strong><br>
+                                <span data-i18n="guide.s6_tip3_desc">The Screenshot button on the toolbar captures the entire page including scrolled content.</span>
+                            </div>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-card-icon">🔓</div>
+                            <div class="tip-card-text">
+                                <strong data-i18n="guide.s6_tip4_title">Unlock form</strong><br>
+                                <span data-i18n="guide.s6_tip4_desc">The Unlock Right Click button removes readonly/disabled from locked input fields.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Profiles Panel                                   -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <div id="profiles" class="tab-panel">
+                <!-- LIST VIEW -->
+                <div id="profiles-view" class="visible">
+                    <div class="section-header">
+                        <h2>📋 <span data-i18n="options.menu_profiles">Profiles</span> <span id="profile-count-badge" class="profile-count-badge">0</span></h2>
+                        <p data-i18n="options.profiles_hint">Manage, edit and customise your saved profiles and their fields.</p>
+                    </div>
+
+                    <div class="profile-search-bar">
+                        <input type="text" id="profile-search" class="form-control" data-i18n-placeholder="options.profiles_search" placeholder="🔍  Search profiles…" style="height:38px;">
+                    </div>
+
+                    <div id="profiles-list" class="profile-list">
+                        <div class="empty-profiles">
+                            <div style="font-size:40px;">📭</div>
+                            <p data-i18n="options.profiles_empty">No profiles yet. Save a form from the toolbar to get started.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EDITOR VIEW -->
+                <div id="profile-editor">
+                    <button class="editor-back-btn" id="editor-back-btn">← <span data-i18n="options.back_profiles">Back to Profiles</span></button>
+
+                    <div class="section-header" style="margin-bottom:16px;">
+                        <h2 id="editor-title">Edit Profile</h2>
+                        <p id="editor-subtitle" style="font-family: monospace; font-size: 12px; color: #94a3b8;"></p>
+                    </div>
+
+                    <!-- Name + URL row -->
+                    <div class="editor-header-row">
+                        <div class="form-group">
+                            <label data-i18n="modal.profile_name">Profile Name</label>
+                            <input type="text" id="editor-name" class="form-control" style="height:38px;" placeholder="e.g. Work Login">
+                        </div>
+                        <div class="form-group" style="flex:2;">
+                            <label>URL</label>
+                            <input type="text" id="editor-url" class="form-control" style="height:38px;" placeholder="https://example.com/login">
+                        </div>
+                    </div>
+
+                    <!-- Fields Table -->
+                    <div style="overflow-x:auto;">
+                        <table class="fields-table" id="fields-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-label" data-i18n="options.col_label">Label</th>
+                                    <th class="col-value" data-i18n="options.col_value">Value</th>
+                                    <th class="col-selector" data-i18n="options.col_selector">Selector</th>
+                                    <th class="col-type" data-i18n="options.col_type">Type</th>
+                                    <th class="col-focus" data-i18n-title="options.col_focus" title="Focus after fill">🎯</th>
+                                    <th class="col-del">🗑</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fields-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Add Field Row -->
+                    <div class="add-field-row" id="add-field-row">
+                        <span style="font-size:12px; font-weight:700; color:#64748b; white-space:nowrap;" data-i18n="options.add_field_label">+ Add Field:</span>
+                        <input type="text" class="inp-label" id="new-field-label" data-i18n-placeholder="options.add_field_label_ph" placeholder="Label">
+                        <input type="text" class="inp-selector" id="new-field-selector" data-i18n-placeholder="options.add_field_selector_ph" placeholder="CSS selector or #id">
+                        <input type="text" class="inp-value" id="new-field-value" data-i18n-placeholder="options.add_field_value_ph" placeholder="Value">
+                        <select id="new-field-type" style="border:1px solid #e2e8f0; border-radius:7px; padding:5px 8px; font-size:12px; color:#2d3748; background:white;">
+                            <option value="text">text</option>
+                            <option value="email">email</option>
+                            <option value="tel">tel</option>
+                            <option value="password">password</option>
+                            <option value="select-one">select</option>
+                            <option value="checkbox">checkbox</option>
+                            <option value="radio">radio</option>
+                            <option value="textarea">textarea</option>
+                        </select>
+                        <button class="btn-add-field" id="btn-add-field" data-i18n="options.add_field_btn">Add</button>
+                    </div>
+                    <p class="tooltip-hint" style="margin-top:6px;">
+                        <span data-i18n="options.focus_tip">🎯 Click the target icon to mark a field that gets focused after the profile is applied.</span>
+                    </p>
+
+                    <!-- Actions -->
+                    <div class="editor-actions">
+                        <button id="editor-save-btn" class="btn-save" data-i18n="btn.save_profile">💾 Save Profile</button>
+                        <button id="editor-back-btn2" class="btn-secondary" data-i18n="btn.cancel">Cancel</button>
+                        <button id="editor-delete-btn" class="btn-danger" style="margin-left:auto;" data-i18n="btn.delete_profile">🗑 Delete Profile</button>
+                    </div>
+                    <span id="editor-status" class="status-msg"></span>
                 </div>
             </div>
 
@@ -369,9 +1400,7 @@
                     <p data-i18n="options.personal_hint">Data used for Smart Fill feature.</p>
                 </div>
 
-                <!-- Top Section: Personal Details + Calendar -->
                 <div style="display: flex; gap: 20px; margin-bottom: 20px; align-items: flex-start; flex-wrap: wrap;">
-                    <!-- Left Column: Personal Attributes -->
                     <div style="flex: 1; min-width: 240px;">
                         <div class="form-group">
                             <label data-i18n="field.firstName">First Name</label>
@@ -391,28 +1420,21 @@
                         </div>
                         <div class="form-group">
                             <label data-i18n="field.dob">Date of Birth</label>
-                            <input type="text" id="setting-dob" class="form-control"
-                                data-i18n-placeholder="placeholder.dob">
-                            <small style="color: #718096; display: block; margin-top: 5px;"
-                                data-i18n="options.dob_hint">
+                            <input type="text" id="setting-dob" class="form-control" data-i18n-placeholder="placeholder.dob">
+                            <small style="color: #718096; display: block; margin-top: 5px;" data-i18n="options.dob_hint">
                                 * Select from the calendar on the right or type manually (YYYY/MM/DD).
                             </small>
                         </div>
                     </div>
 
-                    <!-- Right Column: Calendar -->
                     <div style="flex: 0 0 auto;">
-                        <div
-                            style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-                            <label style="display: block; margin-bottom: 15px; font-weight: 600; color: #4a5568;"
-                                data-i18n="options.select_date">Select
-                                Date</label>
+                        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                            <label style="display: block; margin-bottom: 15px; font-weight: 600; color: #4a5568;" data-i18n="options.select_date">Select Date</label>
                             <div id="inline-calendar"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Bottom Section: Location & Actions -->
                 <div>
                     <div class="form-group">
                         <label data-i18n="field.address">Address</label>
@@ -436,10 +1458,8 @@
                     </div>
 
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button id="save-personal-btn" class="btn-save" style="flex: 2;"
-                            data-i18n="btn.save_settings">Save Settings</button>
-                        <button id="clear-personal-btn" class="btn-save"
-                            style="flex: 1; background: #e2e8f0; color: #4a5568;" data-i18n="btn.clear">Clear</button>
+                        <button id="save-personal-btn" class="btn-save" style="flex: 2;" data-i18n="btn.save_settings">Save Settings</button>
+                        <button id="clear-personal-btn" class="btn-save" style="flex: 1; background: #e2e8f0; color: #4a5568;" data-i18n="btn.clear">Clear</button>
                     </div>
                     <span id="personal-status" class="status-msg" data-i18n="options.saved">Saved!</span>
                 </div>
@@ -453,39 +1473,33 @@
                 </div><br />
                 <div class="form-group">
                     <label data-i18n="label.ua_android">Android</label>
-                    <textarea id="setting-ua-android" class="form-control" rows="3"
-                        style="font-family: monospace; font-size: 12px;"></textarea>
+                    <textarea id="setting-ua-android" class="form-control" rows="3" style="font-family: monospace; font-size: 12px;"></textarea>
                     <br /><br />
                 </div>
                 <div class="form-group">
                     <label data-i18n="label.ua_ios">iOS</label>
-                    <textarea id="setting-ua-ios" class="form-control" rows="3"
-                        style="font-family: monospace; font-size: 12px;"></textarea>
+                    <textarea id="setting-ua-ios" class="form-control" rows="3" style="font-family: monospace; font-size: 12px;"></textarea>
                     <br /><br />
                 </div>
                 <div class="form-group">
                     <label data-i18n="label.ua_macos">MacOS</label>
-                    <textarea id="setting-ua-macos" class="form-control" rows="3"
-                        style="font-family: monospace; font-size: 12px;"></textarea>
+                    <textarea id="setting-ua-macos" class="form-control" rows="3" style="font-family: monospace; font-size: 12px;"></textarea>
                     <br /><br />
                 </div>
                 <div class="form-group">
                     <label data-i18n="label.ua_windows">Windows</label>
-                    <textarea id="setting-ua-windows" class="form-control" rows="3"
-                        style="font-family: monospace; font-size: 12px;"></textarea>
+                    <textarea id="setting-ua-windows" class="form-control" rows="3" style="font-family: monospace; font-size: 12px;"></textarea>
                     <br /><br />
                 </div>
                 <div class="form-group">
                     <label data-i18n="label.ua_linux">Linux</label>
-                    <textarea id="setting-ua-linux" class="form-control" rows="3"
-                        style="font-family: monospace; font-size: 12px;"></textarea>
+                    <textarea id="setting-ua-linux" class="form-control" rows="3" style="font-family: monospace; font-size: 12px;"></textarea>
                     <br /><br />
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button id="save-ua-btn" class="btn-save" data-i18n="btn.save_settings">Save Settings</button>
-                    <button id="reset-ua-btn" class="btn-save" style="background: #e2e8f0; color: #4a5568;"
-                        data-i18n="btn.reset_ua">Reset Defaults</button>
+                    <button id="reset-ua-btn" class="btn-save" style="background: #e2e8f0; color: #4a5568;" data-i18n="btn.reset_ua">Reset Defaults</button>
                 </div>
                 <span id="ua-status" class="status-msg" data-i18n="options.saved">Saved!</span>
             </div>
@@ -499,23 +1513,19 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div>
                         <label data-i18n="btn.export">Export</label>
-                        <p style="font-size: 12px; color: #718096; margin-bottom: 10px;"
-                            data-i18n="options.export_desc">Download a JSON file containing all your data.</p>
+                        <p style="font-size: 12px; color: #718096; margin-bottom: 10px;" data-i18n="options.export_desc">Download a JSON file containing all your data.</p>
                     </div>
                     <div>
                         <label data-i18n="btn.import">Import</label>
-                        <p style="font-size: 12px; color: #718096; margin-bottom: 10px;"
-                            data-i18n="options.import_desc">Upload a previously exported JSON file.</p>
+                        <p style="font-size: 12px; color: #718096; margin-bottom: 10px;" data-i18n="options.import_desc">Upload a previously exported JSON file.</p>
                     </div>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button id="btn-export" class="btn-save" style="flex: 1; background: #4a5568;">
-                        <img src="icons/export.svg" width="14" style="vertical-align:middle; filter: invert(1);"> <span
-                            data-i18n="btn.export">Export</span>
+                        <img src="icons/export.svg" width="14" style="vertical-align:middle; filter: invert(1);"> <span data-i18n="btn.export">Export</span>
                     </button>
                     <button id="btn-import" class="btn-save" style="flex: 1; background: #4a5568;">
-                        <img src="icons/import.svg" width="14" style="vertical-align:middle; filter: invert(1);"> <span
-                            data-i18n="btn.import">Import</span>
+                        <img src="icons/import.svg" width="14" style="vertical-align:middle; filter: invert(1);"> <span data-i18n="btn.import">Import</span>
                     </button>
                 </div>
             </div>
@@ -536,24 +1546,17 @@
                         <option value="ja" data-i18n="lang.ja">日本語</option>
                     </select>
                     <div class="form-group" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
-                        <h3 style="font-size: 14px; margin-bottom: 8px;" data-i18n="options.test_form_download">Download
-                            Demo Form</h3>
-                        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;"
-                            data-i18n="options.test_form_desc">Download the demo form to your computer to test auto-fill
-                            on a local file.</p>
+                        <h3 style="font-size: 14px; margin-bottom: 8px;" data-i18n="options.test_form_download">Download Demo Form</h3>
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;" data-i18n="options.test_form_desc">Download the demo form to your computer to test auto-fill on a local file.</p>
                         <button id="btn-download-demo" class="btn btn-secondary"
                             style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: #667eea; color: white; border: none; cursor: pointer; padding: 10px 20px; border-radius: 8px;">
-                            <img src="icons/export.svg" alt="Download"
-                                style="height: 16px; filter: brightness(0) invert(1);">
+                            <img src="icons/export.svg" alt="Download" style="height: 16px; filter: brightness(0) invert(1);">
                             <span data-i18n="options.test_form_download">Download Demo Form</span>
                         </button>
                     </div>
                     <div class="form-group" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
-                        <h3 style="font-size: 14px; margin-bottom: 8px;" data-i18n="options.external_settings">Advanced
-                            Extension Settings</h3>
-                        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;"
-                            data-i18n="options.external_settings_desc">Manage site permissions, shortcuts, and
-                            management at browser level.</p>
+                        <h3 style="font-size: 14px; margin-bottom: 8px;" data-i18n="options.external_settings">Advanced Extension Settings</h3>
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;" data-i18n="options.external_settings_desc">Manage site permissions, shortcuts, and management at browser level.</p>
                         <a id="browser-extension-settings" href="#" class="btn btn-secondary"
                             style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: #4a5568; color: white; border: none; cursor: pointer; padding: 10px 20px; border-radius: 8px;">
                             <img src="icons/link.svg" alt="Link" style="height: 16px; filter: brightness(0) invert(1);">
@@ -562,26 +1565,176 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ── Privacy Policy Panel ───────────────────────────── -->
+            <div id="privacy" class="tab-panel">
+                <div class="section-header">
+                    <h2 data-i18n="privacy.page_title">Privacy Policy</h2>
+                    <p style="font-size:13px;color:#64748b;margin-top:4px;">
+                        <span data-i18n="privacy.last_updated">Last Updated</span>:
+                        <strong data-i18n="privacy.last_updated_date">February 13, 2026</strong>
+                    </p>
+                </div>
+                <div style="max-width:760px;padding-bottom:40px;">
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.overview_title">Overview</h3>
+                        <p class="privacy-text" data-i18n="privacy.overview_desc">TypeLess – Auto Form Filler is a browser extension that helps users save and auto-fill web forms. This privacy policy explains how we handle your data.</p>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.collection_title">Data Collection</h3>
+                        <p class="privacy-text" data-i18n="privacy.collection_intro">Auto Form Filler collects and stores:</p>
+                        <ul class="privacy-list">
+                            <li data-i18n="privacy.collection_item1">Form data you choose to save (names, addresses, text inputs, selections)</li>
+                            <li data-i18n="privacy.collection_item2">URLs of pages where profiles are created</li>
+                            <li data-i18n="privacy.collection_item3">User preferences (language selection, toolbar visibility)</li>
+                        </ul>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.storage_title">Data Storage</h3>
+                        <ul class="privacy-list">
+                            <li data-i18n="privacy.storage_item1">All data is stored locally on your device using the browser's built-in storage API (Chrome/Edge)</li>
+                            <li data-i18n="privacy.storage_item2">No cloud storage — data never leaves your browser</li>
+                            <li data-i18n="privacy.storage_item3">No external servers — we don't operate any servers</li>
+                            <li data-i18n="privacy.storage_item4">No transmission — your data is never sent anywhere</li>
+                        </ul>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.usage_title">Data Usage</h3>
+                        <p class="privacy-text" data-i18n="privacy.usage_intro">Your saved data is used solely to:</p>
+                        <ul class="privacy-list">
+                            <li data-i18n="privacy.usage_item1">Auto-fill web forms when you choose to apply a profile</li>
+                            <li data-i18n="privacy.usage_item2">Display saved profiles in the extension interface</li>
+                            <li data-i18n="privacy.usage_item3">Remember your preferences (language, toolbar state)</li>
+                        </ul>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.thirdparty_title">Third-Party Access</h3>
+                        <ul class="privacy-list">
+                            <li data-i18n="privacy.thirdparty_item1">No third-party sharing — your data is never shared with anyone</li>
+                            <li data-i18n="privacy.thirdparty_item2">No analytics — we don't track your usage</li>
+                            <li data-i18n="privacy.thirdparty_item3">No advertising — we don't collect data for ads</li>
+                            <li data-i18n="privacy.thirdparty_item4">No external APIs — we don't communicate with external services</li>
+                        </ul>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.control_title">User Control</h3>
+                        <p class="privacy-text" data-i18n="privacy.control_intro">You have full control over your data:</p>
+                        <ul class="privacy-list">
+                            <li data-i18n="privacy.control_item1">Delete profiles individually using the delete button in the toolbar</li>
+                            <li data-i18n="privacy.control_item2">Export profiles to backup your data as JSON</li>
+                            <li data-i18n="privacy.control_item3">Import profiles to restore from backup</li>
+                            <li data-i18n="privacy.control_item4">Clear all data by uninstalling the extension</li>
+                        </ul>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.permissions_title">Permissions Explained</h3>
+                        <p class="privacy-text" data-i18n="privacy.permissions_intro">TypeLess requests the following permissions to provide its core functionality. Each permission is used only for its intended purpose and is essential for the extension to work properly.</p>
+
+                        <h4 class="privacy-sub-title" data-i18n="privacy.perm_core_title">Core Permissions</h4>
+                        <div class="perm-grid">
+                            <div class="perm-card"><div class="perm-name"><code>storage</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_storage_purpose">Save your profiles and preferences locally on your device</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_storage_privacy">100% local storage using Chrome/Edge secure storage API. Data never leaves your device.</span></div></div>
+                            <div class="perm-card"><div class="perm-name"><code>activeTab</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_activetab_purpose">Interact with form fields on the current webpage</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_activetab_privacy">No background scanning, only works on explicit user action.</span></div></div>
+                            <div class="perm-card"><div class="perm-name"><code>scripting</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_scripting_purpose">Inject the floating toolbar and execute form-filling scripts</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_scripting_privacy">No background scripts, only user-initiated actions.</span></div></div>
+                        </div>
+
+                        <h4 class="privacy-sub-title" data-i18n="privacy.perm_utility_title">Utility Permissions</h4>
+                        <div class="perm-grid">
+                            <div class="perm-card"><div class="perm-name"><code>clipboardWrite</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_clipwrite_purpose">Copy profile data to clipboard for sharing between tabs/machines</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_clipwrite_privacy">Only writes to clipboard when you explicitly request it.</span></div></div>
+                            <div class="perm-card"><div class="perm-name"><code>clipboardRead</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_clipread_purpose">Paste saved profile data (JSON) from clipboard directly into TypeLess</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_clipread_privacy">Clipboard read only on demand; no passive monitoring or transmission.</span></div></div>
+                            <div class="perm-card"><div class="perm-name"><code>contextMenus</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_contextmenu_purpose">Add TypeLess options to the browser right-click menu</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_contextmenu_privacy">No data collection, only provides shortcuts to features.</span></div></div>
+                        </div>
+
+                        <h4 class="privacy-sub-title" data-i18n="privacy.perm_advanced_title">Advanced Permissions</h4>
+                        <div class="perm-grid">
+                            <div class="perm-card"><div class="perm-name"><code>declarativeNetRequest</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_dnr_purpose">Modify request headers to support the User Agent Switching feature</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_dnr_privacy">No network traffic monitored or redirected; only specific headers overwritten on demand.</span></div></div>
+                            <div class="perm-card"><div class="perm-name"><code>declarativeNetRequestWithHostAccess</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_dnrhost_purpose">Allow declarativeNetRequest rules to apply across all URLs</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_dnrhost_privacy">Only activates when user triggers UA switching; no background interception.</span></div></div>
+                            <div class="perm-card"><div class="perm-name"><code>downloads</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_downloads_purpose">Download files generated by the extension</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_downloads_privacy">Only downloads files you explicitly request.</span></div></div>
+                        </div>
+
+                        <h4 class="privacy-sub-title" data-i18n="privacy.perm_host_title">Host Permissions</h4>
+                        <div class="perm-grid">
+                            <div class="perm-card"><div class="perm-name"><code>&lt;all_urls&gt;</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_allurls_purpose">Work on any website containing forms</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_allurls_privacy">Extension only activates when you use it; no background scanning.</span></div></div>
+                        </div>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.security_title">Security Guarantees</h3>
+                        <h4 class="privacy-sub-title" data-i18n="privacy.security_data_title">Data Protection</h4>
+                        <ul class="privacy-checklist">
+                            <li data-i18n="privacy.security_local">Local Only: All data stored exclusively on your device</li>
+                            <li data-i18n="privacy.security_notransmit">No Transmission: No data ever sent to external servers</li>
+                            <li data-i18n="privacy.security_noanalytics">No Analytics: No usage tracking or behavioral monitoring</li>
+                            <li data-i18n="privacy.security_nobg">No Background Activity: Extension only works when you interact with it</li>
+                            <li data-i18n="privacy.security_secure">Secure Storage: Uses browser's built-in encrypted storage API</li>
+                        </ul>
+                        <h4 class="privacy-sub-title" data-i18n="privacy.security_perm_title">Permission Minimization</h4>
+                        <ul class="privacy-checklist">
+                            <li data-i18n="privacy.security_essential">Essential Only: Each permission is required for core functionality</li>
+                            <li data-i18n="privacy.security_userctrl">User Controlled: All actions require explicit user initiation</li>
+                            <li data-i18n="privacy.security_transparent">Transparent: Clear explanations for why each permission is needed</li>
+                            <li data-i18n="privacy.security_nooverreach">No Overreach: No unnecessary or excessive permissions requested</li>
+                        </ul>
+                        <h4 class="privacy-sub-title" data-i18n="privacy.security_ops_title">Operational Security</h4>
+                        <ul class="privacy-checklist">
+                            <li data-i18n="privacy.security_noremote">No Remote Code: All functionality runs locally in your browser</li>
+                            <li data-i18n="privacy.security_nothirdparty">No Third Parties: No integration with external services or APIs</li>
+                            <li data-i18n="privacy.security_noaccount">No Accounts: No registration or login required</li>
+                            <li data-i18n="privacy.security_offline">Offline Capable: Works completely without internet connection</li>
+                        </ul>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.children_title">Children's Privacy</h3>
+                        <p class="privacy-text" data-i18n="privacy.children_desc">This extension does not knowingly collect data from children under 13. It is intended for general use and treats all users the same way.</p>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.changes_title">Changes to Privacy Policy</h3>
+                        <p class="privacy-text" data-i18n="privacy.changes_desc">We may update this privacy policy occasionally. Changes will be posted with an updated "Last Updated" date.</p>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h3 class="privacy-section-title" data-i18n="privacy.contact_title">Contact</h3>
+                        <table class="privacy-contact-table">
+                            <tr><td class="contact-label" data-i18n="privacy.contact_website">Website</td><td><a href="https://trong.pro" target="_blank">https://trong.pro</a></td></tr>
+                            <tr><td class="contact-label" data-i18n="privacy.contact_email">Email</td><td><a href="mailto:contact@trong.pro">contact@trong.pro</a></td></tr>
+                            <tr><td class="contact-label" data-i18n="privacy.contact_support">Extension Support</td><td data-i18n="privacy.contact_support_desc">Through the support tab on Chrome Web Store or Microsoft Edge Add-ons</td></tr>
+                        </table>
+                    </div>
+
+                    <div class="privacy-section privacy-consent">
+                        <h3 class="privacy-section-title" data-i18n="privacy.consent_title">Your Consent</h3>
+                        <p class="privacy-text" data-i18n="privacy.consent_desc">By using TypeLess, you consent to this privacy policy.</p>
+                        <div style="margin-top:16px;font-size:12px;color:#94a3b8;">
+                            <span data-i18n="privacy.created_by">Created by</span>: <strong>TRONG.PRO</strong> &nbsp;|&nbsp;
+                            <span data-i18n="privacy.version">Version</span>: <strong>1.0.3</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ── /Privacy Policy Panel ──────────────────────────── -->
+
         </div>
     </div>
 
     <!-- Footer -->
     <footer class="footer">
         <div style="margin-bottom: 8px;">
-            <a href="https://chromewebstore.google.com" target="_blank">
-                ⚡ TypeLess v1.0.2
-            </a>
+            <a href="https://chromewebstore.google.com" target="_blank">⚡ TypeLess v1.0.3</a>
             <span style="color: #cbd5e0; margin: 0 10px;">©</span>
-            <a href="https://trong.pro" target="_blank">
-                <span data-i18n="footer.by">by</span> TRONG.PRO
-            </a>
+            <a href="https://trong.pro" target="_blank"><span data-i18n="footer.by">by</span> TRONG.PRO</a>
             <img src="icons/vn.svg" alt="Vietnam Flag" style="height: 18px; vertical-align: middle; margin-left: 4px;">
         </div>
         <div class="donate-links">
             <span data-i18n="footer.enjoy">Enjoy my work?</span>
-            <a href="https://buymeacoffee.com/trong" target="_blank">
-                <span data-i18n="footer.buy">Buy me a 🍻</span>
-            </a>
+            <a href="https://buymeacoffee.com/trong" target="_blank"><span data-i18n="footer.buy">Buy me a 🍻</span></a>
             <span data-i18n="footer.tip" style="margin-left: 5px;">or tip via</span>
             <a href="https://paypal.me/DaoVanTrong" target="_blank" style="margin-left: 5px;">❤️ PayPal</a>
         </div>

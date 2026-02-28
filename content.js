@@ -9,24 +9,21 @@
  * ──────╚══╝─╚╝──────────────────────────╚══╝
  * 
  * TypeLess - Auto Form Filler
- * v1.0.2 by TRONG.PRO
+ * v1.0.3 by TRONG.PRO
  */
 
-console.log(`%c
-╔══╗─────────╔╗────╔═╗╔═╗╔╗───╔══╗╔═╗╔═╗╔═╦╗╔══╗──╔═╗╔═╗╔═╗
-╚╗╔╝╔╦╗╔═╗╔═╗║║─╔═╗║═╣║═╣║╚╦╦╗╚╗╔╝║╬║║║║║║║║║╔═╣──║╬║║╬║║║║
-─║║─║║║║╬║║╩╣║╚╗║╩╣╠═║╠═║║╬║║║─║║─║╗╣║║║║║║║║╚╗║╔╗║╔╝║╗╣║║║
-─╚╝─╠╗║║╔╝╚═╝╚═╝╚═╝╚═╝╚═╝╚═╬╗║─╚╝─╚╩╝╚═╝╚╩═╝╚══╝╚╝╚╝─╚╩╝╚═╝
-────╚═╝╚╝──────────────────╚═╝
-
-TypeLess - Auto Form Filler
-v1.0.2 by TRONG.PRO
-`, 'color: #667eea; font-weight: bold;');
-
 // Content script
+
+// Guard: returns false when the extension has been reloaded/invalidated.
+// Content scripts can linger on pages after an extension update — all chrome.*
+// calls must be skipped or caught to avoid "Extension context invalidated".
+function _extAlive() {
+    try { return !!(chrome && chrome.runtime && chrome.runtime.id); }
+    catch (_) { return false; }
+}
+
 (function () {
     'use strict';
-    console.log('🚀 Auto Form Filler content script loaded');
 
     // Translation helper
     const t = (key, params) => i18n.t(key, params);
@@ -72,9 +69,27 @@ v1.0.2 by TRONG.PRO
         // Get field information
         getFieldInfo(element, includeUncheckedRadios = false) {
             const type = element.tagName.toLowerCase();
-            const fieldType = type === 'select' ? 'select' :
-                type === 'textarea' ? 'textarea' :
-                    element.type || 'text';
+            // ── Resolve field type — ComboBox must be checked before generic 'text' ──
+            // FineUI DDL inputs have type="text" (or readonly text), but they behave
+            // as dropdownlists. We give them a dedicated 'dropdownlist' type so the
+            // modal can show the right icon and the fill logic picks the right path.
+            let fieldType;
+            if (type === 'select') {
+                fieldType = 'select';
+            } else if (type === 'textarea') {
+                fieldType = 'textarea';
+            } else if (
+                typeof EnhancedFormUtils !== 'undefined' &&
+                element.tagName === 'INPUT' &&
+                element.type !== 'hidden' &&
+                element.type !== 'checkbox' &&
+                element.type !== 'radio' &&
+                EnhancedFormUtils.isWebFormsComboBox(element)
+            ) {
+                fieldType = 'dropdownlist'; // FineUI / combo-wrap detected
+            } else {
+                fieldType = element.type || 'text';
+            }
 
             // Generate unique identifier for the field
             const id = element.id || element.name || this.generateFieldId(element);
@@ -87,6 +102,8 @@ v1.0.2 by TRONG.PRO
 
             // Get value based on field type
             let value;
+            let displayText = null; // Only set for ComboBox fields that have a separate $Value hidden
+
             if (fieldType === 'checkbox') {
                 value = element.checked ? 'checked' : 'unchecked';
             } else if (fieldType === 'radio') {
@@ -97,6 +114,27 @@ v1.0.2 by TRONG.PRO
                 value = element.checked ? element.value : '';
             } else {
                 value = element.value;
+
+                // ── FineUI / combo-wrap ComboBox: store the code value from the hidden $Value ──
+                // The visible text input holds display text (e.g. "补件 Bù kiện").
+                // The hidden input holds the real submit code (e.g. "BJ").
+                // We save the CODE as `value` and the DISPLAY TEXT as `displayText`
+                // so that when filling from a profile we can restore both correctly.
+                if (typeof EnhancedFormUtils !== 'undefined' &&
+                    EnhancedFormUtils.isWebFormsComboBox(element)) {
+                    const hidden = EnhancedFormUtils.getComboBoxHiddenInput(element);
+                    if (hidden) {
+                        // hidden.value may be '' if user hasn't interacted yet
+                        if (hidden.value !== '') {
+                            // text input may be empty (readonly, not shown until user opens DDL)
+                            // → fall back to hidden.value as displayText so restore can show it
+                            displayText = element.value !== '' ? element.value : hidden.value;
+                            value = hidden.value;  // e.g. "BJ" or "无 không có"
+                        }
+                        // else: hidden is empty → keep element.value as the saved value
+                    }
+                    // if hidden === null → no $Value input → text IS the value → keep as-is
+                }
             }
 
             return {
@@ -104,6 +142,7 @@ v1.0.2 by TRONG.PRO
                 type: fieldType,
                 name: element.name || '',
                 value: value,
+                displayText: displayText,  // non-null only for ComboBox fields with a $Value hidden
                 label: this.getFieldLabel(element),
                 selector: this.generateSelector(element),
                 element: element
@@ -206,7 +245,7 @@ v1.0.2 by TRONG.PRO
                 current = current.parentElement;
             }
 
-            return path.join('_') + '_' + Math.random().toString(36).substr(2, 9);
+            return path.join('_') + '_' + Math.random().toString(36).substring(2, 11);
         }
     };
 
@@ -229,7 +268,8 @@ v1.0.2 by TRONG.PRO
                 const element = this.findElement(fieldData.selector, fieldData.id);
                 if (element) {
                     // console.log('  ✅ Element found!');
-                    this.setFieldValue(element, fieldData.value);
+                    // Pass displayText so ComboBox display is restored alongside the code value
+                    this.setFieldValue(element, fieldData.value, fieldData.displayText || null);
                     filledCount++;
                 } else {
                     // console.warn('  ⚠️ Element NOT found');
@@ -237,6 +277,31 @@ v1.0.2 by TRONG.PRO
             });
 
             // console.log(`\n✅ Total filled: ${filledCount}/${profile.fields.length}`);
+
+            // ── Focus field marked with focusAfterFill ────────────────────────
+            const focusField = profile.fields.find(f => f.focusAfterFill);
+            if (focusField) {
+                const focusEl = this.findElement(focusField.selector, focusField.id);
+                if (focusEl) {
+                    setTimeout(() => {
+                        focusEl.focus();
+                        // Only call setSelectionRange on input types that support selection.
+                        // Types like 'email', 'checkbox', 'radio', 'number', 'range', etc.
+                        // have setSelectionRange on their prototype but throw InvalidStateError when called.
+                        const SELECTION_SUPPORTED_TYPES = ['text', 'search', 'url', 'tel', 'password'];
+                        const elType = (focusEl.type || '').toLowerCase();
+                        const isTextarea = focusEl.tagName === 'TEXTAREA';
+                        if (isTextarea || SELECTION_SUPPORTED_TYPES.includes(elType)) {
+                            try {
+                                const len = (focusEl.value || '').length;
+                                focusEl.setSelectionRange(len, len);
+                            } catch (e) {
+                                // Silently ignore: element type does not support selection
+                            }
+                        }
+                    }, 80);
+                }
+            }
 
             // Show notification
             this.showNotification(t('notify.smart', { count: filledCount }));
@@ -267,8 +332,22 @@ v1.0.2 by TRONG.PRO
         },
 
         // Set value for a field
-        setFieldValue(element, value) {
+        setFieldValue(element, value, displayText = null) {
             const tagName = element.tagName.toLowerCase();
+
+            // ── FineUI / combo-wrap ComboBox ──────────────────────────────────────────
+            // Must check before the generic text-input path because:
+            //   • FineUI DDLs may be readonly (blocking standard user input but NOT programmatic set)
+            //   • The real submit value lives in a hidden "$Value" sibling, not in the text input
+            //   • For DDLs WITHOUT a hidden $Value, applyComboBoxValue handles them too (text-only path)
+            if (tagName === 'input' && element.type !== 'hidden' &&
+                element.type !== 'checkbox' && element.type !== 'radio' &&
+                typeof EnhancedFormUtils !== 'undefined' &&
+                EnhancedFormUtils.isWebFormsComboBox(element)) {
+                EnhancedFormUtils.applyComboBoxValue(element, value, displayText);
+                return;
+            }
+            // ──────────────────────────────────────────────────────────────────────────
 
             if (tagName === 'select') {
                 // For select elements, set the value and trigger change event
@@ -286,16 +365,21 @@ v1.0.2 by TRONG.PRO
                     element.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             } else {
-                // For text inputs and textareas
-                element.value = value;
-                element.dispatchEvent(new Event('input', { bubbles: true }));
-                element.dispatchEvent(new Event('change', { bubbles: true }));
+                // For text inputs and textareas – use enhanced setter if available
+                if (typeof EnhancedFormUtils !== 'undefined') {
+                    EnhancedFormUtils.setNativeValue(element, value);
+                } else {
+                    element.value = value;
+                    element.dispatchEvent(new Event('input', { bubbles: true }));
+                    element.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             }
         },
 
         // Show notification
         showNotification(message) {
-            const getIcon = (name) => chrome.runtime.getURL(`icons/${name}.svg`);
+            if (!_extAlive()) return;
+            const getIcon = (name) => { try { return chrome.runtime.getURL(`icons/${name}.svg`); } catch (_) { return ''; } };
 
             // Colour + icon based on message content
             let bg = '#4CAF50';
@@ -309,6 +393,7 @@ v1.0.2 by TRONG.PRO
 
             // ── Shadow DOM host — page CSS cannot affect anything inside ────────
             const host = document.createElement('div');
+            host.className = 'typeless-notification-host';
             // Host is just a fixed-position anchor; all visual styling is inside shadow
             host.style.cssText = 'all:initial;position:fixed;top:20px;right:20px;z-index:2147483647;pointer-events:none;display:block;';
             const shadow = host.attachShadow({ mode: 'open' });
@@ -316,13 +401,20 @@ v1.0.2 by TRONG.PRO
             const nStyle = document.createElement('style');
             nStyle.textContent = `
                 @keyframes fadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+                @font-face {
+                    font-family: 'Be Vietnam Pro';
+                    src: url('${chrome.runtime.getURL('fonts/BeVietnamPro-Regular.woff2')}') format('woff2');
+                    font-weight: normal;
+                    font-style: normal;
+                    font-display: swap;
+                }
                 .notif {
                     background: ${bg};
                     color: white;
                     padding: 12px 20px;
                     border-radius: 8px;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
                     font-size: 14px;
                     font-weight: 500;
                     display: flex;
@@ -337,7 +429,15 @@ v1.0.2 by TRONG.PRO
 
             const notif = document.createElement('div');
             notif.className = 'notif';
-            notif.innerHTML = `<img src="${getIcon(iconName)}"><span>${message}</span>`;
+            // FIX: Use DOM methods instead of innerHTML to avoid XSS.
+            // The img src comes from chrome.runtime.getURL (trusted), but the
+            // message string may originate from page content (e.g. error.message).
+            const notifImg = document.createElement('img');
+            notifImg.src = getIcon(iconName);
+            const notifSpan = document.createElement('span');
+            notifSpan.textContent = message; // Safe: treats message as plain text
+            notif.appendChild(notifImg);
+            notif.appendChild(notifSpan);
             shadow.appendChild(notif);
             // ────────────────────────────────────────────────────────────────────
 
@@ -368,9 +468,10 @@ v1.0.2 by TRONG.PRO
             // Remove ALL existing toolbar hosts if any (cleanup for reloads/updates)
             document.querySelectorAll('#' + TOOLBAR_ID).forEach(el => el.remove());
             if (toolbarInjected) return;
+            if (!_extAlive()) return;
 
             await i18n.init();
-            const getIcon = (name) => chrome.runtime.getURL(`icons/${name}.svg`);
+            const getIcon = (name) => { try { return chrome.runtime.getURL(`icons/${name}.svg`); } catch (_) { return ''; } };
 
             // ── Shadow DOM: isolates toolbar from ALL page CSS ───────────────────
             const host = document.createElement('div');
@@ -381,13 +482,20 @@ v1.0.2 by TRONG.PRO
             // 1. Link extension stylesheet inside shadow so .toolbar-* classes render
             const cssLink = document.createElement('link');
             cssLink.rel = 'stylesheet';
-            cssLink.href = chrome.runtime.getURL('styles.css');
+            try { cssLink.href = chrome.runtime.getURL('styles.css'); } catch (_) { }
             shadow.appendChild(cssLink);
 
             // 2. Host-level styles — applied via :host because the #id rule is
             //    in the light DOM and cannot pierce the shadow boundary
             const hostStyle = document.createElement('style');
             hostStyle.textContent = `
+                @font-face {
+                    font-family: 'Be Vietnam Pro';
+                    src: url('${chrome.runtime.getURL('fonts/BeVietnamPro-Regular.woff2')}') format('woff2');
+                    font-weight: normal;
+                    font-style: normal;
+                    font-display: swap;
+                }
                 :host {
                     display: block !important;
                     position: fixed !important;
@@ -396,7 +504,7 @@ v1.0.2 by TRONG.PRO
                     color: white !important;
                     box-shadow: 0 -2px 20px rgba(0,0,0,0.3) !important;
                     z-index: 2147483640 !important;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+                    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
                     font-size: 14px !important;
                     line-height: 1.4 !important;
                     box-sizing: border-box !important;
@@ -452,7 +560,7 @@ v1.0.2 by TRONG.PRO
 
             if (content && btn) {
                 content.style.display = 'none';
-                btn.innerHTML = `<img src="${chrome.runtime.getURL('icons/expand.svg')}">`;
+                btn.innerHTML = `<img src="${_extAlive() ? chrome.runtime.getURL('icons/expand.svg') : ''}">`;
                 btn.title = t('btn.expand_tooltip');
                 StorageManager.setToolbarVisible(false);
             }
@@ -464,7 +572,7 @@ v1.0.2 by TRONG.PRO
 
             if (content && btn) {
                 content.style.display = 'block';
-                btn.innerHTML = `<img src="${chrome.runtime.getURL('icons/minimize.svg')}">`;
+                btn.innerHTML = `<img src="${_extAlive() ? chrome.runtime.getURL('icons/minimize.svg') : ''}">`;
                 btn.title = t('btn.minimize_tooltip');
                 StorageManager.setToolbarVisible(true);
             }
@@ -489,8 +597,9 @@ v1.0.2 by TRONG.PRO
         },
 
         async refreshToolbarUI() {
+            if (!_extAlive()) return;
             // Helper to get icon URL
-            const getIcon = (name) => chrome.runtime.getURL(`icons/${name}.svg`);
+            const getIcon = (name) => { try { return chrome.runtime.getURL(`icons/${name}.svg`); } catch (_) { return ''; } };
 
             // Update toolbar title and buttons
             const titleEl = toolbarShadow?.getElementById('toolbar-title');
@@ -628,7 +737,7 @@ v1.0.2 by TRONG.PRO
                                 // Add with new ID
                                 merged.push({
                                     ...profile,
-                                    id: Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9),
+                                    id: Date.now().toString() + '-' + Math.random().toString(36).substring(2, 11),
                                     importedAt: new Date().toISOString()
                                 });
                                 addedCount++;
@@ -636,7 +745,7 @@ v1.0.2 by TRONG.PRO
                         }
 
                         // Save merged profiles
-                        await chrome.storage.local.set({ profiles: merged });
+                        if (_extAlive()) await chrome.storage.local.set({ profiles: merged });
                         FormFiller.showNotification(t('notify.imported', { added: addedCount, skipped: importedProfiles.length - addedCount }));
                         this.loadProfiles();
 
@@ -684,6 +793,15 @@ v1.0.2 by TRONG.PRO
                         }
                     }
                 });
+
+                // ── Broadcast Smart Fill to all embedded iframes ──────────────────
+                ToolbarManager._broadcastToIframes({
+                    __typeless_relay: true,
+                    action: 'triggerSmartFill',
+                    settings: globalSettings || {}
+                });
+                // ─────────────────────────────────────────────────────────────────
+
                 if (count > 0) {
                     FormFiller.showNotification(t('notify.smart', { count }));
                 } else {
@@ -743,7 +861,7 @@ v1.0.2 by TRONG.PRO
                             delete newProfile.createdAt;
 
                             await StorageManager.saveProfile(newProfile);
-                            added++;
+                            added++; // count regardless of new/updated
                         }
                     }
 
@@ -774,6 +892,8 @@ v1.0.2 by TRONG.PRO
                 return;
             }
 
+            // Safe: profile.name is escaped via escapeHtml(); profile.id comes from
+            // chrome.storage (internal data, not user-typed HTML); t() returns i18n strings only.
             container.innerHTML = profiles.map(profile => `
         <div class="profile-btn-wrapper">
           <button class="profile-btn" data-profile-id="${profile.id}">
@@ -796,6 +916,13 @@ v1.0.2 by TRONG.PRO
                     if (profile) {
                         // console.log('Loading profile:', profile.name);
                         FormFiller.fillForm(profile);
+                        // ── Also fill iframes that may contain matching fields ──
+                        ToolbarManager._broadcastToIframes({
+                            __typeless_relay: true,
+                            action: 'applyProfile',
+                            profile: profile
+                        });
+                        // ──────────────────────────────────────────────────────
                     } else {
                         console.error('Profile not found:', profileId);
                     }
@@ -823,21 +950,102 @@ v1.0.2 by TRONG.PRO
         },
 
         saveCurrentForm() {
-            const fields = FormDetector.getAllFields();
+            const topFields = FormDetector.getAllFields();
 
-            // Filter out null fields (unchecked radios)
-            const validFields = fields.filter(f => f !== null);
+            // Also collect fields from embedded iframes (async)
+            this.collectIframeFields().then(iframeFields => {
+                const allFields = [...topFields, ...iframeFields];
+                const validFields = allFields.filter(f => f !== null);
 
-            if (validFields.length === 0) {
-                alert(t('alert.no_fields'));
-                return;
-            }
+                if (validFields.length === 0) {
+                    alert(t('alert.no_fields'));
+                    return;
+                }
 
-            // Create field selection modal
-            this.showFieldSelectionModal(validFields);
+                // showFieldSelectionModal is now async (reads counter from storage)
+                this.showFieldSelectionModal(validFields);
+            });
         },
 
-        showFieldSelectionModal(fields) {
+        /**
+         * Request field data from all direct child iframes via postMessage.
+         * Returns a promise that resolves to an array of serialisable field objects.
+         * Elements cannot cross frame boundaries, so the returned objects have
+         * element = null; the iframe fill path identifies them by __fromIframe flag.
+         */
+        collectIframeFields() {
+            return new Promise(resolve => {
+                const iframes = document.querySelectorAll('iframe');
+                if (iframes.length === 0) {
+                    resolve([]);
+                    return;
+                }
+
+                const collected = [];
+                let pending = 0;
+                const requestId = `tl_${Date.now()}`;
+
+                const handler = (event) => {
+                    if (!event.data || !event.data.__typeless_fields_response) return;
+                    if (event.data.requestId !== requestId) return;
+
+                    const fields = event.data.fields || [];
+                    const src = event.data.frameSrc || '';
+                    fields.forEach(f => {
+                        collected.push({
+                            ...f,
+                            element: null,        // cannot serialise DOM nodes
+                            __fromIframe: true,
+                            __frameSrc: src,
+                            displayText: f.displayText || null,
+                            label: `[iframe] ${f.label || f.name || f.id}`
+                        });
+                    });
+
+                    pending--;
+                    if (pending <= 0) {
+                        window.removeEventListener('message', handler);
+                        resolve(collected);
+                    }
+                };
+
+                window.addEventListener('message', handler);
+
+                iframes.forEach(iframe => {
+                    try {
+                        iframe.contentWindow.postMessage({
+                            __typeless_relay: true,
+                            action: 'requestFields',
+                            requestId
+                        }, '*');
+                        pending++;
+                    } catch (e) { /* cross-origin frame blocked – skip */ }
+                });
+
+                if (pending === 0) {
+                    window.removeEventListener('message', handler);
+                    resolve([]);
+                    return;
+                }
+
+                // Timeout: don't wait forever for slow or non-responsive iframes
+                setTimeout(() => {
+                    window.removeEventListener('message', handler);
+                    resolve(collected);
+                }, 600);
+            });
+        },
+
+        async showFieldSelectionModal(fields) {
+            // ── Compute default profile name with auto-increment counter ───────────
+            // Format: "Profile DD/MM/YYYY X"  where X increments each save, resets per day.
+            const now = new Date();
+            const dateKey = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+            const dateLabel = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            const nextNum = await StorageManager.getNextProfileCounter(dateKey);
+            const defaultName = `Profile ${dateLabel} ${nextNum}`;
+            // ──────────────────────────────────────────────────────────────────────
+
             // ── Shadow DOM host for modal — isolated from page CSS ─────────────
             const modalHost = document.createElement('div');
             modalHost.id = 'auto-filler-modal-host';
@@ -845,7 +1053,7 @@ v1.0.2 by TRONG.PRO
 
             const mCssLink = document.createElement('link');
             mCssLink.rel = 'stylesheet';
-            mCssLink.href = chrome.runtime.getURL('styles.css');
+            try { mCssLink.href = chrome.runtime.getURL('styles.css'); } catch (_) { }
             modalShadow.appendChild(mCssLink);
 
             const mHostStyle = document.createElement('style');
@@ -869,52 +1077,82 @@ v1.0.2 by TRONG.PRO
           <div class="modal-body">
             <div class="modal-section">
               <label class="modal-label">${t('modal.profile_name')}</label>
-              <input type="text" class="modal-input" id="profile-name-input" placeholder="Example: Profile 1" value="Profile ${new Date().toLocaleDateString()}">
+              <input type="text" class="modal-input" id="profile-name-input"
+                     placeholder="Profile ${dateLabel} ${nextNum}"
+                     value="${this.escapeHtml(defaultName)}">
             </div>
             <div class="modal-section">
               <div class="modal-section-header">
                 <label class="modal-label">${t('modal.select_fields', { count: fields.length })}</label>
                 <div class="modal-actions">
+                  <span style="font-size:11px;color:#94a3b8;margin-right:6px;white-space:nowrap;">🎯 = ${t('modal.focus_col') || 'Focus after fill'}</span>
                   <button class="modal-btn-small" id="select-all-btn">${t('modal.select_all')}</button>
                   <button class="modal-btn-small" id="deselect-all-btn">${t('modal.deselect_all')}</button>
                 </div>
               </div>
-              <div class="field-list" id="field-list-container">
+              <div class="field-list" id="field-list-container" style="padding-bottom:4px;">
                 ${fields.map((field, index) => {
-                // Format value for display
+                // ── Format value for display in the modal ─────────────────────────────
                 let displayValue = '';
+                let tooltipValue = '';
+
+                const hasValue = !!(
+                    (field.value && field.value.trim() !== '' && field.value !== 'unchecked') ||
+                    (field.displayText && field.displayText.trim() !== '')
+                );
+
                 if (!field.value || field.value.trim() === '' || field.value === 'unchecked') {
                     displayValue = t('modal.empty_value');
+                    tooltipValue = t('modal.empty_value');
                 } else if (field.value === 'checked') {
                     displayValue = t('modal.checked');
+                    tooltipValue = t('modal.checked');
+                } else if (field.displayText) {
+                    const labelTrunc = field.displayText.length > 42
+                        ? field.displayText.substring(0, 42) + '…'
+                        : field.displayText;
+                    displayValue = `${this.escapeHtml(labelTrunc)} <span class="field-value-code">[${this.escapeHtml(field.value)}]</span>`;
+                    tooltipValue = `${field.displayText}  ($Value: ${field.value})`;
                 } else if (field.value.length > 50) {
-                    displayValue = field.value.substring(0, 50) + '...';
+                    displayValue = this.escapeHtml(field.value.substring(0, 50) + '…');
+                    tooltipValue = field.value;
                 } else {
-                    displayValue = field.value;
+                    displayValue = this.escapeHtml(field.value);
+                    tooltipValue = field.value;
                 }
 
-                // Helper for icon (internal to this map function or we need to ensure getFieldIcon exists)
-                // Checking if getFieldIcon exists in FormFiller. It likely doesn't exist in scope if I don't use 'this' correctly or if it's missing.
-                // Actually, looking at previous code, it called 'this.getFieldIcon'.
-                // Let's assume getFieldIcon is a method of FormFiller or I should define it.
-                // Wait, getFieldIcon was NOT in the previous view_file of content.js!
-                // It must have been added or I need to add it.
-                // Let's check if getFieldIcon is defined in FormFiller.
-
-                const typeIcon = '📝'; // Default icon
-
-                const hasValue = field.value && field.value !== 'unchecked' && field.value.trim() !== '';
                 const checkedAttr = hasValue ? 'checked' : '';
 
                 return `
-                  <label class="field-item">
-                    <input type="checkbox" class="field-checkbox" data-index="${index}" ${checkedAttr}>
-                    <span class="field-type-icon">${this.getFieldIcon(field.type)}</span>
-                    <div class="field-info">
-                      <div class="field-label-text">${this.escapeHtml(field.label || field.name || 'Field')}</div>
-                      <div class="field-value-text" title="${this.escapeHtml(field.value)}">${this.escapeHtml(displayValue)}</div>
-                    </div>
-                  </label>
+                  <div class="field-item-row" style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+                    <label class="field-item" style="flex:1;margin-bottom:0;">
+                      <input type="checkbox" class="field-checkbox" data-index="${index}" ${checkedAttr}>
+                      <span class="field-type-icon">${this.getFieldIcon(field.type)}</span>
+                      <div class="field-info">
+                        <div class="field-label-text">${this.escapeHtml(field.label || field.name || 'Field')}</div>
+                        <div class="field-value-text" title="${this.escapeHtml(tooltipValue)}">${field.displayText ? displayValue : this.escapeHtml(displayValue)}</div>
+                      </div>
+                    </label>
+                    <button
+                      type="button"
+                      class="focus-toggle-btn"
+                      data-focus-index="${index}"
+                      title="${t('modal.focus_hint') || 'Set cursor focus to this field after apply'}"
+                      style="
+                        flex-shrink:0;
+                        width:30px;height:30px;
+                        border-radius:6px;
+                        border:2px solid #e2e8f0;
+                        background:white;
+                        cursor:pointer;
+                        display:flex;align-items:center;justify-content:center;
+                        font-size:14px;line-height:1;
+                        transition:all 0.15s;
+                        padding:0;
+                        opacity:0.5;
+                      "
+                    >🎯</button>
+                  </div>
                 `;
             }).join('')}
               </div>
@@ -929,7 +1167,7 @@ v1.0.2 by TRONG.PRO
 
             document.body.appendChild(modalHost);
 
-            // Focus on profile name input
+            // Focus + select-all on profile name input
             setTimeout(() => {
                 modalOverlay.querySelector('#profile-name-input')?.select();
             }, 100);
@@ -951,6 +1189,40 @@ v1.0.2 by TRONG.PRO
                 modalOverlay.querySelectorAll('.field-checkbox').forEach(cb => cb.checked = false);
             });
 
+            // ── Focus-field tracking ──────────────────────────────────────────────────
+            let focusFieldIndex = -1; // index into original fields[] array
+
+            modalOverlay.querySelectorAll('.focus-toggle-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const idx = parseInt(btn.dataset.focusIndex);
+
+                    if (focusFieldIndex === idx) {
+                        // Toggle OFF
+                        focusFieldIndex = -1;
+                        btn.style.opacity = '0.5';
+                        btn.style.borderColor = '#e2e8f0';
+                        btn.style.background = 'white';
+                    } else {
+                        // Deactivate previous
+                        if (focusFieldIndex >= 0) {
+                            const prev = modalOverlay.querySelector(`.focus-toggle-btn[data-focus-index="${focusFieldIndex}"]`);
+                            if (prev) {
+                                prev.style.opacity = '0.5';
+                                prev.style.borderColor = '#e2e8f0';
+                                prev.style.background = 'white';
+                            }
+                        }
+                        // Activate this
+                        focusFieldIndex = idx;
+                        btn.style.opacity = '1';
+                        btn.style.borderColor = '#3291B6';
+                        btn.style.background = '#e0f2f1';
+                    }
+                });
+            });
+
             modalOverlay.querySelector('#modal-save-btn')?.addEventListener('click', () => {
                 const profileName = modalOverlay.querySelector('#profile-name-input')?.value.trim();
 
@@ -963,7 +1235,7 @@ v1.0.2 by TRONG.PRO
                 const selectedFields = [];
                 modalOverlay.querySelectorAll('.field-checkbox:checked').forEach(checkbox => {
                     const index = parseInt(checkbox.dataset.index);
-                    selectedFields.push(fields[index]);
+                    selectedFields.push({ ...fields[index], _origIdx: index });
                 });
 
                 if (selectedFields.length === 0) {
@@ -971,26 +1243,32 @@ v1.0.2 by TRONG.PRO
                     return;
                 }
 
+                // ── Consume the counter (increment and persist) ────────────────
+                // Only consume when saving, not on modal open, so cancelled saves
+                // don't waste a counter slot.
+                StorageManager.consumeProfileCounter(dateKey).then(() => { });
+
                 // Save profile
                 const profile = {
-                    id: Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9), // Generate unique ID
+                    id: Date.now().toString() + '-' + Math.random().toString(36).substring(2, 11),
                     name: profileName,
                     fields: selectedFields.map(f => ({
                         id: f.id,
                         selector: f.selector,
                         value: f.value,
+                        displayText: f.displayText || null,
                         label: f.label,
                         type: f.type,
-                        name: f.name
+                        name: f.name,
+                        focusAfterFill: f._origIdx === focusFieldIndex
                     })),
                     url: window.location.href,
                     pageTitle: document.title,
                     createdAt: new Date().toISOString()
                 };
 
-                console.log('💾 Saving profile:', profile);
-
-                StorageManager.saveProfile(profile).then(success => {
+                StorageManager.saveProfile(profile).then(result => {
+                    const success = result && result.success !== undefined ? result.success : !!result;
                     if (success) {
                         FormFiller.showNotification(t('notify.saved', { name: profileName, count: selectedFields.length }));
                         this.loadProfiles();
@@ -1029,9 +1307,28 @@ v1.0.2 by TRONG.PRO
                 'select': '📋',
                 'textarea': '📄',
                 'checkbox': '☑️',
-                'radio': '🔘'
+                'radio': '🔘',
+                'dropdownlist': '🔽',   // FineUI DDL / combo-wrap
+                'url': '🔗',
+                'search': '🔍',
+                'color': '🎨',
+                'range': '↔️',
             };
             return icons[type] || '📌';
+        },
+
+        /**
+         * Broadcast a postMessage payload to all direct child iframes.
+         * Works for both same-origin and cross-origin iframes (one-way relay only).
+         * Each iframe's content script will re-broadcast to its own children,
+         * so the message propagates through arbitrarily nested iframe trees.
+         */
+        _broadcastToIframes(payload) {
+            document.querySelectorAll('iframe').forEach(iframe => {
+                try {
+                    iframe.contentWindow.postMessage(payload, '*');
+                } catch (e) { /* blocked or null contentWindow – ignore */ }
+            });
         },
 
         escapeHtml(text) {
@@ -1049,180 +1346,201 @@ v1.0.2 by TRONG.PRO
     }
 
     // Listen for messages from popup or background
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        // Only process in top window
-        if (window !== window.top) {
-            return false;
-        }
-
-        if (request.action === 'toggleToolbar') {
-            const content = toolbarShadow?.getElementById('toolbar-content');
-            if (content && content.style.display === 'none') {
-                ToolbarManager.expandToolbar();
-            } else {
-                ToolbarManager.minimizeToolbar();
-            }
-            sendResponse({ success: true });
-        } else if (request.action === 'showToolbar') {
-            ToolbarManager.showToolbar();
-            sendResponse({ success: true });
-        } else if (request.action === 'toggleHideToolbar') {
-            const toolbar = document.getElementById(TOOLBAR_ID);
-            if (toolbar) {
-                const isHidden = toolbar.classList.contains('typeless-hidden');
-                if (isHidden) {
-                    ToolbarManager.showToolbar();
-                } else {
-                    ToolbarManager.hideToolbar();
+    if (_extAlive()) {
+        try {
+            chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                // Only accept messages from this extension (security: reject external senders)
+                if (!sender || sender.id !== chrome.runtime.id) {
+                    return false;
                 }
-            } else {
-                // If toolbar doesn't exist, create it (essentially showing it)
-                ToolbarManager.createToolbar();
-            }
-            sendResponse({ success: true });
-        } else if (request.action === 'fillForm') {
-            FormFiller.fillForm(request.profile);
-            sendResponse({ success: true });
-        } else if (request.action === 'getFields') {
-            // Updated to be consistent with normal saving
-            const fields = FormDetector.getAllFields();
-            sendResponse({ fields });
-        } else if (request.action === 'applyProfile') {
-            // Keyboard shortcut: Apply last profile
-            if (request.profile) {
-                FormFiller.fillForm(request.profile);
-                sendResponse({ success: true });
-            }
-        } else if (request.action === 'toggleToolbar') {
-            // Keyboard shortcut: Toggle toolbar
-            const toolbar = document.getElementById(TOOLBAR_ID);
-            if (toolbar) {
-                const isHidden = toolbar.style.display === 'none';
-                if (isHidden) {
-                    ToolbarManager.showToolbar();
-                } else {
-                    ToolbarManager.hideToolbar();
+
+                // Only process in top window
+                if (window !== window.top) {
+                    return false;
                 }
-                sendResponse({ success: true });
-            }
-        } else if (request.action === 'updateLanguage') {
-            i18n.init().then(() => {
-                ToolbarManager.refreshToolbarUI();
-                FormFiller.showNotification(t('notify.lang_changed'));
-                sendResponse({ success: true });
-            });
-            return true; // Asynchronous response
-        } else if (request.action === 'refreshProfiles') {
-            ToolbarManager.loadProfiles();
-            sendResponse({ success: true });
-        } else if (request.action === 'triggerSmartFill') {
-            // Trigger Smart Fill
-            (async () => {
-                try {
-                    // Load settings first
-                    const globalSettings = await StorageManager.getGlobalSettings();
-                    if (typeof SmartFill !== 'undefined') {
-                        SmartFill.setSettings(globalSettings);
-                    }
 
-                    // Get all fields (use Save dialog logic)
-                    const fields = FormDetector.getAllFields();
-                    let count = 0;
-                    fields.forEach(field => {
-                        const element = field.element;
-
-                        if (element) {
-                            if (typeof SmartFill !== 'undefined') {
-                                const value = SmartFill.generateValue(element, field.label);
-                                if (value && value !== 'unchecked') {
-                                    if (typeof EnhancedFormUtils !== 'undefined') {
-                                        EnhancedFormUtils.applyValue(element, value);
-                                    } else {
-                                        element.value = value;
-                                        element.dispatchEvent(new Event('input', { bubbles: true }));
-                                        element.dispatchEvent(new Event('change', { bubbles: true }));
-                                    }
-                                    count++;
-                                }
-                            }
-                        }
-                    });
-                    if (count > 0) {
-                        FormFiller.showNotification(t('notify.smart', { count }));
+                if (request.action === 'toggleToolbar') {
+                    const content = toolbarShadow?.getElementById('toolbar-content');
+                    if (content && content.style.display === 'none') {
+                        ToolbarManager.expandToolbar();
                     } else {
-                        FormFiller.showNotification(t('notify.no_fields_filled'));
+                        ToolbarManager.minimizeToolbar();
                     }
-                } catch (e) {
-                    console.error('Smart fill error:', e);
-                }
-            })();
-            sendResponse({ success: true });
-        } else if (request.action === 'triggerSaveProfile') {
-            // Trigger Save Profile
-            ToolbarManager.saveCurrentForm();
-            sendResponse({ success: true });
-        } else if (request.action === 'triggerRemoveReadonly') {
-            // Remove readonly and disabled attributes
-            let count = 0;
-            // Use a comprehensive selector to find all potentially locked elements
-            const elements = document.querySelectorAll('[readonly], [disabled], [contenteditable="false"]');
-
-            elements.forEach(el => {
-                let modified = false;
-
-                if (el.hasAttribute('readonly')) {
-                    el.removeAttribute('readonly');
-                    modified = true;
-                }
-                if (el.hasAttribute('disabled')) {
-                    el.removeAttribute('disabled');
-                    modified = true;
-                }
-                if (el.disabled) {
-                    el.disabled = false;
-                    modified = true;
-                }
-                if (el.getAttribute('contenteditable') === 'false') {
-                    el.setAttribute('contenteditable', 'true');
-                    modified = true;
-                }
-
-                if (modified) count++;
-            });
-
-            // FormFiller.showNotification(`🔓 Đã mở khóa ${ count } phần tử / Unlocked ${ count } elements`);
-            // Better message format
-            FormFiller.showNotification(t('notify.unlocked', { count }));
-
-            sendResponse({ success: true });
-        }
-
-        if (request.action === 'triggerEnableRightClick') {
-            try {
-                // Guard against repeated calls stacking anonymous capture listeners
-                if (!window.__typeLessRightClickEnabled) {
-                    const events = ['contextmenu', 'selectstart', 'copy', 'cut', 'paste', 'mousedown', 'mouseup', 'keydown', 'keyup', 'dragstart'];
-
-                    // Named handler so we could remove it if needed
-                    const stopPropHandler = (e) => { e.stopPropagation(); };
-
-                    events.forEach(event => {
-                        document.addEventListener(event, stopPropHandler, true);
+                    sendResponse({ success: true });
+                } else if (request.action === 'showToolbar') {
+                    ToolbarManager.showToolbar();
+                    sendResponse({ success: true });
+                } else if (request.action === 'toggleHideToolbar') {
+                    const toolbar = document.getElementById(TOOLBAR_ID);
+                    if (toolbar) {
+                        const isHidden = toolbar.classList.contains('typeless-hidden');
+                        if (isHidden) {
+                            ToolbarManager.showToolbar();
+                        } else {
+                            ToolbarManager.hideToolbar();
+                        }
+                    } else {
+                        // If toolbar doesn't exist, create it (essentially showing it)
+                        ToolbarManager.createToolbar();
+                    }
+                    sendResponse({ success: true });
+                } else if (request.action === 'fillForm') {
+                    FormFiller.fillForm(request.profile);
+                    sendResponse({ success: true });
+                } else if (request.action === 'getFields') {
+                    // Updated to be consistent with normal saving
+                    const fields = FormDetector.getAllFields();
+                    sendResponse({ fields });
+                } else if (request.action === 'applyProfile') {
+                    // Keyboard shortcut: Apply last profile
+                    if (request.profile) {
+                        FormFiller.fillForm(request.profile);
+                        // Relay to iframes
+                        ToolbarManager._broadcastToIframes({
+                            __typeless_relay: true,
+                            action: 'applyProfile',
+                            profile: request.profile
+                        });
+                        sendResponse({ success: true });
+                    }
+                } else if (request.action === 'toggleToolbar') {
+                    // Keyboard shortcut: Toggle toolbar
+                    const toolbar = document.getElementById(TOOLBAR_ID);
+                    if (toolbar) {
+                        const isHidden = toolbar.style.display === 'none';
+                        if (isHidden) {
+                            ToolbarManager.showToolbar();
+                        } else {
+                            ToolbarManager.hideToolbar();
+                        }
+                        sendResponse({ success: true });
+                    }
+                } else if (request.action === 'updateLanguage') {
+                    i18n.init().then(() => {
+                        ToolbarManager.refreshToolbarUI();
+                        FormFiller.showNotification(t('notify.lang_changed'));
+                        sendResponse({ success: true });
                     });
-                    window.__typeLessRightClickEnabled = true;
+                    return true; // Asynchronous response
+                } else if (request.action === 'refreshProfiles') {
+                    ToolbarManager.loadProfiles();
+                    sendResponse({ success: true });
+                } else if (request.action === 'triggerSmartFill') {
+                    // Trigger Smart Fill
+                    (async () => {
+                        try {
+                            // Load settings first
+                            const globalSettings = await StorageManager.getGlobalSettings();
+                            if (typeof SmartFill !== 'undefined') {
+                                SmartFill.setSettings(globalSettings);
+                            }
+
+                            // Get all fields (use Save dialog logic)
+                            const fields = FormDetector.getAllFields();
+                            let count = 0;
+                            fields.forEach(field => {
+                                const element = field.element;
+
+                                if (element) {
+                                    if (typeof SmartFill !== 'undefined') {
+                                        const value = SmartFill.generateValue(element, field.label);
+                                        if (value && value !== 'unchecked') {
+                                            if (typeof EnhancedFormUtils !== 'undefined') {
+                                                EnhancedFormUtils.applyValue(element, value);
+                                            } else {
+                                                element.value = value;
+                                                element.dispatchEvent(new Event('input', { bubbles: true }));
+                                                element.dispatchEvent(new Event('change', { bubbles: true }));
+                                            }
+                                            count++;
+                                        }
+                                    }
+                                }
+                            });
+
+                            // Relay to iframes
+                            ToolbarManager._broadcastToIframes({
+                                __typeless_relay: true,
+                                action: 'triggerSmartFill',
+                                settings: globalSettings || {}
+                            });
+
+                            if (count > 0) {
+                                FormFiller.showNotification(t('notify.smart', { count }));
+                            } else {
+                                FormFiller.showNotification(t('notify.no_fields_filled'));
+                            }
+                        } catch (e) {
+                            console.error('Smart fill error:', e);
+                        }
+                    })();
+                    sendResponse({ success: true });
+                } else if (request.action === 'triggerSaveProfile') {
+                    // Trigger Save Profile
+                    ToolbarManager.saveCurrentForm();
+                    sendResponse({ success: true });
+                } else if (request.action === 'triggerRemoveReadonly') {
+                    // Remove readonly and disabled attributes
+                    let count = 0;
+                    // Use a comprehensive selector to find all potentially locked elements
+                    const elements = document.querySelectorAll('[readonly], [disabled], [contenteditable="false"]');
+
+                    elements.forEach(el => {
+                        let modified = false;
+
+                        if (el.hasAttribute('readonly')) {
+                            el.removeAttribute('readonly');
+                            modified = true;
+                        }
+                        if (el.hasAttribute('disabled')) {
+                            el.removeAttribute('disabled');
+                            modified = true;
+                        }
+                        if (el.disabled) {
+                            el.disabled = false;
+                            modified = true;
+                        }
+                        if (el.getAttribute('contenteditable') === 'false') {
+                            el.setAttribute('contenteditable', 'true');
+                            modified = true;
+                        }
+
+                        if (modified) count++;
+                    });
+
+                    // FormFiller.showNotification(`🔓 Đã mở khóa ${ count } phần tử / Unlocked ${ count } elements`);
+                    // Better message format
+                    FormFiller.showNotification(t('notify.unlocked', { count }));
+
+                    sendResponse({ success: true });
                 }
 
-                // 2. Clear inline handlers
-                const events = ['contextmenu', 'selectstart', 'copy', 'cut', 'paste', 'mousedown', 'mouseup', 'keydown', 'keyup', 'dragstart'];
-                events.forEach(e => {
-                    document['on' + e] = null;
-                    document.body['on' + e] = null;
-                    window['on' + e] = null;
-                });
+                if (request.action === 'triggerEnableRightClick') {
+                    try {
+                        // Guard against repeated calls stacking anonymous capture listeners
+                        if (!window.__typeLessRightClickEnabled) {
+                            const events = ['contextmenu', 'selectstart', 'copy', 'cut', 'paste', 'mousedown', 'mouseup', 'keydown', 'keyup', 'dragstart'];
 
-                // 3. Inject CSS to allow selection
-                const style = document.createElement('style');
-                style.innerHTML = `
+                            // Named handler so we could remove it if needed
+                            const stopPropHandler = (e) => { e.stopPropagation(); };
+
+                            events.forEach(event => {
+                                document.addEventListener(event, stopPropHandler, true);
+                            });
+                            window.__typeLessRightClickEnabled = true;
+                        }
+
+                        // 2. Clear inline handlers
+                        const events = ['contextmenu', 'selectstart', 'copy', 'cut', 'paste', 'mousedown', 'mouseup', 'keydown', 'keyup', 'dragstart'];
+                        events.forEach(e => {
+                            document['on' + e] = null;
+                            document.body['on' + e] = null;
+                            window['on' + e] = null;
+                        });
+
+                        // 3. Inject CSS to allow selection
+                        const style = document.createElement('style');
+                        style.innerHTML = `
                     * {
                         -webkit-user-select: text !important;
                         -moz-user-select: text !important;
@@ -1231,114 +1549,209 @@ v1.0.2 by TRONG.PRO
                         pointer-events: auto !important;
                     }
                 `;
-                document.head.appendChild(style);
+                        document.head.appendChild(style);
 
-                // 4. Also try to find elements with inline styles inhibiting selection
-                document.querySelectorAll('*').forEach(el => {
-                    if (el.style.userSelect === 'none') {
-                        el.style.userSelect = 'text';
+                        // 4. Also try to find elements with inline styles inhibiting selection
+                        document.querySelectorAll('*').forEach(el => {
+                            if (el.style.userSelect === 'none') {
+                                el.style.userSelect = 'text';
+                            }
+                            // Clean up any inline handlers
+                            events.forEach(ev => {
+                                if (el['on' + ev]) el['on' + ev] = null;
+                                if (el.getAttribute('on' + ev)) el.removeAttribute('on' + ev);
+                            });
+                        });
+
+                        FormFiller.showNotification(t('notify.right_click_enabled'));
+                        sendResponse({ success: true });
+                    } catch (e) {
+                        console.error('Error enabling right click:', e);
+                        FormFiller.showNotification('Error: ' + e.message, 'error');
+                        sendResponse({ success: false, error: e.message });
                     }
-                    // Clean up any inline handlers
-                    events.forEach(ev => {
-                        if (el['on' + ev]) el['on' + ev] = null;
-                        if (el.getAttribute('on' + ev)) el.removeAttribute('on' + ev);
-                    });
-                });
-
-                FormFiller.showNotification(t('notify.right_click_enabled'));
-                sendResponse({ success: true });
-            } catch (e) {
-                console.error('Error enabling right click:', e);
-                FormFiller.showNotification('Error: ' + e.message, 'error');
-                sendResponse({ success: false, error: e.message });
-            }
-        }
-
-        else if (request.action === 'getRenderedHTML') {
-            // Force update value attributes for inputs so they appear in HTML
-            document.querySelectorAll('input, textarea, select').forEach(el => {
-                if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'email' || el.type === 'tel' || el.type === 'password')) {
-                    el.setAttribute('value', el.value);
-                } else if (el.tagName === 'TEXTAREA') {
-                    el.textContent = el.value;
-                } else if (el.tagName === 'SELECT') {
-                    Array.from(el.options).forEach(opt => {
-                        if (opt.selected) opt.setAttribute('selected', 'selected');
-                        else opt.removeAttribute('selected');
-                    });
-                } else if (el.type === 'checkbox' || el.type === 'radio') {
-                    if (el.checked) el.setAttribute('checked', 'checked');
-                    else el.removeAttribute('checked');
                 }
+
+                else if (request.action === 'getRenderedHTML') {
+                    // Force update value attributes for inputs so they appear in HTML
+                    document.querySelectorAll('input, textarea, select').forEach(el => {
+                        if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'email' || el.type === 'tel' || el.type === 'password')) {
+                            el.setAttribute('value', el.value);
+                        } else if (el.tagName === 'TEXTAREA') {
+                            el.textContent = el.value;
+                        } else if (el.tagName === 'SELECT') {
+                            Array.from(el.options).forEach(opt => {
+                                if (opt.selected) opt.setAttribute('selected', 'selected');
+                                else opt.removeAttribute('selected');
+                            });
+                        } else if (el.type === 'checkbox' || el.type === 'radio') {
+                            if (el.checked) el.setAttribute('checked', 'checked');
+                            else el.removeAttribute('checked');
+                        }
+                    });
+
+                    // Clone the document to modify it without affecting the live page
+                    const clone = document.documentElement.cloneNode(true);
+
+                    // Remove extension elements from the clone
+                    const toolbar = clone.querySelector('#' + TOOLBAR_ID);
+                    if (toolbar) toolbar.remove();
+
+                    const notifications = clone.querySelectorAll('.auto-form-filler-notification');
+                    notifications.forEach(n => n.remove());
+
+                    // Remove injected styles
+                    const keyframeStyle = clone.querySelector('#aff-keyframes');
+                    if (keyframeStyle) keyframeStyle.remove();
+
+                    const htmlContent = clone.outerHTML;
+                    sendResponse({ html: htmlContent });
+                }
+
+                else if (request.action === 'prepareForScreenshot') {
+                    // Save current visibility state
+                    const toolbar = document.getElementById(TOOLBAR_ID);
+                    window._toolbarWasVisibleBeforeScreenshot = toolbar && !toolbar.classList.contains('typeless-hidden');
+
+                    // Hide everything
+                    ToolbarManager.hideToolbar();
+
+                    // Also hide any notifications
+                    const notifications = document.querySelectorAll('.typeless-notification-host, .auto-form-filler-notification');
+                    notifications.forEach(n => {
+                        n.dataset.originalDisplay = n.style.display;
+                        n.style.setProperty('display', 'none', 'important');
+                    });
+
+                    sendResponse({ success: true });
+                } else if (request.action === 'cleanupAfterScreenshot') {
+                    // Restore visibility if it was visible before
+                    if (window._toolbarWasVisibleBeforeScreenshot) {
+                        ToolbarManager.showToolbar();
+                    }
+
+                    // Show notifications again (they will fade out eventually)
+                    const notifications = document.querySelectorAll('.typeless-notification-host, .auto-form-filler-notification');
+                    notifications.forEach(n => {
+                        if (n.dataset.originalDisplay !== undefined) {
+                            n.style.display = n.dataset.originalDisplay || ''; // restore original (might be inline block for CSS defaults)
+                        } else {
+                            n.style.display = '';
+                        }
+                    });
+
+                    delete window._toolbarWasVisibleBeforeScreenshot;
+                    sendResponse({ success: true });
+                } else if (request.action === 'showNotification') {
+                    // In-page notification triggered by background or popup after an action
+                    FormFiller.showNotification(request.message || '');
+                    sendResponse({ success: true });
+                } else {
+                    // Unhandled action – return false so the message channel is not held open unnecessarily
+                    return false;
+                }
+
+                return true; // Keep channel open for all handled async responses
             });
 
-            // Clone the document to modify it without affecting the live page
-            const clone = document.documentElement.cloneNode(true);
+            // ═══════════════════════════════════════════════════════════════════════
+            // IFRAME RELAY — postMessage listener
+            // All frames (including nested iframes) listen for relay messages from
+            // their parent frame. This enables the top-frame toolbar to trigger
+            // SmartFill / profile-fill / field-collection across all iframe depths.
+            // ═══════════════════════════════════════════════════════════════════════
+            window.addEventListener('message', async (event) => {
+                // Guard: only accept TypeLess relay messages
+                const data = event.data;
+                if (!data || !data.__typeless_relay) return;
 
-            // Remove extension elements from the clone
-            const toolbar = clone.querySelector('#' + TOOLBAR_ID);
-            if (toolbar) toolbar.remove();
+                // ── requestFields: parent asks this iframe for its serialisable fields ──
+                if (data.action === 'requestFields') {
+                    const fields = FormDetector.getAllFields().map(f => ({
+                        id: f.id,
+                        name: f.name,
+                        type: f.type,
+                        value: f.value,
+                        displayText: f.displayText || null,  // ComboBox display label
+                        label: f.label,
+                        selector: f.selector,
+                        element: undefined  // cannot be serialised across frames
+                    }));
 
-            const notifications = clone.querySelectorAll('.auto-form-filler-notification');
-            notifications.forEach(n => n.remove());
+                    // Reply to whoever sent the request (parent frame or top frame)
+                    try {
+                        (event.source || window.parent).postMessage({
+                            __typeless_fields_response: true,
+                            requestId: data.requestId,
+                            fields,
+                            frameSrc: window.location.href
+                        }, '*');
+                    } catch (e) { /* cross-origin parent – ignore */ }
 
-            // Remove injected styles
-            const keyframeStyle = clone.querySelector('#aff-keyframes');
-            if (keyframeStyle) keyframeStyle.remove();
+                    // Do NOT forward requestFields downward (parent handles recursion itself)
+                    return;
+                }
 
-            const htmlContent = clone.outerHTML;
-            sendResponse({ html: htmlContent });
-        }
+                // ── triggerSmartFill: fill all fields in this frame ───────────────────
+                if (data.action === 'triggerSmartFill') {
+                    try {
+                        const settings = data.settings || {};
+                        if (typeof SmartFill !== 'undefined') {
+                            SmartFill.setSettings(settings);
+                        }
+                        const fields = FormDetector.getAllFields();
+                        fields.forEach(field => {
+                            if (!field.element) return;
+                            if (typeof SmartFill !== 'undefined') {
+                                const value = SmartFill.generateValue(field.element, field.label);
+                                if (value && value !== 'unchecked') {
+                                    if (typeof EnhancedFormUtils !== 'undefined') {
+                                        EnhancedFormUtils.applyValue(field.element, value);
+                                    } else {
+                                        field.element.value = value;
+                                        field.element.dispatchEvent(new Event('input', { bubbles: true }));
+                                        field.element.dispatchEvent(new Event('change', { bubbles: true }));
+                                    }
+                                }
+                            }
+                        });
+                    } catch (e) {
+                        console.error('[TypeLess iframe] SmartFill error:', e);
+                    }
+                }
 
-        else if (request.action === 'prepareForScreenshot') {
-            // Save current visibility state
-            const toolbar = document.getElementById(TOOLBAR_ID);
-            window._toolbarWasVisibleBeforeScreenshot = toolbar && !toolbar.classList.contains('typeless-hidden');
-            
-            // Hide everything
-            ToolbarManager.hideToolbar();
-            
-            // Also hide any notifications
-            const notifications = document.querySelectorAll('.auto-form-filler-notification');
-            notifications.forEach(n => n.style.display = 'none');
-            
-            sendResponse({ success: true });
-        } else if (request.action === 'cleanupAfterScreenshot') {
-            // Restore visibility if it was visible before
-            if (window._toolbarWasVisibleBeforeScreenshot) {
-                ToolbarManager.showToolbar();
-            }
-            
-            // Show notifications again (they will fade out eventually)
-            const notifications = document.querySelectorAll('.auto-form-filler-notification');
-            notifications.forEach(n => n.style.display = '');
-            
-            delete window._toolbarWasVisibleBeforeScreenshot;
-            sendResponse({ success: true });
-        } else if (request.action === 'showNotification') {
-            // In-page notification triggered by background or popup after an action
-            FormFiller.showNotification(request.message || '');
-            sendResponse({ success: true });
-        } else {
-            // Unhandled action – return false so the message channel is not held open unnecessarily
-            return false;
-        }
+                // ── applyProfile: fill matched fields in this frame ───────────────────
+                if (data.action === 'applyProfile' && data.profile) {
+                    try {
+                        // fillForm reads fieldData.displayText if present — ComboBox display restored.
+                        FormFiller.fillForm(data.profile);
+                    } catch (e) {
+                        console.error('[TypeLess iframe] applyProfile error:', e);
+                    }
+                }
 
-        return true; // Keep channel open for all handled async responses
-    });
+                // ── Forward to nested iframes (depth-first propagation) ───────────────
+                document.querySelectorAll('iframe').forEach(iframe => {
+                    try { iframe.contentWindow.postMessage(data, '*'); } catch (e) { }
+                });
+            });
+        } catch (_) { }
+    } // end: if (_extAlive()) try { chrome.runtime.onMessage
 
     // Listen for language changes from storage (Real-time sync)
-    chrome.storage.onChanged.addListener((changes, area) => {
-        if (area === 'local' && changes.language) {
-            const newLang = changes.language.newValue;
-            if (newLang && newLang !== i18n.currentLang) {
-                i18n.init().then(() => {
-                    ToolbarManager.refreshToolbarUI();
-                    FormFiller.showNotification(t('notify.lang_changed'));
-                });
+    if (_extAlive()) try {
+        chrome.storage.onChanged.addListener((changes, area) => {
+            if (area === 'local' && changes.language) {
+                const newLang = changes.language.newValue;
+                if (newLang && newLang !== i18n.currentLang) {
+                    i18n.init().then(() => {
+                        ToolbarManager.refreshToolbarUI();
+                        FormFiller.showNotification(t('notify.lang_changed'));
+                    });
+                }
             }
-        }
-    });
+        });
+    } catch (_) { }
 
 })();
 
