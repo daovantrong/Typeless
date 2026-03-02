@@ -9,7 +9,7 @@
  * ──────╚══╝─╚╝──────────────────────────╚══╝
  * 
  * TypeLess - Auto Form Filler
- * v1.0.3 by TRONG.PRO
+ * v1.0.6 by TRONG.PRO
  */
 
 // Content script
@@ -521,7 +521,7 @@ function _extAlive() {
             const inner = document.createElement('div');
             inner.innerHTML = `
         <div class="toolbar-header">
-          <span class="toolbar-title" id="toolbar-title"><img src="${getIcon('copy')}" style="height:16px; vertical-align:middle"> <span class="title-text">${t('toolbar.title')}</span></span>
+          <span class="toolbar-title"><img src="${getIcon('copy')}"> <span class="title-text">${t('toolbar.title')}</span></span>
           <div class="toolbar-controls">
             <button class="toolbar-btn" id="refresh-profiles-btn" title="${t('notify.refreshed')}"><img src="${getIcon('refresh')}"> <span class="btn-text">${t('btn.refresh_list')}</span></button>
             <button class="toolbar-btn" id="smart-fill-btn" title="${t('btn.smart')}"><img src="${getIcon('flash')}"> <span class="btn-text">${t('btn.smart')}</span></button>
@@ -542,7 +542,7 @@ function _extAlive() {
 
             document.body.appendChild(host);
             toolbarInjected = true;
-            document.body.style.marginBottom = '50px';
+            document.body.style.marginBottom = '64px';
 
             this.attachEventListeners();
             this.loadProfiles();
@@ -591,19 +591,18 @@ function _extAlive() {
             const host = document.getElementById(TOOLBAR_ID);
             if (host) {
                 host.classList.remove('typeless-hidden');
-                document.body.style.marginBottom = '50px';
+                document.body.style.marginBottom = '64px';
                 StorageManager.setToolbarHidden(false);
             }
         },
 
         async refreshToolbarUI() {
             if (!_extAlive()) return;
-            // Helper to get icon URL
             const getIcon = (name) => { try { return chrome.runtime.getURL(`icons/${name}.svg`); } catch (_) { return ''; } };
 
-            // Update toolbar title and buttons
-            const titleEl = toolbarShadow?.getElementById('toolbar-title');
-            if (titleEl) titleEl.innerHTML = `<img src="${getIcon('copy')}" style="height:16px; vertical-align:middle"> <span class="title-text">${t('toolbar.title')}</span>`;
+            // Update toolbar title text (i18n value may contain HTML img icons)
+            const titleText = toolbarShadow?.querySelector('.title-text');
+            if (titleText) titleText.innerHTML = t('toolbar.title');
 
             const refreshBtn = toolbarShadow?.getElementById('refresh-profiles-btn');
             if (refreshBtn) refreshBtn.innerHTML = `<img src="${getIcon('refresh')}"> <span class="btn-text">${t('btn.refresh_list')}</span>`;
@@ -714,6 +713,12 @@ function _extAlive() {
                     }
 
                     try {
+                        // Guard against memory exhaustion from huge files (max 5 MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert(t('alert.error_import'));
+                            document.body.removeChild(input);
+                            return;
+                        }
                         const text = await file.text();
                         const importedProfiles = JSON.parse(text);
 
@@ -877,76 +882,119 @@ function _extAlive() {
         async loadProfiles() {
             const container = toolbarShadow?.getElementById('toolbar-profiles');
             if (!container) return;
-            const allProfiles = await StorageManager.getProfiles();
+            if (!_extAlive()) return; // Skip silently if context invalidated
+            let allProfiles;
+            try {
+                allProfiles = await StorageManager.getProfiles();
+            } catch (e) {
+                return; // Context invalidated — fail silently
+            }
 
             // Filter profiles by current page URL
             const currentUrl = window.location.href;
             const profiles = allProfiles.filter(p => p.url === currentUrl);
-
-            // console.log('📋 Loading profiles for URL:', currentUrl);
-            // console.log('Total profiles in storage:', allProfiles.length);
-            // console.log('Profiles for this page:', profiles.length);
 
             if (profiles.length === 0) {
                 container.innerHTML = `<div class="toolbar-empty">${t('toolbar.empty')}</div>`;
                 return;
             }
 
-            // Safe: profile.name is escaped via escapeHtml(); profile.id comes from
-            // chrome.storage (internal data, not user-typed HTML); t() returns i18n strings only.
-            container.innerHTML = profiles.map(profile => `
-        <div class="profile-btn-wrapper">
-          <button class="profile-btn" data-profile-id="${profile.id}">
-            <span class="profile-name">${this.escapeHtml(profile.name)}</span>
-            <span class="profile-count">${t('field.count', { count: profile.fields?.length || 0 })}</span>
-          </button>
-          <button class="profile-delete-btn" data-profile-id="${profile.id}" title="${t('btn.delete_profile')}">✕</button>
-        </div>
-      `).join('');
+            // Build chip elements
+            container.innerHTML = '';
+            let _dragSrcId = null;
 
-            // console.log('✅ Profile buttons created, attaching event listeners...');
+            profiles.forEach(profile => {
+                const chip = document.createElement('div');
+                chip.className = 'profile-chip';
+                chip.dataset.profileId = profile.id;
+                chip.draggable = true;
+                chip.title = profile.name;
 
-            // Attach click handlers for applying profile
-            container.querySelectorAll('.profile-btn').forEach((btn, index) => {
-                // console.log(`  Attaching apply handler to profile button ${index + 1}`);
-                btn.addEventListener('click', async () => {
-                    // console.log('🖱️ Profile button clicked!', btn.dataset.profileId);
-                    const profileId = btn.dataset.profileId;
-                    const profile = await StorageManager.getProfile(profileId);
-                    if (profile) {
-                        // console.log('Loading profile:', profile.name);
-                        FormFiller.fillForm(profile);
-                        // ── Also fill iframes that may contain matching fields ──
-                        ToolbarManager._broadcastToIframes({
-                            __typeless_relay: true,
-                            action: 'applyProfile',
-                            profile: profile
-                        });
-                        // ──────────────────────────────────────────────────────
-                    } else {
-                        console.error('Profile not found:', profileId);
+                const count = document.createElement('span');
+                count.className = 'chip-count';
+                count.textContent = profile.fields?.length || 0;
+
+                const name = document.createElement('span');
+                name.className = 'chip-name';
+                name.textContent = profile.name;
+
+                const del = document.createElement('button');
+                del.className = 'chip-delete';
+                del.textContent = '×';
+                del.title = t('btn.delete_profile');
+
+                chip.appendChild(count);
+                chip.appendChild(name);
+                chip.appendChild(del);
+                container.appendChild(chip);
+
+                // Apply profile on chip click (not delete btn)
+                chip.addEventListener('click', async (e) => {
+                    if (e.target === del) return;
+                    const p = await StorageManager.getProfile(profile.id);
+                    if (p) {
+                        FormFiller.fillForm(p);
+                        ToolbarManager._broadcastToIframes({ __typeless_relay: true, action: 'applyProfile', profile: p });
                     }
                 });
-            });
 
-            // Attach click handlers for deleting profile
-            container.querySelectorAll('.profile-delete-btn').forEach((btn, index) => {
-                // console.log(`  Attaching delete handler to delete button ${index + 1}`);
-                btn.addEventListener('click', async (e) => {
-                    // console.log('🖱️ Delete button clicked!', btn.dataset.profileId);
-                    e.stopPropagation(); // Prevent triggering profile apply
-                    const profileId = btn.dataset.profileId;
-                    const profile = await StorageManager.getProfile(profileId);
-
-                    if (profile && confirm(t('confirm.delete', { name: profile.name }))) {
-                        await StorageManager.deleteProfile(profileId);
-                        FormFiller.showNotification(t('notify.deleted', { name: profile.name }));
-                        this.loadProfiles(); // Reload profiles list
+                // Delete
+                del.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const p = await StorageManager.getProfile(profile.id);
+                    if (p && confirm(t('confirm.delete', { name: p.name }))) {
+                        await StorageManager.deleteProfile(profile.id);
+                        FormFiller.showNotification(t('notify.deleted', { name: p.name }));
+                        this.loadProfiles();
                     }
                 });
-            });
 
-            // console.log('✅ Event listeners attached successfully!');
+                // ── Drag-and-drop reorder ──
+                chip.addEventListener('dragstart', (e) => {
+                    _dragSrcId = profile.id;
+                    chip.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                chip.addEventListener('dragend', () => {
+                    chip.classList.remove('dragging');
+                    container.querySelectorAll('.profile-chip').forEach(c => c.classList.remove('drag-over'));
+                });
+
+                chip.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    container.querySelectorAll('.profile-chip').forEach(c => c.classList.remove('drag-over'));
+                    if (chip.dataset.profileId !== _dragSrcId) chip.classList.add('drag-over');
+                });
+
+                chip.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    if (!_dragSrcId || _dragSrcId === profile.id) return;
+                    chip.classList.remove('drag-over');
+
+                    // Compute new order from current DOM chips, then swap
+                    const chips = Array.from(container.querySelectorAll('.profile-chip'));
+                    const ids = chips.map(c => c.dataset.profileId);
+                    const srcIdx = ids.indexOf(_dragSrcId);
+                    const dstIdx = ids.indexOf(profile.id);
+                    if (srcIdx === -1 || dstIdx === -1) return;
+
+                    // We reorder the full allProfiles array (across all URLs)
+                    // by moving srcId to just before dstId in the global list
+                    const globalIds = allProfiles.map(p => p.id);
+                    const srcGlobal = globalIds.indexOf(_dragSrcId);
+                    const dstGlobal = globalIds.indexOf(profile.id);
+                    globalIds.splice(srcGlobal, 1);
+                    const insertAt = globalIds.indexOf(profile.id);
+                    // insert before or after depending on direction
+                    globalIds.splice(dstIdx < srcIdx ? insertAt : insertAt + 1, 0, _dragSrcId);
+
+                    await StorageManager.reorderProfiles(globalIds);
+                    _dragSrcId = null;
+                    this.loadProfiles();
+                });
+            });
         },
 
         saveCurrentForm() {
@@ -1072,7 +1120,7 @@ function _extAlive() {
         <div class="auto-filler-modal">
           <div class="modal-header">
             <h2>${t('modal.title')}</h2>
-            <button class="modal-close" id="modal-close-btn">✕</button>
+            <button class="modal-close" id="modal-close-btn">&times;</button>
           </div>
           <div class="modal-body">
             <div class="modal-section">
@@ -1085,7 +1133,7 @@ function _extAlive() {
               <div class="modal-section-header">
                 <label class="modal-label">${t('modal.select_fields', { count: fields.length })}</label>
                 <div class="modal-actions">
-                  <span style="font-size:11px;color:#94a3b8;margin-right:6px;white-space:nowrap;">🎯 = ${t('modal.focus_col') || 'Focus after fill'}</span>
+                  <span style="font-size:11px;color:#94a3b8;margin-right:6px;white-space:nowrap;">${_extAlive() ? '<img src="' + chrome.runtime.getURL('icons/target.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[target]">' : '[*]'} = ${t('modal.focus_col') || 'Focus after fill'}</span>
                   <button class="modal-btn-small" id="select-all-btn">${t('modal.select_all')}</button>
                   <button class="modal-btn-small" id="deselect-all-btn">${t('modal.deselect_all')}</button>
                 </div>
@@ -1130,7 +1178,7 @@ function _extAlive() {
                       <span class="field-type-icon">${this.getFieldIcon(field.type)}</span>
                       <div class="field-info">
                         <div class="field-label-text">${this.escapeHtml(field.label || field.name || 'Field')}</div>
-                        <div class="field-value-text" title="${this.escapeHtml(tooltipValue)}">${field.displayText ? displayValue : this.escapeHtml(displayValue)}</div>
+                        <div class="field-value-text" title="${this.escapeHtml(tooltipValue)}">${displayValue}</div>
                       </div>
                     </label>
                     <button
@@ -1151,7 +1199,7 @@ function _extAlive() {
                         padding:0;
                         opacity:0.5;
                       "
-                    >🎯</button>
+                    ><img src="${_extAlive() ? chrome.runtime.getURL('icons/target.svg') : ''}" style="width:14px;height:14px;vertical-align:middle;display:inline-block;" alt="[target]"></button>
                   </div>
                 `;
             }).join('')}
@@ -1298,23 +1346,23 @@ function _extAlive() {
 
         getFieldIcon(type) {
             const icons = {
-                'text': '📝',
-                'email': '📧',
-                'tel': '📞',
-                'number': '🔢',
-                'date': '📅',
-                'password': '🔒',
-                'select': '📋',
-                'textarea': '📄',
-                'checkbox': '☑️',
-                'radio': '🔘',
-                'dropdownlist': '🔽',   // FineUI DDL / combo-wrap
-                'url': '🔗',
-                'search': '🔍',
-                'color': '🎨',
-                'range': '↔️',
+                'text': '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/description.svg') : 'icons/description.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[text]">',
+                'email': '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/link.svg') : 'icons/link.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[email]">',
+                'tel': '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/link.svg') : 'icons/link.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[tel]">',
+                'number': '##',
+                'date': '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/calendar.svg') : 'icons/calendar.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[date]">',
+                'password': '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/lock.svg') : 'icons/lock.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[lock]">',
+                'select': '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/clipboard.svg') : 'icons/clipboard.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[clip]">',
+                'textarea': '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/description.svg') : 'icons/description.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[text]">',
+                'checkbox': '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/check.svg') : 'icons/check.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[x]">',
+                'radio': '(o)',
+                'dropdownlist': '[v]',   // FineUI DDL / combo-wrap
+                'url': '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/link.svg') : 'icons/link.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[url]">',
+                'search': '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/search.svg') : 'icons/search.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[search]">',
+                'color': '[#]',
+                'range': '[--]',
             };
-            return icons[type] || '📌';
+            return icons[type] || '<img src="' + (chrome.runtime.getURL ? chrome.runtime.getURL('icons/empty.svg') : 'icons/empty.svg') + '" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[?]">';
         },
 
         /**
@@ -1324,6 +1372,8 @@ function _extAlive() {
          * so the message propagates through arbitrarily nested iframe trees.
          */
         _broadcastToIframes(payload) {
+            // Source-based trust check (event.source === iframe.contentWindow) replaces
+            // the previous nonce approach. No nonce needed in the payload.
             document.querySelectorAll('iframe').forEach(iframe => {
                 try {
                     iframe.contentWindow.postMessage(payload, '*');
@@ -1401,18 +1451,6 @@ function _extAlive() {
                             action: 'applyProfile',
                             profile: request.profile
                         });
-                        sendResponse({ success: true });
-                    }
-                } else if (request.action === 'toggleToolbar') {
-                    // Keyboard shortcut: Toggle toolbar
-                    const toolbar = document.getElementById(TOOLBAR_ID);
-                    if (toolbar) {
-                        const isHidden = toolbar.style.display === 'none';
-                        if (isHidden) {
-                            ToolbarManager.showToolbar();
-                        } else {
-                            ToolbarManager.hideToolbar();
-                        }
                         sendResponse({ success: true });
                     }
                 } else if (request.action === 'updateLanguage') {
@@ -1540,7 +1578,7 @@ function _extAlive() {
 
                         // 3. Inject CSS to allow selection
                         const style = document.createElement('style');
-                        style.innerHTML = `
+                        style.textContent = `
                     * {
                         -webkit-user-select: text !important;
                         -moz-user-select: text !important;
@@ -1646,6 +1684,10 @@ function _extAlive() {
                     // In-page notification triggered by background or popup after an action
                     FormFiller.showNotification(request.message || '');
                     sendResponse({ success: true });
+                } else if (request.action === 'ping') {
+                    // Background uses this on update to detect tabs that have TypeLess running.
+                    // Replying 'pong' signals: "yes, I have an active content script + toolbar."
+                    sendResponse({ pong: true });
                 } else {
                     // Unhandled action – return false so the message channel is not held open unnecessarily
                     return false;
@@ -1661,9 +1703,37 @@ function _extAlive() {
             // SmartFill / profile-fill / field-collection across all iframe depths.
             // ═══════════════════════════════════════════════════════════════════════
             window.addEventListener('message', async (event) => {
-                // Guard: only accept TypeLess relay messages
+                // Guard: only accept TypeLess relay messages from trusted frame sources.
+                // Security model: verify event.source belongs to the expected frame hierarchy
+                // instead of using a per-frame nonce (nonces are unique per frame and cannot
+                // be shared cross-origin, which broke iframe communication after the security fix).
+                //
+                // Trust rules:
+                //   • Top frame  → only accept from direct child iframes (contentWindow)
+                //   • Child iframe → only accept from parent or top frame
+                // This ensures messages only flow through the legitimate frame tree and
+                // prevents arbitrary cross-origin pages from spoofing relay messages.
                 const data = event.data;
                 if (!data || !data.__typeless_relay) return;
+
+                let _isTrustedSource = false;
+                if (window === window.top) {
+                    // Top frame: accept from direct child iframes only
+                    const _iframes = document.querySelectorAll('iframe');
+                    for (const _f of _iframes) {
+                        try {
+                            if (event.source === _f.contentWindow) {
+                                _isTrustedSource = true;
+                                break;
+                            }
+                        } catch (_) { /* cross-origin contentWindow access blocked */ }
+                    }
+                } else {
+                    // Child iframe: accept from direct parent or top frame
+                    _isTrustedSource = (event.source === window.parent) ||
+                                       (event.source === window.top);
+                }
+                if (!_isTrustedSource) return;
 
                 // ── requestFields: parent asks this iframe for its serialisable fields ──
                 if (data.action === 'requestFields') {
@@ -1752,6 +1822,79 @@ function _extAlive() {
             }
         });
     } catch (_) { }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // SPA / Client-side routing — auto-refresh profile list on URL change
+    //
+    // Covers all navigation patterns that DON'T trigger a real page reload:
+    //   • pushState / replaceState  (React Router, Vue Router, Next.js, Nuxt…)
+    //   • popstate                  (browser Back / Forward in SPA)
+    //   • hashchange                (hash-based routing, older SPAs)
+    //
+    // Strategy:
+    //   1. Hook History API in content script (works without extra permissions)
+    //   2. Also listen for 'typeless-url-changed' message sent by background.js
+    //      via webNavigation.onHistoryStateUpdated (catches edge cases where the
+    //      page overwrites history before our hook runs, e.g. prerender/prefetch)
+    //
+    // A debounce (120 ms) prevents duplicate calls when both paths fire together.
+    // ═══════════════════════════════════════════════════════════════════════
+    if (window === window.top) { // Only run in top-level frame
+        let _spaLastUrl = location.href;
+        let _spaDebounceTimer = null;
+
+        function _onUrlChanged(newUrl) {
+            if (newUrl === _spaLastUrl) return;
+            _spaLastUrl = newUrl;
+
+            clearTimeout(_spaDebounceTimer);
+            _spaDebounceTimer = setTimeout(() => {
+                // console.log('[TypeLess] SPA URL changed → reload profiles:', newUrl);
+                ToolbarManager.loadProfiles();
+            }, 120);
+        }
+
+        // ── 1. Hook pushState & replaceState ──────────────────────────────
+        (function _hookHistory() {
+            const _wrap = (origFn) => function (...args) {
+                const result = origFn.apply(this, args);
+                // args[2] is the new URL (may be relative or absolute)
+                const next = args[2]
+                    ? new URL(String(args[2]), location.href).href
+                    : location.href;
+                _onUrlChanged(next);
+                return result;
+            };
+
+            try {
+                history.pushState    = _wrap(history.pushState);
+                history.replaceState = _wrap(history.replaceState);
+            } catch (e) { /* some pages restrict history access */ }
+        })();
+
+        // ── 2. popstate (Back / Forward button) ──────────────────────────
+        window.addEventListener('popstate', () => _onUrlChanged(location.href));
+
+        // ── 3. hashchange (hash-based SPA routing) ────────────────────────
+        window.addEventListener('hashchange', () => _onUrlChanged(location.href));
+
+        // ── 4. Message from background.js (webNavigation fallback) ────────
+        // background.js fires chrome.tabs.sendMessage with action 'spaUrlChanged'
+        // when webNavigation.onHistoryStateUpdated or onReferenceFragmentUpdated
+        // fires — this catches prefetch/prerender cases that bypass our hooks.
+        // The handler is already registered in the chrome.runtime.onMessage block
+        // above; we add the action case here via a secondary lightweight listener
+        // to keep the SPA logic self-contained in one place.
+        if (_extAlive()) try {
+            chrome.runtime.onMessage.addListener((request, sender) => {
+                if (!sender || sender.id !== chrome.runtime.id) return false;
+                if (request.action === 'spaUrlChanged' && request.url) {
+                    _onUrlChanged(request.url);
+                }
+                // return false → don't send a response (fire-and-forget)
+            });
+        } catch (_) { }
+    }
 
 })();
 

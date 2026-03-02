@@ -9,7 +9,7 @@
  * ──────╚══╝─╚╝──────────────────────────╚══╝
  * 
  * TypeLess - Auto Form Filler
- * v1.0.3 by TRONG.PRO
+ * v1.0.6 by TRONG.PRO
  */
 
 // Storage management for profiles
@@ -162,6 +162,34 @@ const StorageManager = {
       return true;
     } catch (error) {
       console.error('Error deleting profile:', error);
+      return false;
+    }
+  },
+
+  // Clear ALL profiles
+  async clearAllProfiles() {
+    try {
+      await chrome.storage.local.set({ profiles: [] });
+      return true;
+    } catch (e) {
+      console.error('Error clearing profiles:', e);
+      return false;
+    }
+  },
+
+  // Reorder profiles by an array of IDs (drag-and-drop support)
+  async reorderProfiles(orderedIds) {
+    try {
+      const profiles = await this.getProfiles();
+      const map = new Map(profiles.map(p => [p.id, p]));
+      const reordered = orderedIds.map(id => map.get(id)).filter(Boolean);
+      // Safety: append any profiles not listed in orderedIds at the end
+      const inOrder = new Set(orderedIds);
+      profiles.forEach(p => { if (!inOrder.has(p.id)) reordered.push(p); });
+      await chrome.storage.local.set({ profiles: reordered });
+      return true;
+    } catch (e) {
+      console.error('Error reordering profiles:', e);
       return false;
     }
   },

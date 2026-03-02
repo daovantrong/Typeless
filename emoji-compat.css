@@ -1,0 +1,59 @@
+/*
+ * emoji-compat.css
+ * Windows 7 / older browser emoji replacement
+ * Uses inline SVG via CSS classes so icons render everywhere
+ */
+
+/* Base icon span */
+.ic {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  line-height: 1;
+}
+.ic-sm { width: 0.85em; height: 0.85em; }
+.ic-lg { width: 1.3em; height: 1.3em; vertical-align: -0.25em; }
+.ic-xl { width: 1.6em; height: 1.6em; vertical-align: -0.35em; }
+
+/* ⚡ lightning */
+.ic-lightning { background-image: url("icons/lightning.svg"); }
+/* 🎯 target */
+.ic-target { background-image: url("icons/target.svg"); }
+/* 🖥️ monitor */
+.ic-monitor { background-image: url("icons/monitor.svg"); }
+/* 💾 save/floppy */
+.ic-floppy { background-image: url("icons/save.svg"); }
+/* ▶️ play */
+.ic-play { background-image: url("icons/play-arrow.svg"); }
+/* 🗂️ profiles/folder */
+.ic-folder-tab { background-image: url("icons/folder-tab.svg"); }
+/* ⌨️ keyboard */
+.ic-keyboard { background-image: url("icons/keyboard.svg"); }
+/* 🔒 lock */
+.ic-lock { background-image: url("icons/lock.svg"); }
+/* 🔓 unlock */
+.ic-unlock { background-image: url("icons/unlock.svg"); }
+/* 🌐 globe */
+.ic-world { background-image: url("icons/world.svg"); }
+/* 📱 mobile */
+.ic-mobile { background-image: url("icons/mobile.svg"); }
+/* 🍻 beer */
+.ic-beer { background-image: url("icons/beer.svg"); }
+/* ❤️ heart */
+.ic-heart { background-image: url("icons/heart.svg"); }
+/* ⚠️ warning */
+.ic-warning { background-image: url("icons/warning.svg"); }
+/* 🔍 search */
+.ic-search { background-image: url("icons/search.svg"); }
+/* 🚫 no/block */
+.ic-no { background-image: url("icons/no-ads.svg"); }
+/* 🆓 free */
+.ic-free { background-image: url("icons/free-badge.svg"); }
+/* 🔧 wrench */
+.ic-wrench { background-image: url("icons/settings.svg"); }
+/* 📋 clipboard */
+.ic-clipboard { background-image: url("icons/clipboard.svg"); }

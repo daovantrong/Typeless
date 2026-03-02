@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autofill Extension Test Playground - Iframe Separate</title>
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --bg2: #141418;
+    --bg3: #1c1c22;
+    --border: #2a2a35;
+    --border-accent: #3d3d50;
+    --text: #e8e8f0;
+    --text-muted: #7878a0;
+    --accent: #5b5ef4;
+    --accent2: #00e5a0;
+    --accent3: #ff5f7e;
+    --accent4: #f0b429;
+    --error: #ff4d6d;
+    --radius: 8px;
+    --mono: 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: linear-gradient(135deg, #12121a 0%, #1a1a2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .site-header .badge {
+    background: var(--accent); color: #fff;
+    font-size: 9px; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 4px;
+  }
+  .site-header h1 { font-size: 17px; font-weight: 700; letter-spacing: 0.5px; }
+  .site-header .sub {
+    margin-left: auto; font-size: 10px;
+    color: var(--text-muted); font-family: var(--mono);
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    min-height: calc(100vh - 63px);
+  }
+  .main-col {
+    padding: 22px;
+    display: flex; flex-direction: column; gap: 22px;
+  }
+  .side-col {
+    border-left: 1px solid var(--border);
+    background: var(--bg2);
+    display: flex; flex-direction: column;
+    height: calc(100vh - 63px);
+    position: sticky; top: 63px;
+  }
+
+  /* ── Card ── */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .card-header {
+    background: var(--bg3); border-bottom: 1px solid var(--border);
+    padding: 11px 18px; display: flex; align-items: center; gap: 10px;
+  }
+  .card-header .tag {
+    font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 4px; background: var(--accent); color: #fff; flex-shrink: 0;
+  }
+  .card-header .tag.green  { background: var(--accent2); color: #000; }
+  .card-header .tag.red    { background: var(--accent3); }
+  .card-header .tag.yellow { background: var(--accent4); color: #000; }
+  .card-header .tag.purple { background: #8b5cf6; }
+  .card-header .tag.orange { background: #f97316; }
+  .card-header h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; flex: 1; }
+  .card-body { padding: 20px; }
+
+  /* ── Form ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid .span2 { grid-column: span 2; }
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  label .req { color: var(--accent3); margin-left: 2px; }
+
+  input[type="text"], input[type="email"], input[type="password"],
+  input[type="number"], input[type="date"], textarea, select {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-size: 13px;
+    padding: 9px 12px; outline: none;
+    transition: border-color .2s, box-shadow .2s; font-family: inherit;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,94,244,.15);
+  }
+  input[disabled] { opacity: .4; cursor: not-allowed; }
+  input[readonly] { border-color: var(--border-accent); color: var(--text-muted); }
+  textarea { resize: vertical; min-height: 80px; }
+  select { cursor: pointer; }
+  select[multiple] { min-height: 90px; }
+
+  .check-item, .radio-item {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; font-size: 13px; color: var(--text);
+  }
+  input[type="checkbox"], input[type="radio"] {
+    width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer;
+  }
+  input[type="file"] {
+    width: 100%; background: var(--bg); border: 1px dashed var(--border-accent);
+    border-radius: var(--radius); color: var(--text-muted); font-size: 12px;
+    padding: 8px 12px; cursor: pointer;
+  }
+
+  .field-error { font-size: 11px; color: var(--error); margin-top: 2px; display: none; }
+  .field-error.show { display: block; }
+
+  code {
+    font-family: var(--mono); font-size: 9px; color: var(--accent4);
+    background: rgba(240,180,41,.08); padding: 1px 4px; border-radius: 3px;
+  }
+
+  /* ── ComboBox ── */
+  .combo-wrap { position: relative; }
+  .combo-arrow {
+    position: absolute; right: 10px; top: 50%;
+    transform: translateY(-50%); color: var(--text-muted); font-size: 10px; pointer-events: none;
+  }
+  .combo-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--bg3); border: 1px solid var(--border-accent);
+    border-radius: var(--radius); z-index: 200; max-height: 180px;
+    overflow-y: auto; display: none; box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  }
+  .combo-dropdown.open { display: block; }
+  .combo-item {
+    padding: 9px 12px; cursor: pointer; font-size: 13px;
+    display: flex; justify-content: space-between; transition: background .12s;
+  }
+  .combo-item:hover { background: var(--bg); }
+  .combo-item.selected { background: rgba(91,94,244,.2); color: var(--accent); }
+  .combo-val { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
+  .combo-no-result { padding: 9px 12px; color: var(--text-muted); font-size: 12px; }
+  .combo-state { margin-top: 4px; font-size: 10px; font-family: var(--mono); color: var(--text-muted); }
+  .combo-state span { color: var(--accent2); }
+  .hidden-obs {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-family: var(--mono);
+    background: rgba(240,180,41,.1); border: 1px solid rgba(240,180,41,.3);
+    border-radius: 4px; padding: 3px 8px; color: var(--accent4); margin-top: 4px;
+  }
+
+  /* ── Section sep ── */
+  .sep {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--text-muted); font-size: 9px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase; margin: 18px 0 12px;
+  }
+  .sep::before, .sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: var(--radius); font-size: 11px;
+    font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;
+    cursor: pointer; border: none; transition: all .2s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #4648d8; transform: translateY(-1px); }
+  .btn-success { background: var(--accent2); color: #000; }
+  .btn-success:hover { background: #00c98c; transform: translateY(-1px); }
+  .btn-danger { background: var(--accent3); color: #fff; }
+  .btn-danger:hover { background: #e04060; }
+  .btn-sm { padding: 5px 10px; font-size: 9px; }
+
+  .form-actions {
+    display: flex; gap: 10px;
+    margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border);
+  }
+
+  /* ── Output ── */
+  .output-block {
+    margin-top: 16px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+  }
+  .output-label {
+    background: var(--bg3); padding: 5px 12px; font-size: 9px; font-weight: 800;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px;
+  }
+  .output-label .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent2); animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .output-pre {
+    padding: 14px; font-family: var(--mono); font-size: 12px; color: var(--accent2);
+    white-space: pre-wrap; word-break: break-all; max-height: 220px; overflow-y: auto; min-height: 40px;
+  }
+
+  /* ── Dynamic placeholder ── */
+  .dyn-placeholder {
+    background: var(--bg); border: 2px dashed var(--border-accent);
+    border-radius: var(--radius); padding: 28px; text-align: center; color: var(--text-muted);
+  }
+  .timer-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+  .timer-fill { height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 2s linear; }
+
+  /* ── Iframe browser chrome ── */
+  .iframe-wrapper {
+    background: var(--bg); border: 1px solid var(--border-accent);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .iframe-url-bar {
+    background: var(--bg3); border-bottom: 1px solid var(--border);
+    padding: 8px 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .url-dots { display: flex; gap: 5px; }
+  .url-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .url-dot.r { background: #ff5f57; }
+  .url-dot.y { background: #febc2e; }
+  .url-dot.g { background: #28c840; }
+  .iframe-url-text {
+    flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 20px;
+    padding: 4px 14px; font-size: 11px; font-family: var(--mono);
+    color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  iframe { width: 100%; border: none; display: block; min-height: 540px; background: transparent; }
+
+  /* ── postMessage log ── */
+  .cross-log {
+    background: var(--bg3); border-top: 1px solid var(--border);
+    max-height: 110px; overflow-y: auto; padding: 8px 14px;
+    font-family: var(--mono); font-size: 10px; color: var(--text-muted);
+  }
+  .cl-entry { padding: 1px 0; }
+  .cl-time  { color: var(--border-accent); }
+  .cl-type  { color: var(--accent4); margin: 0 6px; }
+  .cl-msg   { color: var(--text-muted); }
+
+  /* ── Shadow DOM ── */
+  #shadowHost { border: 1px solid var(--border-accent); border-radius: var(--radius); padding: 2px; min-height: 80px; }
+
+  /* ── Status dot ── */
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-accent); margin-left: auto; }
+  .status-dot.live { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); animation: pulse 1.5s infinite; }
+
+  /* ── Info box ── */
+  .info-box {
+    background: rgba(91,94,244,.08); border: 1px solid rgba(91,94,244,.2);
+    border-radius: var(--radius); padding: 9px 13px; font-size: 12px;
+    color: var(--text-muted); margin-bottom: 16px;
+  }
+  .info-box strong { color: var(--accent); }
+
+  /* ── Debug Panel ── */
+  .debug-header {
+    background: var(--bg3); border-bottom: 1px solid var(--border);
+    padding: 11px 14px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .debug-header h3 { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
+  .debug-log { flex: 1; overflow-y: auto; padding: 10px; font-family: var(--mono); font-size: 10px; line-height: 1.9; }
+  .log-entry { display: flex; gap: 8px; padding: 2px 5px; border-radius: 3px; }
+  .log-entry:hover { background: var(--bg3); }
+  .log-time  { color: var(--text-muted); flex-shrink: 0; }
+  .log-type  { flex-shrink: 0; width: 58px; text-align: right; }
+  .log-type.change { color: var(--accent); }
+  .log-type.input  { color: var(--accent2); }
+  .log-type.hidden { color: var(--accent4); }
+  .log-type.submit { color: var(--accent3); }
+  .log-type.dom    { color: #a78bfa; }
+  .log-type.iframe { color: #06b6d4; }
+  .log-msg { color: var(--text); flex: 1; word-break: break-all; }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-accent); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="badge">DEV</span>
+  <h1>🧪 Autofill Extension Test Playground</h1>
+  <span class="sub">5 Forms · 2 Files · Pure HTML/JS · No Backend</span>
+</header>
+
+<div class="layout">
+<div class="main-col">
+
+<!-- ══════════════ CARD 1: MAIN FORM ══════════════ -->
+<div class="card">
+  <div class="card-header">
+    <span class="tag">1</span>
+    <h2>MAIN FORM — Full Field Coverage</h2>
+    <div class="status-dot live"></div>
+  </div>
+  <div class="card-body">
+    <div class="info-box">
+      Tests: <strong>text, email, password, number, date, textarea, checkbox, radio, select, multi-select, complex names, disabled, readonly, hidden tokens, file</strong>
+    </div>
+
+    <form id="mainForm" novalidate autocomplete="on">
+      <input type="hidden" name="__VIEWSTATE"                value="dGhpcyBpcyBhIGZha2Ugdmlld3N0YXRlIHRva2Vu">
+      <input type="hidden" name="__RequestVerificationToken" value="FAKE_CSRF_TOKEN_MAIN_12345">
+
+      <div class="form-grid">
+        <div class="field-group">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" name="name" id="f-name" placeholder="John Doe" required autocomplete="name">
+          <span class="field-error" id="err-name">Name is required</span>
+        </div>
+        <div class="field-group">
+          <label>Username <span class="req">*</span></label>
+          <input type="text" name="username" id="f-username" placeholder="johndoe" required autocomplete="username">
+          <span class="field-error" id="err-username">Username is required</span>
+        </div>
+        <div class="field-group">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" name="email" id="f-email" placeholder="john@example.com" required autocomplete="email">
+          <span class="field-error" id="err-email">Valid email required</span>
+        </div>
+        <div class="field-group">
+          <label>Password <span class="req">*</span></label>
+          <input type="password" name="password" id="f-password" placeholder="••••••••" required autocomplete="current-password">
+          <span class="field-error" id="err-password">Password required</span>
+        </div>
+        <div class="field-group">
+          <label>Age</label>
+          <input type="number" name="age" id="f-age" placeholder="25" min="1" max="120">
+        </div>
+        <div class="field-group">
+          <label>Birth Date</label>
+          <input type="date" name="birthdate" id="f-birthdate">
+        </div>
+        <div class="field-group">
+          <label>City <code>user[address][city]</code></label>
+          <input type="text" name="user[address][city]" id="f-city" placeholder="Ho Chi Minh City">
+        </div>
+        <div class="field-group">
+          <label>Order Item <code>order.item[0].name</code></label>
+          <input type="text" name="order.item[0].name" id="f-orderitem" placeholder="Laptop Pro">
+        </div>
+        <div class="field-group">
+          <label>Data ID <code>data.user-id</code></label>
+          <input type="text" name="data.user-id" id="f-datauserid" placeholder="USR-00123">
+        </div>
+        <div class="field-group">
+          <label>ID-only <code>no name</code></label>
+          <input type="text" id="fieldWithIdOnly" placeholder="id only, no name attribute">
+        </div>
+        <div class="field-group">
+          <label>Disabled</label>
+          <input type="text" name="disabledField" value="Cannot change me" disabled>
+        </div>
+        <div class="field-group">
+          <label>Readonly</label>
+          <input type="text" name="readonlyField" value="Read only value" readonly>
+        </div>
+        <div class="field-group">
+          <label>Phone <code>sharedFieldName</code></label>
+          <input type="text" name="sharedFieldName" id="f-phone" placeholder="+84 900 000 000">
+        </div>
+        <div class="field-group">
+          <label>Website</label>
+          <input type="text" name="website" id="f-website" placeholder="https://example.com">
+        </div>
+        <div class="field-group span2">
+          <label>Bio / Notes</label>
+          <textarea name="bio" id="f-bio" placeholder="Write something..."></textarea>
+        </div>
+        <div class="field-group">
+          <label>File Upload</label>
+          <input type="file" name="avatar" id="f-file" accept="image/*">
+        </div>
+        <div class="field-group">
+          <label>Country <span class="req">*</span></label>
+          <select name="country" id="f-country" required>
+            <option value="">-- Select --</option>
+            <option value="VN">🇻🇳 Vietnam</option>
+            <option value="US">🇺🇸 United States</option>
+            <option value="JP">🇯🇵 Japan</option>
+            <option value="SG">🇸🇬 Singapore</option>
+            <option value="DE">🇩🇪 Germany</option>
+          </select>
+          <span class="field-error" id="err-country">Country required</span>
+        </div>
+        <div class="field-group">
+          <label>Skills (multi)</label>
+          <select name="skills[]" id="f-skills" multiple>
+            <option value="js">JavaScript</option>
+            <option value="py">Python</option>
+            <option value="go">Go</option>
+            <option value="rs">Rust</option>
+            <option value="ts">TypeScript</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Gender</label>
+          <label class="radio-item"><input type="radio" name="gender" value="male"> Male</label>
+          <label class="radio-item"><input type="radio" name="gender" value="female"> Female</label>
+          <label class="radio-item"><input type="radio" name="gender" value="other"> Other</label>
+        </div>
+        <div class="field-group">
+          <label>Interests</label>
+          <label class="check-item"><input type="checkbox" name="interests[]" value="tech"> Technology</label>
+          <label class="check-item"><input type="checkbox" name="interests[]" value="music"> Music</label>
+          <label class="check-item"><input type="checkbox" name="interests[]" value="sports"> Sports</label>
+        </div>
+      </div>
+
+      <div class="sep">Custom ComboBox — FineUI / ExtJS Style</div>
+      <div class="form-grid">
+        <div class="field-group span2">
+          <label>Department <code>demoCombo$Value</code></label>
+          <div class="combo-wrap">
+            <input type="text" id="mainComboText" placeholder="Type to filter...">
+            <span class="combo-arrow">▼</span>
+            <input type="hidden" name="demoCombo$Value" id="mainComboHidden" value="">
+            <div class="combo-dropdown" id="mainComboDropdown"></div>
+          </div>
+          <div class="combo-state">text: <span id="mainComboTextDisp">—</span> &nbsp;|&nbsp; hidden: <span id="mainComboHiddenDisp">—</span></div>
+          <div class="hidden-obs" id="mainComboBadge">hidden value: <strong>not set</strong></div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">▶ Submit Main Form</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="resetForm('mainForm', mainClear)">↺ Reset</button>
+      </div>
+    </form>
+
+    <div class="output-block">
+      <div class="output-label"><span class="dot"></span> PAYLOAD — MAIN FORM</div>
+      <pre class="output-pre" id="mainFormOutput">— Not submitted yet —</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CARD 2: DYNAMIC FORM ══════════════ -->
+<div class="card">
+  <div class="card-header">
+    <span class="tag green">2</span>
+    <h2>DYNAMIC FORM — Injected After 2s Delay</h2>
+    <div class="status-dot" id="dynDot"></div>
+  </div>
+  <div class="card-body">
+    <div class="info-box">
+      Tests: <strong>extension detects forms injected into DOM after page load (MutationObserver)</strong>
+    </div>
+    <div id="dynPlaceholder" class="dyn-placeholder">
+      <div>⏳ Form will appear in <strong id="dynCount">2</strong>s...</div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+    </div>
+    <div id="dynContainer"></div>
+  </div>
+</div>
+
+<!-- ══════════════ CARD 3: IFRAME FORM (external file) ══════════════ -->
+<div class="card">
+  <div class="card-header">
+    <span class="tag red">3</span>
+    <h2>IFRAME FORM — Separate File: <code style="font-size:11px">test-playground-iframe.html</code></h2>
+  </div>
+  <div class="card-body">
+    <div class="info-box">
+      Tests: <strong>extension crosses into real separate-file iframe document.
+      Open both files from same folder (or serve via local HTTP server).</strong>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+      <label style="flex-shrink:0;white-space:nowrap">iframe src:</label>
+      <input type="text" id="iframeSrcInput" value="test-playground-iframe.html"
+             style="flex:1;font-family:var(--mono);font-size:12px"
+             placeholder="test-playground-iframe.html">
+      <button class="btn btn-primary btn-sm" onclick="loadIframe()">Load ↗</button>
+    </div>
+
+    <div class="iframe-wrapper">
+      <div class="iframe-url-bar">
+        <div class="url-dots">
+          <div class="url-dot r"></div>
+          <div class="url-dot y"></div>
+          <div class="url-dot g"></div>
+        </div>
+        <div class="iframe-url-text" id="iframeUrlDisplay">test-playground-iframe.html</div>
+      </div>
+      <iframe id="iframeEl" src="test-playground-iframe.html" title="Iframe Form"
+              sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+    </div>
+
+    <div class="output-block" style="margin-top:12px">
+      <div class="output-label">
+        <span class="dot"></span> postMessage log — events from iframe
+        <button class="btn btn-danger btn-sm" style="margin-left:auto;font-size:8px" onclick="clearCrossLog()">Clear</button>
+      </div>
+      <div class="cross-log" id="crossLog">
+        <div class="cl-entry"><span class="cl-time">--:--:--</span><span class="cl-type">[DOM]</span><span class="cl-msg"> Waiting for postMessage from iframe...</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CARD 4: SHADOW DOM ══════════════ -->
+<div class="card">
+  <div class="card-header">
+    <span class="tag yellow">4</span>
+    <h2>SHADOW DOM FORM — Encapsulated Root (mode: open)</h2>
+  </div>
+  <div class="card-body">
+    <div class="info-box">Tests: <strong>extension accesses elements inside Shadow DOM</strong></div>
+    <div id="shadowHost"></div>
+    <div class="output-block">
+      <div class="output-label"><span class="dot"></span> PAYLOAD — SHADOW FORM</div>
+      <pre class="output-pre" id="shadowFormOutput">— Not submitted yet —</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CARD 5: EDGE CASES ══════════════ -->
+<div class="card">
+  <div class="card-header">
+    <span class="tag orange">5</span>
+    <h2>EDGE CASES — Duplicate Names, Special Chars, ASP.NET Tokens</h2>
+  </div>
+  <div class="card-body">
+    <div class="info-box">
+      Contains: <strong>duplicate name across forms, special chars in name, ViewState, CSRF tokens</strong>
+    </div>
+    <form id="edgeForm" novalidate>
+      <input type="hidden" name="__VIEWSTATE"                value="EDGE_VIEWSTATE_TOKEN_XYZ">
+      <input type="hidden" name="__RequestVerificationToken" value="EDGE_CSRF_TOKEN_456">
+      <div class="form-grid">
+        <div class="field-group">
+          <label>Dup name <code>sharedFieldName</code></label>
+          <input type="text" name="sharedFieldName" id="edge-phone" placeholder="Same name, diff form">
+        </div>
+        <div class="field-group">
+          <label>Alt field <code>altField</code></label>
+          <input type="text" name="altField" id="fieldWithIdOnly2" placeholder="Dup id scenario">
+        </div>
+        <div class="field-group">
+          <label>Special <code>data.user-id</code></label>
+          <input type="text" name="data.user-id" id="edge-datauserid" placeholder="Special char name">
+        </div>
+        <div class="field-group">
+          <label>Array <code>order.item[0].name</code></label>
+          <input type="text" name="order.item[0].name" id="edge-orderitem" placeholder="Array-style name">
+        </div>
+        <div class="field-group span2">
+          <label>Nested <code>user[address][street]</code></label>
+          <input type="text" name="user[address][street]" id="edge-street" placeholder="123 Main St">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">▶ Submit Edge Form</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="resetForm('edgeForm')">↺ Reset</button>
+      </div>
+    </form>
+    <div class="output-block">
+      <div class="output-label"><span class="dot"></span> PAYLOAD — EDGE FORM</div>
+      <pre class="output-pre" id="edgeFormOutput">— Not submitted yet —</pre>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main-col -->
+
+<!-- ══════════════ DEBUG PANEL ══════════════ -->
+<div class="side-col">
+  <div class="debug-header">
+    <h3>📡 Global Event Log</h3>
+    <button class="btn btn-danger btn-sm" onclick="clearLog()">Clear</button>
+  </div>
+  <div class="debug-log" id="debugLog">
+    <div class="log-entry">
+      <span class="log-time">--:--:--</span>
+      <span class="log-type dom">DOM</span>
+      <span class="log-msg">Page loaded. Monitoring all forms...</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /layout -->
+
+<script>
+'use strict';
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const now = () => new Date().toTimeString().slice(0,8);
+
+// ── Global Debug Log ──────────────────────────────────────────────────────────
+function addLog(type, msg) {
+  const log = document.getElementById('debugLog');
+  const e = document.createElement('div');
+  e.className = 'log-entry';
+  e.innerHTML = `<span class="log-time">${now()}</span><span class="log-type ${type}">${type}</span><span class="log-msg">${esc(msg)}</span>`;
+  log.appendChild(e);
+  log.scrollTop = log.scrollHeight;
+}
+function clearLog() { document.getElementById('debugLog').innerHTML=''; addLog('dom','Log cleared.'); }
+
+// ── Cross-doc log ─────────────────────────────────────────────────────────────
+function addCrossLog(type, msg) {
+  const log = document.getElementById('crossLog');
+  const e = document.createElement('div');
+  e.className = 'cl-entry';
+  e.innerHTML = `<span class="cl-time">${now()}</span><span class="cl-type">[${esc(type).toUpperCase()}]</span><span class="cl-msg"> ${esc(String(msg).substring(0,120))}</span>`;
+  log.appendChild(e);
+  log.scrollTop = log.scrollHeight;
+  addLog('iframe', `[${type}] ${String(msg).substring(0,70)}`);
+}
+function clearCrossLog() { document.getElementById('crossLog').innerHTML=''; }
+
+// Listen for postMessage from iframe
+window.addEventListener('message', ev => {
+  if (!ev.data || typeof ev.data !== 'object') return;
+  const d = ev.data;
+  if (d.type === 'iframe-log')    addCrossLog(d.logType||'info', d.msg||'');
+  if (d.type === 'iframe-submit') addCrossLog('submit', '✅ payload: ' + JSON.stringify(d.payload).substring(0,100));
+});
+
+// ── Global change / input listeners ──────────────────────────────────────────
+document.addEventListener('change', function(e) {
+  const t = e.target; if (!t.tagName) return;
+  const val = t.type==='checkbox' ? (t.checked?'☑ ':' ☐ ')+t.value
+            : t.type==='radio'    ? (t.checked?'● ':'○ ')+t.value
+            : String(t.value).substring(0,40);
+  addLog('change', `[${t.tagName.toLowerCase()}] name="${t.name||''}" id="${t.id||''}" → "${val}"`);
+}, true);
+
+document.addEventListener('input', function(e) {
+  const t = e.target;
+  if (!t.tagName || t.type==='hidden') return;
+  addLog('input', `[${t.tagName.toLowerCase()}] name="${t.name||''}" → "${String(t.value).substring(0,30)}"`);
+}, true);
+
+// ── Hidden value observer ─────────────────────────────────────────────────────
+function observeHidden(hiddenEl, badgeEl, textDispEl, hiddenDispEl) {
+  const orig = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  Object.defineProperty(hiddenEl, 'value', {
+    get() { return orig.get.call(this); },
+    set(v) {
+      orig.set.call(this, v);
+      if (badgeEl)     badgeEl.innerHTML          = `hidden value: <strong>${v||'(empty)'}</strong>`;
+      if (hiddenDispEl) hiddenDispEl.textContent  = v || '—';
+      addLog('hidden', `[hidden] name="${hiddenEl.name}" → "${v}"`);
+      hiddenEl.dispatchEvent(new Event('change', {bubbles:true}));
+      hiddenEl.dispatchEvent(new Event('input',  {bubbles:true}));
+    }
+  });
+  new MutationObserver(() => {
+    const v = orig.get.call(hiddenEl);
+    if (badgeEl)     badgeEl.innerHTML         = `hidden value: <strong>${v||'(empty)'}</strong>`;
+    if (hiddenDispEl) hiddenDispEl.textContent = v || '—';
+  }).observe(hiddenEl, { attributes: true, attributeFilter: ['value'] });
+}
+
+// ── ComboBox factory ──────────────────────────────────────────────────────────
+function buildCombo(cfg) {
+  const ti = document.getElementById(cfg.textId);
+  const hi = document.getElementById(cfg.hiddenId);
+  const dd = document.getElementById(cfg.dropdownId);
+  if (!ti || !hi || !dd) return;
+
+  const badgeEl    = cfg.badgeId     ? document.getElementById(cfg.badgeId)     : null;
+  const hidDispEl  = cfg.hiddenDispId? document.getElementById(cfg.hiddenDispId): null;
+  const txtDispEl  = cfg.textDispId  ? document.getElementById(cfg.textDispId)  : null;
+
+  observeHidden(hi, badgeEl, txtDispEl, hidDispEl);
+
+  let selVal='', selLabel='', isOpen=false;
+
+  function render(f) {
+    dd.innerHTML = '';
+    const list = cfg.data.filter(d =>
+      d.label.toLowerCase().includes(f.toLowerCase()) ||
+      d.value.toLowerCase().includes(f.toLowerCase())
+    );
+    if (!list.length) { dd.innerHTML='<div class="combo-no-result">No results</div>'; return; }
+    list.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'combo-item' + (item.value===selVal?' selected':'');
+      div.innerHTML = `${esc(item.label)}<span class="combo-val">${esc(item.value)}</span>`;
+      div.addEventListener('mousedown', e => {
+        e.preventDefault();
+        selVal=item.value; selLabel=item.label;
+        ti.value = item.label;
+        hi.value = item.value;
+        if (txtDispEl) txtDispEl.textContent = item.label;
+        ti.dispatchEvent(new Event('input',  {bubbles:true}));
+        ti.dispatchEvent(new Event('change', {bubbles:true}));
+        close();
+        addLog('change', `[combo:${cfg.hiddenId}] "${item.label}" → hidden="${item.value}"`);
+      });
+      dd.appendChild(div);
+    });
+  }
+
+  function open()  { render(ti.value); dd.classList.add('open'); isOpen=true; }
+  function close() {
+    dd.classList.remove('open'); isOpen=false;
+    if (ti.value !== selLabel)
+      addLog('hidden', `[combo:${cfg.hiddenId}] typed="${ti.value}" but hidden unchanged`);
+  }
+
+  ti.addEventListener('focus', ()=>open());
+  ti.addEventListener('input', ()=>{ render(ti.value); if(!isOpen) open(); });
+  ti.addEventListener('blur',  ()=>setTimeout(close, 160));
+}
+
+// ── Combo datasets ────────────────────────────────────────────────────────────
+const DATA_DEPT = [
+  {label:'Engineering',     value:'ENG'},{label:'Product',         value:'PRD'},
+  {label:'Design',          value:'DSN'},{label:'Marketing',       value:'MKT'},
+  {label:'Human Resources', value:'HR'}, {label:'Finance',         value:'FIN'},
+  {label:'Customer Success',value:'CS'}, {label:'Legal',           value:'LGL'},
+];
+const DATA_CITY = [
+  {label:'Ho Chi Minh City',value:'HCM'},{label:'Hanoi',    value:'HAN'},
+  {label:'Da Nang',         value:'DAN'},{label:'Can Tho',  value:'CTO'},
+  {label:'Hue',             value:'HUE'},
+];
+
+buildCombo({
+  textId:'mainComboText', hiddenId:'mainComboHidden', dropdownId:'mainComboDropdown',
+  data:DATA_DEPT, textDispId:'mainComboTextDisp', hiddenDispId:'mainComboHiddenDisp', badgeId:'mainComboBadge',
+});
+
+// ── Form helpers ──────────────────────────────────────────────────────────────
+function collectFormData(form) {
+  const out = {};
+  for (const [k,v] of new FormData(form).entries()) {
+    if (out[k]!==undefined) { if (!Array.isArray(out[k])) out[k]=[out[k]]; out[k].push(v); }
+    else out[k] = v;
+  }
+  const unch=[];
+  form.querySelectorAll('input[type=checkbox]').forEach(cb => { if (!cb.checked) unch.push((cb.name||'?')+'='+cb.value); });
+  if (unch.length) out['__unchecked_boxes'] = unch;
+  return out;
+}
+
+function resetForm(formId, cb) {
+  const f = document.getElementById(formId); if (!f) return;
+  f.reset();
+  f.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
+  f.querySelectorAll('input,select,textarea').forEach(e => e.style.borderColor='');
+  if (cb) cb();
+}
+
+function mainClear() {
+  document.getElementById('mainComboTextDisp').textContent   = '—';
+  document.getElementById('mainComboHiddenDisp').textContent = '—';
+  document.getElementById('mainComboBadge').innerHTML        = 'hidden value: <strong>not set</strong>';
+}
+
+// ── Main form validation + submit ─────────────────────────────────────────────
+function validateMain() {
+  let ok = true;
+  [ ['f-name','err-name',v=>v.trim().length>0],
+    ['f-username','err-username',v=>v.trim().length>0],
+    ['f-email','err-email',v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)],
+    ['f-password','err-password',v=>v.length>=4],
+    ['f-country','err-country',v=>v!==''],
+  ].forEach(([id,errId,test])=>{
+    const el=document.getElementById(id), err=document.getElementById(errId); if(!el||!err) return;
+    if (!test(el.value)) { err.classList.add('show'); el.style.borderColor='var(--error)'; ok=false; }
+    else { err.classList.remove('show'); el.style.borderColor=''; }
+  });
+  return ok;
+}
+
+document.getElementById('mainForm').addEventListener('submit', function(e) {
+  e.preventDefault(); addLog('submit','mainForm submitted');
+  if (!validateMain()) { addLog('submit','⚠ Validation failed'); return; }
+  document.getElementById('mainFormOutput').textContent = JSON.stringify(collectFormData(this),null,2);
+});
+
+document.getElementById('edgeForm').addEventListener('submit', function(e) {
+  e.preventDefault(); addLog('submit','edgeForm submitted');
+  document.getElementById('edgeFormOutput').textContent = JSON.stringify(collectFormData(this),null,2);
+});
+
+// ── Dynamic form (2s delay) ───────────────────────────────────────────────────
+let dynSecs = 2;
+setTimeout(()=>{ document.getElementById('timerFill').style.width='100%'; }, 50);
+const dynTmr = setInterval(()=>{
+  dynSecs--;
+  document.getElementById('dynCount').textContent = dynSecs;
+  if (dynSecs<=0) { clearInterval(dynTmr); renderDynamic(); }
+},1000);
+
+function renderDynamic() {
+  document.getElementById('dynPlaceholder').style.display='none';
+  document.getElementById('dynDot').classList.add('live');
+  addLog('dom','✅ Dynamic form injected into DOM');
+
+  document.getElementById('dynContainer').innerHTML = `
+    <form id="dynamicForm" novalidate>
+      <div class="form-grid">
+        <div class="field-group"><label>Dyn Name</label>
+          <input type="text" name="dynName" id="dyn-name" placeholder="Detected dynamically?"></div>
+        <div class="field-group"><label>Dyn Email</label>
+          <input type="email" name="dynEmail" id="dyn-email" placeholder="dyn@test.com"></div>
+        <div class="field-group"><label>City Dropdown</label>
+          <select name="dynCity" id="dyn-city">
+            <option value="">-- Select --</option>
+            <option value="hanoi">Hanoi</option>
+            <option value="hcm">Ho Chi Minh</option>
+            <option value="danang">Da Nang</option>
+          </select></div>
+        <div class="field-group"><label>Status</label>
+          <label class="check-item"><input type="checkbox" name="dynStatus[]" value="active"> Active</label>
+          <label class="check-item"><input type="checkbox" name="dynStatus[]" value="verified"> Verified</label></div>
+        <div class="field-group span2">
+          <label>City ComboBox <code>dynCombo\$Value</code></label>
+          <div class="combo-wrap">
+            <input type="text" id="dynComboText" placeholder="Filter...">
+            <span class="combo-arrow">▼</span>
+            <input type="hidden" name="dynCombo\$Value" id="dynComboHidden" value="">
+            <div class="combo-dropdown" id="dynComboDropdown"></div>
+          </div>
+          <div class="combo-state">hidden: <span id="dynComboHidDisp">—</span></div>
+          <div class="hidden-obs" id="dynComboBadge">hidden value: <strong>not set</strong></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success">▶ Submit Dynamic Form</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="resetForm('dynamicForm')">↺ Reset</button>
+      </div>
+    </form>
+    <div class="output-block">
+      <div class="output-label"><span class="dot"></span> PAYLOAD — DYNAMIC FORM</div>
+      <pre class="output-pre" id="dynFormOutput">— Not submitted yet —</pre>
+    </div>`;
+
+  buildCombo({
+    textId:'dynComboText', hiddenId:'dynComboHidden', dropdownId:'dynComboDropdown',
+    data:DATA_CITY, hiddenDispId:'dynComboHidDisp', badgeId:'dynComboBadge',
+  });
+
+  document.getElementById('dynamicForm').addEventListener('submit', function(e) {
+    e.preventDefault(); addLog('submit','dynamicForm submitted');
+    document.getElementById('dynFormOutput').textContent = JSON.stringify(collectFormData(this),null,2);
+  });
+}
+
+// ── Iframe loader ─────────────────────────────────────────────────────────────
+function loadIframe() {
+  const src = document.getElementById('iframeSrcInput').value.trim(); if (!src) return;
+  const iframe = document.getElementById('iframeEl');
+  iframe.src = src;
+  document.getElementById('iframeUrlDisplay').textContent = src;
+  addLog('iframe', `Loading iframe → "${src}"`);
+  iframe.onload = () => {
+    addLog('iframe', `✅ iframe loaded: "${src}"`);
+    try {
+      const h = iframe.contentDocument.body.scrollHeight;
+      if (h>0) iframe.style.height = (h+40)+'px';
+    } catch(e) { addLog('iframe','ℹ Cannot resize iframe (cross-origin block)'); }
+  };
+}
+
+// Auto-resize on first load
+document.getElementById('iframeEl').addEventListener('load', function() {
+  try {
+    const h = this.contentDocument.body.scrollHeight;
+    if (h>100) this.style.height = (h+40)+'px';
+  } catch(e) {}
+});
+
+// ── Shadow DOM form ───────────────────────────────────────────────────────────
+(function() {
+  const host   = document.getElementById('shadowHost');
+  const shadow = host.attachShadow({ mode:'open' });
+
+  const COLORS = [
+    {label:'Red',   value:'#ff0000'},{label:'Green',  value:'#00cc66'},
+    {label:'Blue',  value:'#4466ff'},{label:'Purple', value:'#9933ff'},
+    {label:'Orange',value:'#ff8800'},
+  ];
+
+  shadow.innerHTML = `
+    <style>
+      :host{display:block;padding:20px;}
+      *{box-sizing:border-box;margin:0;padding:0;}
+      .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+      .span2{grid-column:span 2;}
+      .fg{display:flex;flex-direction:column;gap:4px;}
+      .lbl{font-size:10px;font-weight:700;color:#7878a0;text-transform:uppercase;letter-spacing:1px;}
+      input[type=text],select{width:100%;background:#0d0d0f;border:1px solid #2a2a35;border-radius:6px;color:#e8e8f0;font-size:12px;padding:8px 10px;outline:none;font-family:inherit;transition:border-color .2s;}
+      input:focus,select:focus{border-color:#5b5ef4;}
+      .ck{display:flex;align-items:center;gap:6px;font-size:12px;color:#e8e8f0;cursor:pointer;margin-top:5px;}
+      input[type=checkbox]{accent-color:#5b5ef4;}
+      .cw{position:relative;}
+      .ca{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:#7878a0;font-size:9px;pointer-events:none;}
+      .cd{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1c1c22;border:1px solid #3d3d50;border-radius:6px;z-index:200;max-height:140px;overflow-y:auto;display:none;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+      .cd.open{display:block;}
+      .ci{padding:8px 10px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px;}
+      .ci:hover{background:#0d0d0f;}
+      .sw{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+      .btn{display:inline-flex;align-items:center;padding:9px 18px;border-radius:7px;font-size:11px;font-weight:800;text-transform:uppercase;cursor:pointer;border:none;background:#f0b429;color:#000;margin-top:14px;}
+      .st{font-size:10px;font-family:monospace;color:#7878a0;margin-top:3px;}
+      .st span{color:#00e5a0;}
+      .ho{display:inline-flex;font-size:10px;font-family:monospace;background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.3);border-radius:4px;padding:3px 7px;color:#f0b429;margin-top:3px;}
+    </style>
+    <form id="shadowForm">
+      <div class="grid">
+        <div class="fg"><span class="lbl">Shadow Name</span>
+          <input type="text" name="shadowName" id="sn" placeholder="Inside Shadow DOM"></div>
+        <div class="fg"><span class="lbl">Shadow Select</span>
+          <select name="shadowSelect" id="ss">
+            <option value="">-- Pick --</option>
+            <option value="a">Alpha</option><option value="b">Beta</option><option value="g">Gamma</option>
+          </select></div>
+        <div class="fg"><span class="lbl">Shadow Checkbox</span>
+          <label class="ck"><input type="checkbox" name="shadowCheck" value="yes"> Enable shadow feature</label></div>
+        <div class="fg span2">
+          <span class="lbl">Color ComboBox — hidden: shadowCombo$Value</span>
+          <div class="cw">
+            <input type="text" id="scText" placeholder="Filter color...">
+            <span class="ca">▼</span>
+            <input type="hidden" name="shadowCombo$Value" id="scHidden" value="">
+            <div class="cd" id="scDrop"></div>
+          </div>
+          <div class="st">hidden: <span id="scHidDisp">—</span></div>
+          <div class="ho" id="scBadge">hidden value: <strong>not set</strong></div>
+        </div>
+      </div>
+      <button type="submit" class="btn">▶ Submit Shadow Form</button>
+    </form>`;
+
+  const sti = shadow.getElementById('scText');
+  const shi = shadow.getElementById('scHidden');
+  const sdd = shadow.getElementById('scDrop');
+  const shd = shadow.getElementById('scHidDisp');
+  const shb = shadow.getElementById('scBadge');
+  const origD = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');
+
+  Object.defineProperty(shi,'value',{
+    get(){return origD.get.call(this);},
+    set(v){
+      origD.set.call(this,v);
+      if(shd) shd.textContent=v||'—';
+      if(shb) shb.innerHTML=`hidden value: <strong>${v}</strong>`;
+      shi.dispatchEvent(new Event('change',{bubbles:true}));
+      addLog('hidden',`[shadow-hidden] "${shi.name}" = "${v}"`);
+    }
+  });
+
+  function renderShadow(f) {
+    sdd.innerHTML='';
+    COLORS.filter(d=>d.label.toLowerCase().includes(f.toLowerCase())).forEach(item=>{
+      const d=document.createElement('div'); d.className='ci';
+      d.innerHTML=`<span class="sw" style="background:${item.value}"></span>${item.label}`;
+      d.addEventListener('mousedown',e=>{
+        e.preventDefault(); sti.value=item.label; shi.value=item.value;
+        sti.dispatchEvent(new Event('input',{bubbles:true}));
+        sti.dispatchEvent(new Event('change',{bubbles:true}));
+        sdd.classList.remove('open');
+        addLog('change',`[shadow-combo] "${item.label}" → "${item.value}"`);
+      });
+      sdd.appendChild(d);
+    });
+    if(!sdd.children.length) sdd.innerHTML='<div style="padding:8px;color:#7878a0;font-size:11px">No results</div>';
+  }
+
+  sti.addEventListener('focus', ()=>{ renderShadow(sti.value); sdd.classList.add('open'); });
+  sti.addEventListener('input', ()=>{ renderShadow(sti.value); sdd.classList.add('open'); });
+  sti.addEventListener('blur',  ()=>setTimeout(()=>sdd.classList.remove('open'),160));
+
+  shadow.getElementById('shadowForm').addEventListener('submit', function(e) {
+    e.preventDefault(); addLog('submit','shadowForm submitted');
+    const data = {
+      shadowName:          shadow.getElementById('sn').value,
+      shadowSelect:        shadow.getElementById('ss').value,
+      shadowCheck:         shadow.querySelector('[name=shadowCheck]').checked,
+      'shadowCombo$Value': origD.get.call(shi),
+    };
+    document.getElementById('shadowFormOutput').textContent = JSON.stringify(data,null,2);
+  });
+
+  addLog('dom','✅ Shadow DOM attached (mode: open) with form #shadowForm');
+})();
+
+// ── Init log ──────────────────────────────────────────────────────────────────
+addLog('dom', `Playground ready — ${new Date().toLocaleString()}`);
+addLog('dom', 'iframe src="test-playground-iframe.html" — ensure both files are in the same folder');
+addLog('dom', '💡 If iframe shows blank: open via http:// (use: npx serve .)');
+</script>
+</body>
+</html>

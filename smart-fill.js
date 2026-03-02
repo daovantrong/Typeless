@@ -9,7 +9,7 @@
  * ──────╚══╝─╚╝──────────────────────────╚══╝
  * 
  * TypeLess - Auto Form Filler
- * v1.0.3 by TRONG.PRO
+ * v1.0.6 by TRONG.PRO
  */
 
 // Smart field detection and value generation

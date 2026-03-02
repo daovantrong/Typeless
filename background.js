@@ -9,7 +9,7 @@ console.log(`%c
 ──────╚══╝─╚╝──────────────────────────╚══╝
 
 TypeLess - Auto Form Filler
-v1.0.3 by TRONG.PRO
+v1.0.6 by TRONG.PRO
 `, 'color: #667eea; font-weight: bold;');
 
 // Background service worker
@@ -20,57 +20,155 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     if (details.reason === 'install') {
         // console.log('Auto Form Filler installed successfully!');
 
+        // Load default profiles from default.json
+        try {
+            const response = await fetch(chrome.runtime.getURL('default.json'));
+            
+            // Check if response is OK
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const defaultData = await response.json();
+            
+            // Validate data structure
+            if (!defaultData || typeof defaultData !== 'object') {
+                throw new Error('Invalid JSON structure - expected object');
+            }
+            
+            if (!Array.isArray(defaultData.profiles)) {
+                throw new Error('Invalid data - profiles array not found');
+            }
+            
+            if (defaultData.profiles.length === 0) {
+                console.log('Default profiles file is empty, skipping import');
+                // NOTE: do NOT return here — openOptionsPage() must still run below
+            } else {
+                // Validate each profile has required fields
+                const validProfiles = defaultData.profiles.filter(profile => {
+                    return profile && 
+                           typeof profile === 'object' && 
+                           typeof profile.name === 'string' && 
+                           profile.name.trim() !== '' &&
+                           Array.isArray(profile.fields);
+                });
+                
+                if (validProfiles.length === 0) {
+                    throw new Error('No valid profiles found in default.json');
+                }
+                
+                if (validProfiles.length < defaultData.profiles.length) {
+                    console.warn(`Skipped ${defaultData.profiles.length - validProfiles.length} invalid profiles`);
+                }
+                
+                // Import valid profiles using StorageManager
+                for (const profile of validProfiles) {
+                    await StorageManager.saveProfile(profile);
+                }
+                console.log(`Successfully loaded ${validProfiles.length} default profiles`);
+            }
+            
+        } catch (error) {
+            console.error('Failed to load default profiles:', error.message);
+            console.log('Extension will continue without default profiles');
+        }
+
         // Set default settings
         chrome.storage.local.set({
-            toolbarVisible: true,
-            profiles: []
+            toolbarVisible: true
         });
 
         // Open options page to welcome user and show settings
-        chrome.runtime.openOptionsPage();
-        // Options page is opened above — no extra notification needed on install.
+        // chrome.runtime.openOptionsPage() can silently fail in service worker context
+        // right after installation. Use tabs.create as a reliable alternative.
+        try {
+            await chrome.tabs.create({ url: chrome.runtime.getURL('options.html') });
+        } catch (_) {
+            chrome.runtime.openOptionsPage(); // fallback
+        }
     } else if (details.reason === 'update') {
         console.log('Auto Form Filler updated to version:', chrome.runtime.getManifest().version);
     }
 
-    // Inject content scripts into existing tabs
-    const manifest = chrome.runtime.getManifest();
-    const contentScripts = manifest.content_scripts[0];
+    // Helper: URLs that cannot be scripted or reloaded by extensions
+    const isRestrictedUrl = (url) =>
+        !url ||
+        url.startsWith('chrome://') ||
+        url.startsWith('edge://') ||
+        url.startsWith('chrome-extension://') ||
+        url.startsWith('about:') ||
+        url.startsWith('data:') ||
+        url.startsWith('https://chrome.google.com/webstore') ||
+        url.startsWith('https://chromewebstore.google.com') ||
+        url.startsWith('https://microsoftedge.microsoft.com/addons');
 
-    const tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
+    // Query ALL tabs — including file://, http://, https://, etc.
+    // chrome.tabs.query with no url filter returns every tab the extension can see.
+    const allTabs = await chrome.tabs.query({});
 
-    // Use Promise.all to inject scripts in parallel for better performance
-    await Promise.all(tabs.map(async (tab) => {
-        // Skip restricted URLs
-        if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('edge://') ||
-            tab.url.startsWith('https://chrome.google.com/webstore') ||
-            tab.url.startsWith('https://chromewebstore.google.com') ||
-            tab.url.startsWith('https://microsoftedge.microsoft.com/addons')) {
-            return;
-        }
+    if (details.reason === 'update') {
+        // On UPDATE: old content scripts are invalidated. We must NOT blindly reload
+        // every tab — that would be disruptive. Instead, ping each tab to check
+        // whether TypeLess toolbar is actually running there, then only reload those.
+        //
+        // Ping mechanism: send a 'ping' message; content script replies 'pong' if alive.
+        // If the context is invalidated the sendMessage call will reject/error, which
+        // also tells us a reload is needed (script was there but is now dead).
+        await Promise.all(allTabs.map(async (tab) => {
+            if (!tab.id || isRestrictedUrl(tab.url)) return;
 
-        try {
-            // Inject CSS
-            if (contentScripts.css) {
-                for (const file of contentScripts.css) {
-                    await chrome.scripting.insertCSS({
-                        target: { tabId: tab.id, allFrames: true },
-                        files: [file]
+            const needsReload = await new Promise(resolve => {
+                try {
+                    chrome.tabs.sendMessage(tab.id, { action: 'ping' }, (response) => {
+                        if (chrome.runtime.lastError) {
+                            // lastError means either: no content script, or context invalidated.
+                            // Either way, nothing to reload (no toolbar was injected).
+                            resolve(false);
+                        } else {
+                            // Got a reply → TypeLess is running in this tab → reload it.
+                            resolve(response && response.pong === true);
+                        }
                     });
+                } catch (_) {
+                    resolve(false);
+                }
+            });
+
+            if (needsReload) {
+                try {
+                    await chrome.tabs.reload(tab.id);
+                } catch (err) {
+                    console.warn(`Could not reload tab ${tab.id}:`, err.message);
                 }
             }
+        }));
+    } else {
+        // On fresh INSTALL: no old scripts exist — inject directly into injectable tabs.
+        const manifest = chrome.runtime.getManifest();
+        const contentScripts = manifest.content_scripts[0];
 
-            // Inject JS
-            if (contentScripts.js) {
-                await chrome.scripting.executeScript({
-                    target: { tabId: tab.id, allFrames: true },
-                    files: contentScripts.js
-                });
+        await Promise.all(allTabs.map(async (tab) => {
+            if (!tab.id || isRestrictedUrl(tab.url)) return;
+            try {
+                if (contentScripts.css) {
+                    for (const file of contentScripts.css) {
+                        await chrome.scripting.insertCSS({
+                            target: { tabId: tab.id, allFrames: true },
+                            files: [file]
+                        });
+                    }
+                }
+                if (contentScripts.js) {
+                    await chrome.scripting.executeScript({
+                        target: { tabId: tab.id, allFrames: true },
+                        files: contentScripts.js
+                    });
+                }
+            } catch (err) {
+                console.error(`Failed to inject script into tab ${tab.id}:`, err);
             }
-        } catch (err) {
-            console.error(`Failed to inject script into tab ${tab.id}:`, err);
-        }
-    }));
+        }));
+    }
 
     // Initial context menu creation
     updateContextMenus();
@@ -91,6 +189,13 @@ function sendInPageNotification(tabId, message) {
 
 // Listen for messages from content scripts or popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // Security: reject messages from external websites.
+    // Valid senders are either extension pages (no sender.tab) or
+    // content scripts injected by this extension (sender.id matches).
+    if (sender.id !== chrome.runtime.id) {
+        return false;
+    }
+
     if (request.action === 'getProfiles') {
         // Get profiles from storage
         StorageManager.getProfiles().then(profiles => {
@@ -450,6 +555,38 @@ async function injectTypeLess(tabId) {
 
 
 // console.log('Auto Form Filler background service worker loaded');
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SPA / Client-side routing — webNavigation fallback (background side)
+//
+// chrome.webNavigation.onHistoryStateUpdated fires when a page calls
+// history.pushState / replaceState — even before our content-script hook
+// has a chance to run (e.g. prefetched or prerendered pages).
+//
+// chrome.webNavigation.onReferenceFragmentUpdated fires on hash changes
+// for pages that don't use pushState at all (old-school hash routing).
+//
+// Both events are sent to the content script as 'spaUrlChanged' messages.
+// The content script already has the History API hook as the primary path;
+// this is the safety-net that catches whatever the hook misses.
+// ═══════════════════════════════════════════════════════════════════════════
+function _notifyTabSpaChange(details) {
+    // Only top-level frame (frameId 0), skip sub-frames and extension pages
+    if (details.frameId !== 0) return;
+    if (details.url && details.url.startsWith('chrome-extension://')) return;
+
+    chrome.tabs.sendMessage(details.tabId, {
+        action: 'spaUrlChanged',
+        url: details.url
+    }).catch(() => {
+        // Tab may not have the content script yet (e.g. new tab, restricted page) — ignore.
+    });
+}
+
+if (chrome.webNavigation) {
+    chrome.webNavigation.onHistoryStateUpdated.addListener(_notifyTabSpaChange);
+    chrome.webNavigation.onReferenceFragmentUpdated.addListener(_notifyTabSpaChange);
+}
 
 /**
  * End of background.js

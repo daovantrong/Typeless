@@ -9,7 +9,7 @@
 ──────╚══╝─╚╝──────────────────────────╚══╝
 
 TypeLess - Auto Form Filler
-v1.0.3 by TRONG.PRO
+v1.0.6 by TRONG.PRO
 -->
 <!DOCTYPE html>
 <html lang="vi">
@@ -541,9 +541,10 @@ v1.0.3 by TRONG.PRO
         .toast {
             visibility: hidden;
             min-width: 250px;
+            max-width: 320px;
             background-color: rgba(30, 30, 30, 0.95);
             color: #fff;
-            text-align: center;
+            text-align: left;
             border-radius: 8px;
             padding: 12px 16px;
             position: fixed;
@@ -554,14 +555,11 @@ v1.0.3 by TRONG.PRO
             top: 50%;
             transform: translate(-50%, -50%);
             /* Center */
-            font-size: 14px;
+            font-size: 13px;
+            line-height: 1.7;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             opacity: 0;
             transition: opacity 0.3s, visibility 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
 
         .toast.show {
@@ -699,6 +697,33 @@ v1.0.3 by TRONG.PRO
         .empty-state p {
             margin: 5px 0;
         }
+        /* Profile drag handle */
+        .drag-handle {
+            cursor: grab;
+            padding: 0 6px;
+            color: #ccc;
+            font-size: 16px;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .drag-handle:active { cursor: grabbing; }
+        .profile-item.is-dragging { opacity: 0.4; }
+        .profile-item.drag-over-top    { border-top: 2px solid var(--primary-color); }
+        .profile-item.drag-over-bottom { border-bottom: 2px solid var(--primary-color); }
+
+        /* Restricted page banner */
+        #restricted-banner {
+            display: none;
+            background: #fff3cd;
+            border-bottom: 1px solid #ffc107;
+            padding: 8px 12px;
+            gap: 8px;
+            align-items: flex-start;
+            font-size: 12px;
+            color: #856404;
+            line-height: 1.4;
+        }
+        #restricted-banner .banner-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
     </style>
 </head>
 
@@ -717,12 +742,18 @@ v1.0.3 by TRONG.PRO
             </button>
         </header>
 
+        <!-- Restricted page warning -->
+        <div id="restricted-banner">
+            <span class="banner-icon">⚠️</span>
+            <span id="restricted-msg" data-i18n="popup.restricted_msg">TypeLess cannot work on system browser pages. Please switch to a regular webpage.</span>
+        </div>
+
         <div class="controls">
             <button class="btn btn-secondary" id="btn-open-options" style="padding: 8px; flex: 4;">
                 ⚙️ <span data-i18n="btn.open_options">Open Settings</span>
             </button>
             <button class="btn btn-secondary" id="showToolbar" style="padding: 8px; flex: 6;">
-                👁️/🚫 <span data-i18n="popup.show">Hiện/Ẩn</span>
+                👁️/<img src="icons/no-ads.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[no]"> <span data-i18n="popup.show">Hiện/Ẩn</span>
             </button>
         </div>
 
@@ -820,7 +851,7 @@ v1.0.3 by TRONG.PRO
         <div style="margin-bottom: 8px;">
             <a href="https://chromewebstore.google.com" target="_blank"
                 style="text-decoration: none; color: var(--text-secondary);">
-                ⚡ TypeLess v1.0.3
+                <img src="icons/lightning.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[fast]"> TypeLess v1.0.6
             </a>
             <span style="color: #ccc; margin: 0 6px;">©</span>
             <a href="https://trong.pro" target="_blank" style="text-decoration: none; color: var(--text-secondary);">
@@ -832,11 +863,11 @@ v1.0.3 by TRONG.PRO
             <span data-i18n="footer.enjoy">Enjoy my work?</span>
             <a href="https://buymeacoffee.com/trong" target="_blank"
                 style="color: var(--primary-color); text-decoration: none;">
-                <span data-i18n="footer.buy">Buy me a 🍻</span>
+                <span data-i18n="footer.buy">Buy me a <img src="icons/beer.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[beer]"></span>
             </a>
             <span data-i18n="footer.tip">or tip via</span>
             <a href="https://paypal.me/DaoVanTrong" target="_blank"
-                style="color: var(--primary-color); text-decoration: none;">❤️
+                style="color: var(--primary-color); text-decoration: none;"><img src="icons/heart.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[heart]">
                 PayPal</a>
         </div>
     </div>

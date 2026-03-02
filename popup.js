@@ -9,7 +9,7 @@ console.log(`%c
 ──────╚══╝─╚╝──────────────────────────╚══╝
 
 TypeLess - Auto Form Filler
-v1.0.3 by TRONG.PRO
+v1.0.6 by TRONG.PRO
 `, 'color: #667eea; font-weight: bold;');
 
 // Popup script for profile management
@@ -17,6 +17,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize i18n
     await i18n.init();
     translateUI();
+
+    // ── Detect restricted page and show warning banner ─────────────────────
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const restrictedPrefixes = ['chrome://', 'edge://', 'about:', 'brave://', 'opera://'];
+    // Also block other extensions' pages, but NOT our own (e.g. options.html)
+    const ownExtOrigin = chrome.runtime.getURL('');
+    const isRestricted = activeTab && activeTab.url && (
+        restrictedPrefixes.some(p => activeTab.url.startsWith(p)) ||
+        (activeTab.url.startsWith('chrome-extension://') && !activeTab.url.startsWith(ownExtOrigin)) ||
+        (activeTab.url.startsWith('moz-extension://') && !activeTab.url.startsWith(ownExtOrigin))
+    );
+
+    if (isRestricted) {
+        const banner = document.getElementById('restricted-banner');
+        if (banner) {
+            banner.style.display = 'flex';
+            // Show human-readable URL type
+            const url = activeTab.url || '';
+            const protocol = url.split('://')[0] + '://';
+            const msgEl = banner.querySelector('#restricted-msg');
+            if (msgEl) {
+                // Store protocol for translateUI to use
+                msgEl.dataset.protocol = protocol;
+                msgEl.removeAttribute('data-i18n'); // use dynamic rendering instead
+                const rawMsg = i18n.t('popup.restricted_msg_protocol') || i18n.t('popup.restricted_msg');
+                msgEl.textContent = rawMsg.replace('{protocol}', protocol);
+            }
+        }
+        // Dim action buttons that won't work
+        const unavailableTitle = i18n.t('popup.restricted_unavailable');
+        ['showToolbar', 'btn-unlock-right-click', 'btn-save-html',
+         'btn-screenshot-full', 'btn-screenshot'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.disabled = true; el.style.opacity = '0.4'; el.title = unavailableTitle; }
+        });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     // Listen for language changes
     chrome.storage.onChanged.addListener(async (changes, area) => {
@@ -61,6 +98,21 @@ function translateUI() {
         element.title = t(key);
     });
 
+    // Re-render restricted banner message (dynamic: includes protocol token)
+    const msgEl = document.getElementById('restricted-msg');
+    if (msgEl && msgEl.dataset.protocol) {
+        const rawMsg = t('popup.restricted_msg_protocol') || t('popup.restricted_msg');
+        msgEl.textContent = rawMsg.replace('{protocol}', msgEl.dataset.protocol);
+    }
+
+    // Re-render disabled button titles for restricted pages
+    const unavailableTitle = t('popup.restricted_unavailable');
+    ['showToolbar', 'btn-unlock-right-click', 'btn-save-html',
+     'btn-screenshot-full', 'btn-screenshot'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.disabled) el.title = unavailableTitle;
+    });
+
 }
 
 // Load and display all profiles
@@ -102,8 +154,9 @@ async function loadProfiles() {
     }
 
     container.innerHTML = profiles.map(profile => `
-    <div class="profile-item" data-profile-id="${profile.id}">
+    <div class="profile-item" data-profile-id="${profile.id}" draggable="true">
       <div class="profile-header">
+        <span class="drag-handle" title="Kéo để sắp xếp">⠿</span>
         <div class="profile-name-wrap">
           <span class="profile-name" id="pname-${profile.id}">${escapeHtml(profile.name)}</span>
           <input class="profile-name-edit" id="pedit-${profile.id}"
@@ -132,6 +185,60 @@ async function loadProfiles() {
       ${profile.url ? `<div class="profile-url" title="${escapeHtml(profile.url)}"><img src="icons/link.svg" class="icon-img" style="width:12px; height:12px; vertical-align:middle"> ${escapeHtml(profile.url)}</div>` : ''}
     </div>
   `).join('');
+
+    // ── Drag-and-drop reorder ─────────────────────────────────────────────
+    let _dndSrcId = null;
+    container.querySelectorAll('.profile-item').forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+            _dndSrcId = item.dataset.profileId;
+            item.classList.add('is-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        item.addEventListener('dragend', () => {
+            item.classList.remove('is-dragging');
+            container.querySelectorAll('.profile-item').forEach(i => {
+                i.classList.remove('drag-over-top', 'drag-over-bottom');
+            });
+        });
+        item.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (item.dataset.profileId === _dndSrcId) return;
+            const rect = item.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            container.querySelectorAll('.profile-item').forEach(i => i.classList.remove('drag-over-top', 'drag-over-bottom'));
+            item.classList.add(e.clientY < midY ? 'drag-over-top' : 'drag-over-bottom');
+        });
+        item.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            if (!_dndSrcId || _dndSrcId === item.dataset.profileId) return;
+            container.querySelectorAll('.profile-item').forEach(i => i.classList.remove('drag-over-top', 'drag-over-bottom'));
+
+            const allItems = Array.from(container.querySelectorAll('.profile-item'));
+            const allIds = allItems.map(i => i.dataset.profileId);
+            const srcIdx = allIds.indexOf(_dndSrcId);
+            const dstIdx = allIds.indexOf(item.dataset.profileId);
+
+            // Determine insert position
+            const rect = item.getBoundingClientRect();
+            const insertBefore = e.clientY < rect.top + rect.height / 2;
+
+            // Reorder all profiles (global) — preserve other-page profiles order
+            const all = await StorageManager.getProfiles();
+            const globalIds = all.map(p => p.id);
+            const srcGlobal = globalIds.indexOf(_dndSrcId);
+            globalIds.splice(srcGlobal, 1); // remove src
+            const dstGlobal = globalIds.indexOf(item.dataset.profileId);
+            globalIds.splice(insertBefore ? dstGlobal : dstGlobal + 1, 0, _dndSrcId);
+
+            await StorageManager.reorderProfiles(globalIds);
+            _dndSrcId = null;
+            await loadProfiles();
+            // Notify toolbar to refresh
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tab) safeMsg(tab.id, { action: 'refreshProfiles' });
+        });
+    });
+    // ─────────────────────────────────────────────────────────────────────
 
     // ── profile action buttons are handled by a single delegated listener
     // attached once in attachEventListeners() — nothing to add here
@@ -235,7 +342,7 @@ async function confirmRename(profileId, renameBtn) {
         const ok = await StorageManager.renameProfile(profileId, newName);
         if (ok) {
             nameSpan.textContent = newName;
-            showNotification(`✏️ Đổi tên → "${newName}"`);
+            showNotification(`✏️ Đổi tên → "${escapeHtml(newName)}"`);
             // Notify content script to refresh toolbar dropdown
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             if (tab) safeMsg(tab.id, { action: 'refreshProfiles' });
@@ -345,7 +452,7 @@ function attachEventListeners() {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         safeMsg(tab.id, { action: 'toggleHideToolbar' }, (response) => {
             if (chrome.runtime.lastError) {
-                showNotification('Error: ' + chrome.runtime.lastError.message, 'error');
+                showNotification('Error: ' + escapeHtml(chrome.runtime.lastError.message), 'error');
             }
         });
     });
@@ -387,12 +494,13 @@ function attachEventListeners() {
             const result = await StorageManager.restoreBackupData(importedData);
 
             if (result.count > 0 || result.settingsRestored) {
-                const msg = [
-                    result.added > 0 ? `+${result.added} ${t('notify.added_new') || 'mới'}` : '',
-                    result.updated > 0 ? `↺${result.updated} ${t('notify.updated') || 'cập nhật'}` : '',
-                    result.skipped > 0 ? `⚠ ${result.skipped} ${t('notify.skipped') || 'bỏ qua'}` : '',
-                ].filter(Boolean).join('  ');
-                showNotification(`${t('notify.pasted')}${msg ? '  — ' + msg : ''}`);
+                const lines = [
+                    `📋 ${t('notify.pasted')}`,
+                    `+${result.added} ${t('notify.added_new') || 'mới'}`,
+                    `↺${result.updated} ${t('notify.updated') || 'cập nhật'}`,
+                    `⚠️${result.skipped} ${t('notify.skipped') || 'bỏ qua'}`,
+                ];
+                showNotification(lines.join('<br>'));
                 await loadProfiles();
 
                 const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -511,7 +619,7 @@ async function applyProfile(profileId) {
             // "hãy đóng popup ngay sau khi người dùng bấm các nút chức năng chỉ hiển thị text thông báo: +Utilities... +User Agent..."
             // It seems "Utilities" list and "User Agent" list are the target.
             // Apply Profile is not in that list.
-            showNotification(`<img src="icons/check.svg" class="icon-img"> ${t('notify.applied', { name: profile.name })}`);
+            showNotification(`<img src="icons/check.svg" class="icon-img"> ${t('notify.applied', { name: escapeHtml(profile.name) })}`);
             setTimeout(() => window.close(), 1000);
         }
     });
@@ -531,7 +639,7 @@ async function deleteProfile(profileId) {
     const success = await StorageManager.deleteProfile(profileId);
 
     if (success) {
-        showNotification(`<img src="icons/delete.svg" class="icon-img"> ${t('notify.deleted', { name: profile.name })}`);
+        showNotification(`<img src="icons/delete.svg" class="icon-img"> ${t('notify.deleted', { name: escapeHtml(profile.name) })}`);
         await loadProfiles();
 
         // Notify content script to refresh its list too
@@ -553,8 +661,8 @@ function showNotification(message, type = 'success') {
         toast.className = 'toast';
         document.body.appendChild(toast);
     }
-
-    toast.textContent = message; // Use textContent (not innerHTML) to prevent XSS
+    //toast.textContent = message; // Use textContent (not innerHTML) to prevent XSS
+    toast.innerHTML = message; // Use innerHTML to render icon images. Because the data is from an internal file (a trusted source).
     toast.className = `toast show ${type}`;
 
     setTimeout(() => {

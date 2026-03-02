@@ -9,7 +9,7 @@
  * ──────╚══╝─╚╝──────────────────────────╚══╝
  * 
  * TypeLess - Auto Form Filler
- * v1.0.3 by TRONG.PRO
+ * v1.0.5 by TRONG.PRO
  */
 
 /**

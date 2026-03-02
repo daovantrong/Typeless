@@ -91,4 +91,4 @@ Dependencies:
 - Works completely offline once installed.
 - Compatible with Chrome 88+ and Edge 88+.
 
-Version: 1.0.3 - Includes inline profile rename, FineUI/ComboBox support, screenshot toolbar fix, Profile Manager in Settings, and enhanced export/import format.
+Version: 1.0.5 - Includes inline profile rename, FineUI/ComboBox support, screenshot toolbar fix, Profile Manager in Settings, and enhanced export/import format.

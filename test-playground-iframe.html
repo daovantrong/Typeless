@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<!-- AUTOFILL TEST: test-playground-iframe.html replica -->
+<!-- Exact FineUI field naming: name="ContentPanelN$field", id="ContentPanelN_field-inputEl" -->
+<!-- Hidden combo value: name="ContentPanelN$field$Value" -->
+<html><head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>内部系统 — test-playground-iframe.html</title>
+<style>
+  :root {
+    --bg:       #1a1a1f;
+    --bg2:      #22222a;
+    --bg3:      #2a2a34;
+    --bg4:      #181820;
+    --border:   #38383f;
+    --border2:  #44444e;
+    --text:     #d8d8e8;
+    --text-dim: #8888aa;
+    --label-bg: #1e2030;
+    --label-fg: #9ab0cc;
+    --cell-bg:  #22222a;
+    --accent:   #3c72c8;
+    --accent2:  #29b87d;
+    --accent3:  #e05555;
+    --accent4:  #e8a930;
+    --hover-row:#282835;
+    --mono:     'Courier New', monospace;
+    --radius:   4px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
+    font-size: 12px;
+    min-height: 100vh;
+  }
+
+  /* ── Top info bar ── */
+  .top-bar {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .top-bar .pill {
+    background: rgba(60,114,200,.25);
+    border: 1px solid rgba(60,114,200,.5);
+    border-radius: 3px;
+    padding: 1px 7px;
+    color: #7ab0f8;
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+  .top-bar .pill.asp { background: rgba(232,169,48,.15); border-color: rgba(232,169,48,.4); color: var(--accent4); }
+  .top-bar .sep { color: var(--border2); }
+
+  /* ── Section panel ── */
+  .panel-wrap {
+    margin: 14px 20px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    background: linear-gradient(90deg, #1e2636 0%, #1a1e2a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 7px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-header .ph-tag {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: var(--accent);
+    color: #fff;
+  }
+  .panel-header .ph-tag.p2 { background: #7c4dba; }
+  .panel-header .ph-tag.p3 { background: var(--accent2); color: #000; }
+  .panel-header .ph-tag.p4 { background: var(--accent4); color: #000; }
+  .panel-header h3 { font-size: 11px; font-weight: 700; color: #a8c0e0; }
+
+  /* ── Table layout (FineUI blockpanel style) ── */
+  .tablehtml {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .tablehtml td {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .tablehtml td.label {
+    background: var(--label-bg);
+    color: var(--label-fg);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    width: 160px;
+    min-width: 140px;
+  }
+
+  .tablehtml td.content {
+    background: var(--cell-bg);
+    min-width: 160px;
+  }
+
+  /* ── FineUI textbox ── */
+  .f-field-wrap {
+    display: inline-block;
+    width: 100%;
+  }
+
+  .f-textbox, .f-dropdownlist-text {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 12px;
+    padding: 5px 8px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color .18s, box-shadow .18s;
+  }
+
+  .f-textbox:focus, .f-dropdownlist-text:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(60,114,200,.2);
+  }
+
+  .f-textbox[readonly], .f-dropdownlist-text[readonly] {
+    background: #1a1a22;
+    color: var(--text-dim);
+    border-color: var(--border);
+  }
+
+  /* NumberBox */
+  .f-numberbox-wrap {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  .f-numberbox-wrap .f-textbox {
+    padding-right: 22px;
+  }
+  .f-numberbox-spinners {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 20px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border2);
+  }
+  .f-spin-btn {
+    flex: 1;
+    background: var(--bg3);
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .1s;
+  }
+  .f-spin-btn:hover { background: var(--bg4); color: var(--text); }
+  .f-spin-btn:first-child { border-bottom: 1px solid var(--border2); }
+
+  /* ── FineUI DropDownList (ComboBox) ── */
+  .f-ddl-wrap {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .f-dropdownlist-text {
+    padding-right: 28px;
+    cursor: pointer;
+  }
+
+  .f-ddl-arrow {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid var(--border2);
+    color: var(--text-dim);
+    font-size: 9px;
+    cursor: pointer;
+    pointer-events: none;
+    transition: background .1s;
+  }
+
+  .f-ddl-clear {
+    position: absolute;
+    right: 24px; top: 50%;
+    transform: translateY(-50%);
+    width: 16px; height: 16px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+  .f-ddl-wrap:hover .f-ddl-clear.has-value { display: flex; }
+
+  .f-ddl-list {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0; right: 0;
+    background: var(--bg3);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    z-index: 9999;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,.6);
+  }
+  .f-ddl-list.open { display: block; }
+
+  .f-ddl-item {
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--text);
+    transition: background .1s;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+  }
+  .f-ddl-item:hover { background: var(--accent); color: #fff; }
+  .f-ddl-item.selected { background: rgba(60,114,200,.25); color: #7ab0f8; }
+  .f-ddl-item-empty { padding: 6px 10px; color: var(--text-dim); font-size: 11px; font-style: italic; }
+
+  /* FineUI field hidden value badge */
+  .hidden-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 3px;
+    font-size: 9px;
+    font-family: var(--mono);
+    background: rgba(232,169,48,.1);
+    border: 1px solid rgba(232,169,48,.3);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent4);
+  }
+
+  /* ── ContentPanel3 buttons ── */
+  .f-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    color: var(--text);
+    transition: all .15s;
+    text-decoration: none;
+    font-family: inherit;
+  }
+  .f-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .f-btn.btn-save { background: rgba(41,184,125,.15); border-color: rgba(41,184,125,.4); color: var(--accent2); }
+  .f-btn.btn-save:hover { background: var(--accent2); color: #000; }
+  .f-btn.btn-reset { background: rgba(232,169,48,.1); border-color: rgba(232,169,48,.3); color: var(--accent4); }
+  .f-btn.btn-reset:hover { background: var(--accent4); color: #000; }
+
+  /* ── Grid (ContentPanel4) ── */
+  .f-grid-wrap {
+    overflow-x: auto;
+    background: var(--bg2);
+  }
+
+  .f-grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    min-width: 1400px;
+  }
+
+  .f-grid thead th {
+    background: var(--bg4);
+    color: var(--text-dim);
+    font-weight: 700;
+    padding: 7px 8px;
+    border: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+    font-size: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .f-grid tbody tr { transition: background .1s; }
+  .f-grid tbody tr:hover { background: var(--hover-row); }
+  .f-grid tbody tr.alt { background: rgba(255,255,255,.02); }
+
+  .f-grid tbody td {
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .f-grid .td-del { text-align: center; width: 40px; }
+  .f-grid .td-num { text-align: center; color: var(--text-dim); width: 30px; }
+  .f-grid .td-mo  { font-family: var(--mono); font-size: 10px; color: var(--accent); }
+  .f-grid .td-stt { font-family: var(--mono); font-size: 10px; color: var(--accent2); }
+  .f-grid .td-time { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .f-grid .td-spec { max-width: 220px; font-size: 10px; }
+
+  .del-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    background: rgba(224,85,85,.15);
+    border: 1px solid rgba(224,85,85,.3);
+    border-radius: 3px;
+    color: var(--accent3);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all .15s;
+    text-decoration: none;
+  }
+  .del-btn:hover { background: var(--accent3); color: #fff; }
+
+  /* ── Output / payload panel ── */
+  .output-panel {
+    margin: 0 20px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg4);
+  }
+  .output-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 5px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .output-header h4 {
+    font-size: 9px; font-weight: 800;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim);
+  }
+  .output-header .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent2); animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .output-pre {
+    padding: 12px; font-family: var(--mono); font-size: 10px;
+    color: var(--accent2); white-space: pre-wrap; word-break: break-all;
+    max-height: 180px; overflow-y: auto;
+  }
+
+  /* ── Debug log ── */
+  .debug-panel {
+    margin: 0 20px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .debug-header {
+    background: var(--bg3); border-bottom: 1px solid var(--border);
+    padding: 5px 12px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .debug-header span { font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); }
+  .debug-log {
+    max-height: 140px; overflow-y: auto;
+    padding: 6px 10px; font-family: var(--mono); font-size: 10px; line-height: 1.8;
+    background: var(--bg4);
+  }
+  .le { display: flex; gap: 8px; padding: 1px 3px; border-radius: 2px; }
+  .le:hover { background: var(--bg3); }
+  .lt { color: var(--text-dim); flex-shrink: 0; }
+  .lk { flex-shrink: 0; width: 55px; text-align: right; }
+  .lk.change { color: var(--accent); }
+  .lk.input  { color: var(--accent2); }
+  .lk.hidden { color: var(--accent4); }
+  .lk.submit { color: var(--accent3); }
+  .lk.dom    { color: #a78bfa; }
+  .lm { color: var(--text); flex: 1; word-break: break-all; }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  .clear-btn { font-size: 9px; padding: 2px 7px; border-radius: 3px; border: 1px solid var(--border2); background: transparent; color: var(--text-dim); cursor: pointer; }
+  .clear-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+
+  .hidden-fields-info {
+    margin: 6px 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+  .hf-item {
+    background: rgba(60,114,200,.1);
+    border: 1px solid rgba(60,114,200,.25);
+    border-radius: 3px;
+    padding: 2px 8px;
+    color: #7ab0f8;
+  }
+  .hf-item .hf-name { color: var(--accent4); }
+  .hf-item .hf-val  { color: var(--text-dim); font-size: 9px; margin-left: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Top info bar -->
+<div class="top-bar">
+  <span class="pill asp">ASP.NET WebForms</span>
+  <span class="sep">|</span>
+  <span class="pill">FineUI v3.x</span>
+  <span class="sep">|</span>
+  <span>test-playground-iframe.html</span>
+  <span class="sep">|</span>
+  <span id="originSpan" style="color:#5577aa">loading...</span>
+</div>
+
+<form method="post" action="./test-playground-iframe.html" id="Form1" autocomplete="off">
+
+<!-- ─── ASP.NET hidden tokens ─── -->
+<div class="aspNetHidden" style="display:none">
+  <input type="hidden" name="__EVENTTARGET"           id="__EVENTTARGET"           value="ContentPanel1$tbxmo">
+  <input type="hidden" name="__EVENTARGUMENT"         id="__EVENTARGUMENT"         value="Blur">
+  <input type="hidden" name="__VIEWSTATE"             id="__VIEWSTATE"             value="/wEPDwUKMTk2NDY3NDQxNA9kFgICAw8WAh4MYXV0b2NvbXBsZXRlBQNvZmZkGAIFHl9fQ29udHJvbHNSZXF1aXJlUG9zdEJhY2tLZXlfXxYiBQ1Db250ZW50UGFuZWwx">
+  <input type="hidden" name="__VIEWSTATEGENERATOR"   id="__VIEWSTATEGENERATOR"   value="B207494D">
+</div>
+
+<!-- Hidden fields info display (for extension testing visibility) -->
+<div class="hidden-fields-info">
+  <div class="hf-item"><span class="hf-name">__EVENTTARGET</span><span class="hf-val">ContentPanel1$tbxmo</span></div>
+  <div class="hf-item"><span class="hf-name">__EVENTARGUMENT</span><span class="hf-val">Blur</span></div>
+  <div class="hf-item"><span class="hf-name">__VIEWSTATE</span><span class="hf-val">/wEPDwUKMTk2NDY3N… (truncated)</span></div>
+  <div class="hf-item"><span class="hf-name">__VIEWSTATEGENERATOR</span><span class="hf-val">B207494D</span></div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     ContentPanel1 — Header info (MO → Line)
+════════════════════════════════════════════ -->
+<div class="panel-wrap">
+  <div class="panel-header">
+    <span class="ph-tag">Panel 1</span>
+    <h3>基本信息 Thông tin cơ bản — MO / Model / Version / Line</h3>
+  </div>
+  <div style="padding:10px">
+    <table class="tablehtml">
+      <tbody>
+        <tr>
+          <!-- MO: text, EDITABLE — trigger postback on blur -->
+          <td class="label">MO：</td>
+          <td class="content">
+            <div class="f-field-wrap" id="ContentPanel1_tbxmo">
+              <input id="ContentPanel1_tbxmo-inputEl"
+                     class="f-textbox"
+                     type="text"
+                     name="ContentPanel1$tbxmo"
+                     placeholder="Enter MO number..."
+                     autocomplete="off">
+            </div>
+          </td>
+
+          <!-- 机型 Model: readonly text (auto-filled after MO lookup) -->
+          <td class="label">机型 Model：</td>
+          <td class="content">
+            <div class="f-field-wrap" id="ContentPanel1_tbxjx">
+              <input id="ContentPanel1_tbxjx-inputEl"
+                     class="f-textbox"
+                     type="text"
+                     name="ContentPanel1$tbxjx"
+                     readonly
+                     autocomplete="off"
+                     placeholder="auto-filled">
+            </div>
+          </td>
+
+          <!-- 版本 Version: readonly -->
+          <td class="label">版本 Version：</td>
+          <td class="content">
+            <div class="f-field-wrap" id="ContentPanel1_tbxbb">
+              <input id="ContentPanel1_tbxbb-inputEl"
+                     class="f-textbox"
+                     type="text"
+                     name="ContentPanel1$tbxbb"
+                     readonly
+                     autocomplete="off"
+                     placeholder="auto-filled">
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <!-- 批量 số lượng: readonly -->
+          <td class="label">批量 số lượng：</td>
+          <td class="content">
+            <div class="f-field-wrap" id="ContentPanel1_tbxpl">
+              <input id="ContentPanel1_tbxpl-inputEl"
+                     class="f-textbox"
+                     type="text"
+                     name="ContentPanel1$tbxpl"
+                     readonly
+                     autocomplete="off"
+                     placeholder="auto-filled">
+            </div>
+          </td>
+
+          <!-- 成品料号 PN: readonly -->
+          <td class="label">成品料号 PN：</td>
+          <td class="content">
+            <div class="f-field-wrap" id="ContentPanel1_tbxcplh">
+              <input id="ContentPanel1_tbxcplh-inputEl"
+                     class="f-textbox"
+                     type="text"
+                     name="ContentPanel1$tbxcplh"
+                     readonly
+                     autocomplete="off"
+                     placeholder="auto-filled">
+            </div>
+          </td>
+
+          <!-- 线别 Line: FineUI DropDownList — has $Value hidden -->
+          <td class="label">线别 Line：</td>
+          <td class="content">
+            <div id="ContentPanel1_ddlxb" class="f-ddl-wrap">
+              <input type="hidden"
+                     name="ContentPanel1$ddlxb$Value"
+                     id="ContentPanel1_ddlxb-hiddenEl"
+                     value="">
+              <input id="ContentPanel1_ddlxb-inputEl"
+                     class="f-dropdownlist-text"
+                     type="text"
+                     name="ContentPanel1$ddlxb"
+                     autocomplete="off"
+                     placeholder="Select line..."
+                     readonly>
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel1_ddlxb-list"></div>
+            </div>
+            <div class="hidden-badge" id="badge-ddlxb">$Value: <strong>—</strong></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     ContentPanel2 — Defect details
+════════════════════════════════════════════ -->
+<div class="panel-wrap">
+  <div class="panel-header">
+    <span class="ph-tag p2">Panel 2</span>
+    <h3>不良详情 Chi tiết lỗi — Nguyên nhân / Phương pháp / Đơn vị</h3>
+  </div>
+  <div style="padding:10px">
+    <table class="tablehtml">
+      <tbody>
+        <tr>
+          <!-- 不良原因: DDL + $Value hidden -->
+          <td class="label">不良原因 Nguyên nhân không đạt：</td>
+          <td class="content">
+            <div id="ContentPanel2_ddlblyy" class="f-ddl-wrap">
+              <input type="hidden" name="ContentPanel2$ddlblyy$Value" id="ContentPanel2_ddlblyy-hiddenEl" value="">
+              <input id="ContentPanel2_ddlblyy-inputEl" class="f-dropdownlist-text" type="text"
+                     name="ContentPanel2$ddlblyy" autocomplete="off" placeholder="Select..." readonly>
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel2_ddlblyy-list"></div>
+            </div>
+            <div class="hidden-badge" id="badge-ddlblyy">$Value: <strong>—</strong></div>
+          </td>
+
+          <!-- 处理方法: DDL + $Value hidden (readonly text) -->
+          <td class="label">处理方法 Phương pháp xử lí：</td>
+          <td class="content">
+            <div id="ContentPanel2_ddlclff" class="f-ddl-wrap">
+              <input type="hidden" name="ContentPanel2$ddlclff$Value" id="ContentPanel2_ddlclff-hiddenEl" value="">
+              <input id="ContentPanel2_ddlclff-inputEl" class="f-dropdownlist-text" type="text"
+                     name="ContentPanel2$ddlclff" autocomplete="off" readonly
+                     placeholder="auto from 不良原因...">
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel2_ddlclff-list"></div>
+            </div>
+            <div class="hidden-badge" id="badge-ddlclff">$Value: <strong>—</strong></div>
+          </td>
+
+          <!-- 责任单位: DDL + $Value hidden (readonly) -->
+          <td class="label">责任单位 Đơn vị phụ trách：</td>
+          <td class="content">
+            <div id="ContentPanel2_ddlzrdw" class="f-ddl-wrap">
+              <input type="hidden" name="ContentPanel2$ddlzrdw$Value" id="ContentPanel2_ddlzrdw-hiddenEl" value="">
+              <input id="ContentPanel2_ddlzrdw-inputEl" class="f-dropdownlist-text" type="text"
+                     name="ContentPanel2$ddlzrdw" autocomplete="off" readonly
+                     placeholder="auto from 不良原因...">
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel2_ddlzrdw-list"></div>
+            </div>
+            <div class="hidden-badge" id="badge-ddlzrdw">$Value: <strong>—</strong></div>
+          </td>
+        </tr>
+        <tr>
+          <!-- 区分: DDL + $Value hidden (readonly) -->
+          <td class="label">区分 Phân tích：</td>
+          <td class="content">
+            <div id="ContentPanel2_ddlqf" class="f-ddl-wrap">
+              <input type="hidden" name="ContentPanel2$ddlqf$Value" id="ContentPanel2_ddlqf-hiddenEl" value="">
+              <input id="ContentPanel2_ddlqf-inputEl" class="f-dropdownlist-text" type="text"
+                     name="ContentPanel2$ddlqf" autocomplete="off" readonly placeholder="Select...">
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel2_ddlqf-list"></div>
+            </div>
+            <div class="hidden-badge" id="badge-ddlqf">$Value: <strong>—</strong></div>
+          </td>
+
+          <!-- 产品状态: DDL + $Value hidden (readonly) -->
+          <td class="label">产品状态 trạng thái sản phẩm：</td>
+          <td class="content">
+            <div id="ContentPanel2_ddlcpzt" class="f-ddl-wrap">
+              <input type="hidden" name="ContentPanel2$ddlcpzt$Value" id="ContentPanel2_ddlcpzt-hiddenEl" value="">
+              <input id="ContentPanel2_ddlcpzt-inputEl" class="f-dropdownlist-text" type="text"
+                     name="ContentPanel2$ddlcpzt" autocomplete="off" readonly placeholder="Select...">
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel2_ddlcpzt-list"></div>
+            </div>
+            <div class="hidden-badge" id="badge-ddlcpzt">$Value: <strong>—</strong></div>
+          </td>
+
+          <!-- 子母板: DDL NO $Value hidden (readonly) -->
+          <td class="label">子母板 Bản Con：</td>
+          <td class="content">
+            <div id="ContentPanel2_ddlzmb" class="f-ddl-wrap">
+              <!-- NOTE: no hidden $Value input here — extension must handle this case -->
+              <input id="ContentPanel2_ddlzmb-inputEl" class="f-dropdownlist-text" type="text"
+                     name="ContentPanel2$ddlzmb" autocomplete="off" readonly placeholder="Select...">
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel2_ddlzmb-list"></div>
+            </div>
+            <div class="hidden-badge" style="border-color:rgba(224,85,85,.4);color:var(--accent3)">⚠ NO $Value hidden input</div>
+          </td>
+        </tr>
+        <tr>
+          <!-- 元件位号: DDL EDITABLE (no readonly, no $Value hidden) -->
+          <td class="label">元件位号 Mã linh kiện：</td>
+          <td class="content">
+            <div id="ContentPanel2_ddlwh" class="f-ddl-wrap">
+              <!-- no hidden $Value here either — just text input -->
+              <input id="ContentPanel2_ddlwh-inputEl" class="f-dropdownlist-text" type="text"
+                     name="ContentPanel2$ddlwh" autocomplete="off"
+                     placeholder="Type to filter or select...">
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel2_ddlwh-list"></div>
+            </div>
+            <div class="hidden-badge" style="border-color:rgba(224,85,85,.4);color:var(--accent3)">⚠ NO $Value hidden input (editable)</div>
+          </td>
+
+          <!-- 元件规格: DDL readonly NO $Value hidden -->
+          <td class="content" colspan="3">
+            <div style="margin-bottom:4px;font-size:10px;color:var(--text-dim)">元件规格 Quy cách mô hình：</div>
+            <div id="ContentPanel2_ddlyjgg" class="f-ddl-wrap">
+              <input id="ContentPanel2_ddlyjgg-inputEl" class="f-dropdownlist-text" type="text"
+                     name="ContentPanel2$ddlyjgg" autocomplete="off" readonly
+                     placeholder="auto from 元件位号...">
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel2_ddlyjgg-list"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <!-- 元件周期: text editable -->
+          <td class="label">元件周期 Ngày tháng linh kiện：</td>
+          <td class="content">
+            <div class="f-field-wrap" id="ContentPanel2_tbxyjzq">
+              <input id="ContentPanel2_tbxyjzq-inputEl" class="f-textbox" type="text"
+                     name="ContentPanel2$tbxyjzq" autocomplete="off" placeholder="e.g. 2024Q1">
+            </div>
+          </td>
+
+          <!-- 序列号 STT: text editable -->
+          <td class="label">序列号 STT：</td>
+          <td class="content">
+            <div class="f-field-wrap" id="ContentPanel2_tbxxlh">
+              <input id="ContentPanel2_tbxxlh-inputEl" class="f-textbox" type="text"
+                     name="ContentPanel2$tbxxlh" autocomplete="off"
+                     placeholder="e.g. YCFA196000334">
+            </div>
+          </td>
+
+          <!-- 不良现象: DDL + $Value hidden -->
+          <td class="label">不良现象 Hiện tượng lỗi：</td>
+          <td class="content">
+            <div id="ContentPanel2_ddlblxx" class="f-ddl-wrap">
+              <input type="hidden" name="ContentPanel2$ddlblxx$Value" id="ContentPanel2_ddlblxx-hiddenEl" value="">
+              <input id="ContentPanel2_ddlblxx-inputEl" class="f-dropdownlist-text" type="text"
+                     name="ContentPanel2$ddlblxx" autocomplete="off" placeholder="Select...">
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel2_ddlblxx-list"></div>
+            </div>
+            <div class="hidden-badge" id="badge-ddlblxx">$Value: <strong>—</strong></div>
+          </td>
+        </tr>
+        <tr>
+          <!-- 物料料号: text editable -->
+          <td class="label">物料料号 Mã vật liệu：</td>
+          <td class="content">
+            <div class="f-field-wrap" id="ContentPanel2_tbxwldm">
+              <input id="ContentPanel2_tbxwldm-inputEl" class="f-textbox" type="text"
+                     name="ContentPanel2$tbxwldm" autocomplete="off"
+                     placeholder="e.g. 2420500037">
+            </div>
+          </td>
+
+          <!-- 不良数量: NumberBox -->
+          <td class="label">不良数量 Số lượng lỗi：</td>
+          <td class="content">
+            <div class="f-numberbox-wrap" id="ContentPanel2_tbxblsl">
+              <input id="ContentPanel2_tbxblsl-inputEl" class="f-textbox" type="text"
+                     name="ContentPanel2$tbxblsl" autocomplete="off"
+                     placeholder="0">
+              <div class="f-numberbox-spinners">
+                <button type="button" class="f-spin-btn" onclick="spinNum('ContentPanel2_tbxblsl-inputEl',1)">▲</button>
+                <button type="button" class="f-spin-btn" onclick="spinNum('ContentPanel2_tbxblsl-inputEl',-1)">▼</button>
+              </div>
+            </div>
+          </td>
+
+          <!-- 备注 Ghi chú: text editable -->
+          <td class="label">备注 Ghi chú：</td>
+          <td class="content">
+            <div class="f-field-wrap" id="ContentPanel2_tbxnbz">
+              <input id="ContentPanel2_tbxnbz-inputEl" class="f-textbox" type="text"
+                     name="ContentPanel2$tbxnbz" autocomplete="off" placeholder="Notes...">
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <!-- 多选位号: DDL editable no $Value hidden -->
+          <td class="label">多选位号 Số bit nhiều lựa chọn：</td>
+          <td class="content">
+            <div id="ContentPanel2_ddldgwh" class="f-ddl-wrap">
+              <input id="ContentPanel2_ddldgwh-inputEl" class="f-dropdownlist-text" type="text"
+                     name="ContentPanel2$ddldgwh" autocomplete="off"
+                     placeholder="Multi-select position...">
+              <span class="f-ddl-arrow">▼</span>
+              <div class="f-ddl-list" id="ContentPanel2_ddldgwh-list"></div>
+            </div>
+          </td>
+
+          <!-- 多个料号: text editable (colspan 3) -->
+          <td class="label">多个料号 Nhiều số mặt hàng：</td>
+          <td class="content" colspan="3">
+            <div class="f-field-wrap" id="ContentPanel2_tbxdxwhlh">
+              <input id="ContentPanel2_tbxdxwhlh-inputEl" class="f-textbox" type="text"
+                     name="ContentPanel2$tbxdxwhlh" autocomplete="off" style="width:100%"
+                     placeholder="Multiple item codes separated by comma...">
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <!-- 多个规格: text editable (colspan 5) -->
+          <td class="label">多个规格 Nhiều thông số kỹ thuật：</td>
+          <td class="content" colspan="5">
+            <div class="f-field-wrap" id="ContentPanel2_tbxdxwhms">
+              <input id="ContentPanel2_tbxdxwhms-inputEl" class="f-textbox" type="text"
+                     name="ContentPanel2$tbxdxwhms" autocomplete="off" style="width:100%"
+                     placeholder="Multiple specs...">
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     ContentPanel3 — Buttons + hidden auxiliary fields
+════════════════════════════════════════════ -->
+<div class="panel-wrap">
+  <div class="panel-header">
+    <span class="ph-tag p3">Panel 3</span>
+    <h3>操作按钮 Thao tác + Hidden auxiliary fields</h3>
+  </div>
+  <div style="padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+
+    <a id="ContentPanel3_btnTJ" class="f-btn btn-save" href="javascript:void(0)"
+       onclick="handleBtnTJ()">
+      💾 添加元件 Thêm vào
+    </a>
+
+    <a id="ContentPanel3_btnCZ" class="f-btn btn-reset" href="javascript:void(0)"
+       onclick="handleBtnCZ()">
+      ↺ 重置 Cài lại
+    </a>
+
+    <a id="ContentPanel3_btnGet" class="f-btn" href="javascript:void(0)"
+       onclick="handleBtnGet()">
+      🔍 获取多选位号对应料号和规格 nhận được
+    </a>
+
+    <!-- Hidden auxiliary text fields (display:none — extension edge case) -->
+    <div style="display:none" id="ContentPanel3_tbxzwl">
+      <input id="ContentPanel3_tbxzwl-inputEl" type="text"
+             name="ContentPanel3$tbxzwl" autocomplete="off">
+    </div>
+    <div style="display:none" id="ContentPanel3_tbxwllb">
+      <input id="ContentPanel3_tbxwllb-inputEl" type="text"
+             name="ContentPanel3$tbxwllb" autocomplete="off">
+    </div>
+    <div style="display:none" id="ContentPanel3_tbxcnname">
+      <input id="ContentPanel3_tbxcnname-inputEl" type="text"
+             name="ContentPanel3$tbxcnname" autocomplete="off">
+    </div>
+
+    <span style="font-size:10px;color:var(--text-dim);margin-left:10px">
+      ⚠ 3 hidden inputs: <code style="color:var(--accent4);font-size:9px">tbxzwl, tbxwllb, tbxcnname</code> (display:none)
+    </span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     ContentPanel4 — Grid (data table)
+════════════════════════════════════════════ -->
+<div class="panel-wrap">
+  <div class="panel-header">
+    <span class="ph-tag p4">Panel 4</span>
+    <h3>Grid1 — 维修记录 Lịch sử sửa chữa</h3>
+  </div>
+  <div class="f-grid-wrap" style="padding:0">
+    <table class="f-grid" id="ContentPanel4_Grid1">
+      <thead>
+        <tr>
+          <th class="td-del"></th>
+          <th class="td-num">#</th>
+          <th>MO</th>
+          <th>不良原因 Nguyên nhân</th>
+          <th>处理方法 Phương pháp</th>
+          <th>责任单位 Đơn vị</th>
+          <th>区分 Phân tích</th>
+          <th>子母板 Bản Con</th>
+          <th>元件位号 Mã linh kiện</th>
+          <th>物料料号 Mã vật liệu</th>
+          <th>元件规格 Quy cách</th>
+          <th>不良现象 Hiện tượng</th>
+          <th>序号 STT</th>
+          <th>备注 Ghi chú</th>
+          <th>操作时间 Thời gian</th>
+        </tr>
+      </thead>
+      <tbody id="grid-tbody">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</form><!-- /Form1 -->
+
+<!-- Payload output -->
+<div class="output-panel">
+  <div class="output-header">
+    <h4>📦 SUBMITTED PAYLOAD — Form1</h4>
+    <span class="dot"></span>
+  </div>
+  <pre class="output-pre" id="formOutput">— Form not submitted yet —</pre>
+</div>
+
+<!-- Event log -->
+<div class="debug-panel">
+  <div class="debug-header">
+    <span>📡 Event Log (iframe)</span>
+    <button class="clear-btn" onclick="clearLog()">Clear</button>
+  </div>
+  <div class="debug-log" id="dbgLog">
+    <div class="le"><span class="lt">--:--:--</span><span class="lk dom">dom</span><span class="lm">iframe-form.html loaded</span></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── Utilities ──────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const ts  = () => new Date().toTimeString().slice(0,8);
+
+function log(type, msg) {
+  const box = $('dbgLog');
+  const d = document.createElement('div');
+  d.className = 'le';
+  d.innerHTML = `<span class="lt">${ts()}</span><span class="lk ${type}">${type}</span><span class="lm">${esc(msg)}</span>`;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+  try { window.parent.postMessage({ type:'iframe-log', logType:type, msg }, '*'); } catch(e) {}
+}
+function clearLog() { $('dbgLog').innerHTML=''; log('dom','Log cleared'); }
+
+// ── Display origin ─────────────────────────────────────────────────────────────
+$('originSpan').textContent = window.location.href.slice(0,70);
+
+// ── Data: FineUI dropdown options (extracted from real system) ─────────────────
+const DDL_DATA = {
+  // 线别 Line
+  'ddlxb': [
+    { text:'SMT Line A', value:'SMTA' },
+    { text:'SMT Line B', value:'SMTB' },
+    { text:'SMT Line C', value:'SMTC' },
+    { text:'DIP Line 1', value:'DIP1' },
+    { text:'DIP Line 2', value:'DIP2' },
+  ],
+  // 不良原因 Nguyên nhân không đạt
+  'ddlblyy': [
+    { text:'撞件 Va chạm,vỡ',   value:'ZJ' },
+    { text:'翘件 Đứng liệu',    value:'QJ' },
+    { text:'不良 Lỗi',          value:'BL' },
+    { text:'元件破损 Vỡ liệu',  value:'YJPS' },
+    { text:'反向 Ngược chiều',  value:'FX' },
+    { text:'漏件 Thiếu liệu',   value:'LJ' },
+    { text:'立碑 Dựng đứng',    value:'LB' },
+    { text:'位移 Lệch vị trí',  value:'YY' },
+  ],
+  // 处理方法 Phương pháp xử lí
+  'ddlclff': [
+    { text:'补件 Bù kiện',                                        value:'BJ' },
+    { text:'重新焊接 điều chỉnh vị trí và hàn cố định',           value:'ZXHJ' },
+    { text:'更换元件 Thay đổi nguyên liệu',                       value:'GHYJ' },
+    { text:'调整补焊 Diều chỉnh Bù thiếc',                        value:'TZBH' },
+    { text:'补锡 Bù chì',                                         value:'BX' },
+  ],
+  // 责任单位 Đơn vị phụ trách
+  'ddlzrdw': [
+    { text:'后段 Công đoạn sau',  value:'HD' },
+    { text:'SMT',                 value:'SMT' },
+    { text:'物料 Vật liệu',       value:'WL' },
+    { text:'设计 Thiết kế',       value:'SJ' },
+  ],
+  // 区分 Phân tích
+  'ddlqf': [
+    { text:'漏件 Thiếu liệu',     value:'LJ' },
+    { text:'翘件 Đứng liệu',      value:'QJ' },
+    { text:'坏件 liệu hỏng',      value:'HJ' },
+    { text:'方向反 lắp ngược liệu',value:'FXF' },
+    { text:'假焊 Hàn giả',        value:'JH' },
+    { text:'连锡 Dính chì',       value:'LX' },
+  ],
+  // 产品状态
+  'ddlcpzt': [
+    { text:'合格 Đạt',      value:'HG' },
+    { text:'不合格 Không đạt', value:'BHG' },
+    { text:'待定 Chờ xử lý', value:'DD' },
+  ],
+  // 子母板
+  'ddlzmb': [
+    { text:'无 không có', value:'W' },
+    { text:'子板 bản phụ', value:'ZB' },
+    { text:'母板 bản chính', value:'MB' },
+  ],
+  // 元件位号 Mã linh kiện
+  'ddlwh': [
+    { text:'T56', value:'T56' }, { text:'U64', value:'U64' },
+    { text:'U50', value:'U50' }, { text:'T45', value:'T45' },
+    { text:'U1',  value:'U1'  }, { text:'U28', value:'U28' },
+    { text:'D1',  value:'D1'  }, { text:'U16', value:'U16' },
+    { text:'L48', value:'L48' }, { text:'L50', value:'L50' },
+    { text:'L144',value:'L144'}, { text:'L141',value:'L141'},
+    { text:'Q12', value:'Q12' }, { text:'D2',  value:'D2'  },
+    { text:'J22', value:'J22' }, { text:'J21', value:'J21' },
+    { text:'U47', value:'U47' }, { text:'C100',value:'C100'},
+    { text:'R210',value:'R210'}, { text:'C205',value:'C205'},
+  ],
+  // 元件规格 (mapped from 元件位号 for demo)
+  'ddlyjgg': [
+    { text:'CHIP-LAN-T|隔离变压器|1000BASE-T|4.6*3.4*3.2mm', value:'SPEC001' },
+    { text:'IC|DC-DC|TPS563208DDCR|Buck|4.5-17V|3A|580kHz',  value:'SPEC002' },
+    { text:'LED|3.2*1.0|侧发光|红绿蓝三色|20mA',             value:'SPEC003' },
+    { text:'IND|252012|1uH|M|3.6A/3.0A|0.054欧',             value:'SPEC004' },
+    { text:'Triode|3904|NPN|SOT-23',                          value:'SPEC005' },
+    { text:'RFConnector|I-PEX|DC-6GHz',                       value:'SPEC006' },
+  ],
+  // 不良现象
+  'ddlblxx': [
+    { text:'拼不通 Ping Không thông',         value:'PBT' },
+    { text:'功率低 Công suất thấp',           value:'GLL' },
+    { text:'电源灯不亮 Đèn nguồn Không sáng', value:'DYDBL' },
+    { text:'死机 Treo máy',                   value:'SJ' },
+    { text:'无信号 Mất tín hiệu',             value:'WXH' },
+  ],
+  // 多选位号
+  'ddldgwh': [
+    { text:'D1,D2 (LED group)',    value:'D1D2' },
+    { text:'U1,U2 (CPU group)',    value:'U1U2' },
+    { text:'L48,L50 (IND group)',  value:'L4850' },
+    { text:'T45,T56 (LAN group)',  value:'T4556' },
+  ],
+};
+
+// ── Hidden value interceptor ───────────────────────────────────────────────────
+const origValDesc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+
+function interceptHidden(hiddenEl, badgeId) {
+  Object.defineProperty(hiddenEl, 'value', {
+    get() { return origValDesc.get.call(this); },
+    set(v) {
+      origValDesc.set.call(this, v);
+      if (badgeId) {
+        const b = $(badgeId);
+        if (b) b.innerHTML = `$Value: <strong style="color:#e8c870">${v || '(empty)'}</strong>`;
+      }
+      log('hidden', `[hidden] name="${hiddenEl.name}" → "${v}"`);
+      hiddenEl.dispatchEvent(new Event('change', {bubbles:true}));
+      hiddenEl.dispatchEvent(new Event('input',  {bubbles:true}));
+    }
+  });
+  new MutationObserver(() => {
+    const v = origValDesc.get.call(hiddenEl);
+    if (badgeId) {
+      const b = $(badgeId);
+      if (b) b.innerHTML = `$Value: <strong style="color:#e8c870">${v || '(empty)'}</strong>`;
+    }
+  }).observe(hiddenEl, { attributes: true, attributeFilter: ['value'] });
+}
+
+// ── Build FineUI DropDownList ──────────────────────────────────────────────────
+function buildDDL(fieldKey, panelId, opts = {}) {
+  /*
+   fieldKey: 'ddlblyy'
+   panelId:  'ContentPanel2'
+   opts.editable: bool (text input accepts typing)
+   opts.noHidden: bool (no $Value hidden input)
+   opts.badgeId:  id of badge element
+   opts.onChange: callback(item)
+  */
+  const wrapperId  = `${panelId}_${fieldKey}`;
+  const textId     = `${panelId}_${fieldKey}-inputEl`;
+  const hiddenId   = `${panelId}_${fieldKey}-hiddenEl`;
+  const listId     = `${panelId}_${fieldKey}-list`;
+
+  const textEl   = $(textId);
+  const hiddenEl = opts.noHidden ? null : $(hiddenId);
+  const listEl   = $(listId);
+  const data     = DDL_DATA[fieldKey] || [];
+
+  if (!textEl || !listEl) return;
+
+  if (hiddenEl) interceptHidden(hiddenEl, opts.badgeId || null);
+
+  let selVal = '', selText = '', isOpen = false;
+
+  function render(filter) {
+    listEl.innerHTML = '';
+    const items = opts.editable && filter
+      ? data.filter(d => d.text.toLowerCase().includes(filter.toLowerCase()) ||
+                         d.value.toLowerCase().includes(filter.toLowerCase()))
+      : data;
+
+    if (!items.length) {
+      listEl.innerHTML = '<div class="f-ddl-item-empty">No results</div>';
+      return;
+    }
+    items.forEach(item => {
+      const d = document.createElement('div');
+      d.className = 'f-ddl-item' + (item.value === selVal ? ' selected' : '');
+      d.innerHTML = esc(item.text);
+      d.addEventListener('mousedown', e => {
+        e.preventDefault();
+        selVal  = item.value;
+        selText = item.text;
+        textEl.value = item.text;
+        if (hiddenEl) hiddenEl.value = item.value;
+        textEl.dispatchEvent(new Event('input',  {bubbles:true}));
+        textEl.dispatchEvent(new Event('change', {bubbles:true}));
+        close();
+        log('change', `[ddl] name="${textEl.name}" text="${item.text}" → $Value="${item.value}"`);
+        if (opts.onChange) opts.onChange(item);
+      });
+      listEl.appendChild(d);
+    });
+  }
+
+  function open()  { render(opts.editable ? textEl.value : ''); listEl.classList.add('open'); isOpen = true; }
+  function close() { listEl.classList.remove('open'); isOpen = false; }
+
+  textEl.addEventListener('focus', () => open());
+  if (opts.editable) {
+    textEl.addEventListener('input', () => { render(textEl.value); if (!isOpen) open(); });
+  }
+  textEl.addEventListener('blur', () => setTimeout(close, 160));
+  textEl.addEventListener('click', () => { if (isOpen) close(); else open(); });
+}
+
+// ── Init all DDLs ──────────────────────────────────────────────────────────────
+
+// Panel 1
+buildDDL('ddlxb', 'ContentPanel1', { badgeId:'badge-ddlxb' });
+
+// Panel 2 — dropdowns with $Value hidden
+buildDDL('ddlblyy', 'ContentPanel2', {
+  badgeId: 'badge-ddlblyy',
+  onChange(item) {
+    // Simulate dependent fields auto-populating (readonly readonly fields)
+    log('dom', `[cascade] ddlblyy="${item.value}" → auto-setting ddlclff, ddlzrdw, ddlqf`);
+    // Simple cascade demo
+    const cascadeMap = {
+      'ZJ':  { clff:{ text:'补件 Bù kiện', value:'BJ' },              zrdw:{ text:'后段 Công đoạn sau', value:'HD' }, qf:{ text:'漏件 Thiếu liệu', value:'LJ' }},
+      'QJ':  { clff:{ text:'重新焊接 điều chỉnh vị trí và hàn cố định', value:'ZXHJ' }, zrdw:{ text:'SMT', value:'SMT' },              qf:{ text:'翘件 Đứng liệu', value:'QJ' }},
+      'BL':  { clff:{ text:'更换元件 Thay đổi nguyên liệu', value:'GHYJ' },             zrdw:{ text:'物料 Vật liệu', value:'WL' },      qf:{ text:'坏件 liệu hỏng', value:'HJ' }},
+      'YJPS':{ clff:{ text:'更换元件 Thay đổi nguyên liệu', value:'GHYJ' },             zrdw:{ text:'后段 Công đoạn sau', value:'HD' }, qf:{ text:'坏件 liệu hỏng', value:'HJ' }},
+      'FX':  { clff:{ text:'调整补焊 Diều chỉnh Bù thiếc', value:'TZBH' },              zrdw:{ text:'SMT', value:'SMT' },              qf:{ text:'方向反 lắp ngược liệu', value:'FXF' }},
+      'LJ':  { clff:{ text:'补件 Bù kiện', value:'BJ' },              zrdw:{ text:'后段 Công đoạn sau', value:'HD' }, qf:{ text:'漏件 Thiếu liệu', value:'LJ' }},
+    };
+    const m = cascadeMap[item.value];
+    if (!m) return;
+    function setDDLVal(fieldKey, panelId, item) {
+      const ti = $(`${panelId}_${fieldKey}-inputEl`);
+      const hi = $(`${panelId}_${fieldKey}-hiddenEl`);
+      if (ti) { ti.value = item.text; ti.dispatchEvent(new Event('change',{bubbles:true})); }
+      if (hi) { hi.value = item.value; }
+    }
+    setDDLVal('ddlclff', 'ContentPanel2', m.clff);
+    setDDLVal('ddlzrdw', 'ContentPanel2', m.zrdw);
+    setDDLVal('ddlqf',   'ContentPanel2', m.qf);
+  }
+});
+buildDDL('ddlclff', 'ContentPanel2', { badgeId:'badge-ddlclff' });
+buildDDL('ddlzrdw', 'ContentPanel2', { badgeId:'badge-ddlzrdw' });
+buildDDL('ddlqf',   'ContentPanel2', { badgeId:'badge-ddlqf' });
+buildDDL('ddlcpzt', 'ContentPanel2', { badgeId:'badge-ddlcpzt' });
+buildDDL('ddlzmb',  'ContentPanel2', { noHidden: true });
+buildDDL('ddlwh',   'ContentPanel2', { noHidden: true, editable: true,
+  onChange(item) {
+    // Auto-set 元件规格 based on 位号
+    const specMap = {
+      T56:'SPEC001',T45:'SPEC001',U64:'SPEC002',U50:'SPEC002',
+      U16:'SPEC002',D1:'SPEC003', D2:'SPEC003', L48:'SPEC004',
+      L50:'SPEC004',L141:'SPEC004',L144:'SPEC004',Q12:'SPEC005',
+      J22:'SPEC006',J21:'SPEC006', U47:'SPEC002',
+    };
+    const specVal = specMap[item.value];
+    const specItem = (DDL_DATA['ddlyjgg'] || []).find(s => s.value === specVal);
+    if (specItem) {
+      const si = $('ContentPanel2_ddlyjgg-inputEl');
+      if (si) { si.value = specItem.text; si.dispatchEvent(new Event('change',{bubbles:true})); }
+      log('dom', `[cascade] ddlwh="${item.value}" → ddlyjgg="${specItem.text}"`);
+    }
+  }
+});
+buildDDL('ddlyjgg', 'ContentPanel2', { noHidden: true });
+buildDDL('ddlblxx', 'ContentPanel2', { badgeId:'badge-ddlblxx' });
+buildDDL('ddldgwh', 'ContentPanel2', { noHidden: true, editable: true });
+
+// ── NumberBox spinner ──────────────────────────────────────────────────────────
+function spinNum(inputId, delta) {
+  const el = $(inputId);
+  if (!el) return;
+  const v = parseFloat(el.value) || 0;
+  el.value = Math.max(0, v + delta);
+  el.dispatchEvent(new Event('input',  {bubbles:true}));
+  el.dispatchEvent(new Event('change', {bubbles:true}));
+}
+
+// ── Button handlers ────────────────────────────────────────────────────────────
+function handleBtnTJ() {
+  // Collect form and add to grid
+  const row = collectCurrentRow();
+  if (!row.blyy) {
+    alert('Please select 不良原因 Nguyên nhân!');
+    return;
+  }
+  addGridRow(row);
+  log('submit', `[btnTJ] Row added: MO=${row.mo} wh=${row.wh}`);
+  try { window.parent.postMessage({ type:'iframe-row-add', payload: row }, '*'); } catch(e) {}
+}
+
+function handleBtnCZ() {
+  // Reset ContentPanel2 fields
+  ['ddlblyy','ddlclff','ddlzrdw','ddlqf','ddlcpzt','ddlzmb','ddlwh','ddlyjgg','ddlblxx','ddldgwh'].forEach(key => {
+    const ti = document.querySelector(`[name="ContentPanel2$${key}"]`);
+    const hi = document.querySelector(`[name="ContentPanel2$${key}$Value"]`);
+    if (ti) { ti.value = ''; ti.dispatchEvent(new Event('change',{bubbles:true})); }
+    if (hi) { hi.value = ''; }
+  });
+  ['tbxyjzq','tbxxlh','tbxwldm','tbxblsl','tbxnbz','tbxdxwhlh','tbxdxwhms'].forEach(key => {
+    const el = document.querySelector(`[name="ContentPanel2$${key}"]`);
+    if (el) { el.value = ''; el.dispatchEvent(new Event('change',{bubbles:true})); }
+  });
+  // Reset badges
+  ['ddlblyy','ddlclff','ddlzrdw','ddlqf','ddlcpzt','ddlblxx'].forEach(k => {
+    const b = $('badge-'+k);
+    if (b) b.innerHTML = '$Value: <strong>—</strong>';
+  });
+  log('dom', '[btnCZ] Form reset');
+}
+
+function handleBtnGet() {
+  const dgwh = document.querySelector('[name="ContentPanel2$ddldgwh"]');
+  const val = dgwh ? dgwh.value : '';
+  log('dom', `[btnGet] Fetching specs for multi-position: "${val}"`);
+  if (!val) { alert('Please select 多选位号 first!'); return; }
+  // Simulate populate
+  const el = document.querySelector('[name="ContentPanel2$tbxdxwhms"]');
+  if (el) { el.value = 'CHIP-LAN-T|LED|IC|IND (simulated)'; el.dispatchEvent(new Event('change',{bubbles:true})); }
+}
+
+// ── Grid data ──────────────────────────────────────────────────────────────────
+const GRID_ROWS = [
+  { mo:'MY259023', blyy:'撞件 Va chạm,vỡ',  clff:'补件 Bù kiện',                    zrdw:'后段 Công đoạn sau',  qf:'漏件 Thiếu liệu',      zmb:'无', wh:'T56', wldm:'2420500037', spec:'CHIP-LAN-T|隔离变压器|1000BASE-T', blxx:'拼不通 Ping Không thông',       stt:'YCF9023011964', bz:'',      time:'2025/12/31 12:47:57' },
+  { mo:'MY25B290', blyy:'翘件 Đứng liệu',   clff:'重新焊接 điều chỉnh vị trí',        zrdw:'SMT',                 qf:'翘件 Đứng liệu',       zmb:'无', wh:'U64', wldm:'3165500014', spec:'Directional coupler|SLCP06',      blxx:'功率低 Công suất thấp',         stt:'YCFB290007448', bz:'',      time:'2025/12/31 12:46:55' },
+  { mo:'MY25B290', blyy:'不良 Lỗi',         clff:'更换元件 Thay đổi nguyên liệu',    zrdw:'物料 Vật liệu',       qf:'坏件 liệu hỏng',       zmb:'无', wh:'U50', wldm:'3185500121', spec:'IC|Diplexer|SLFD18-5R950G',       blxx:'电源灯不亮 Đèn nguồn Không sáng',stt:'YCFB290008177', bz:'',      time:'2025/12/31 12:44:55' },
+  { mo:'MY258508', blyy:'元件破损 Vỡ liệu', clff:'更换元件 Thay đổi nguyên liệu',    zrdw:'后段 Công đoạn sau',  qf:'坏件 liệu hỏng',       zmb:'无', wh:'T45', wldm:'2420500037', spec:'CHIP-LAN-T|隔离变压器|1000BASE-T', blxx:'拼不通 Ping Không thông',       stt:'YCF8508016798', bz:'99-17', time:'2025/12/31 12:41:18' },
+  { mo:'MY25A196', blyy:'不良 Lỗi',         clff:'更换元件 Thay đổi nguyên liệu',    zrdw:'物料 Vật liệu',       qf:'坏件 liệu hỏng',       zmb:'无', wh:'U1',  wldm:'/',          spec:'/',                               blxx:'电源灯不亮 Đèn nguồn Không sáng',stt:'YCFA196000334', bz:'99-28', time:'2025/12/31 12:39:35' },
+  { mo:'MY25A346', blyy:'不良 Lỗi',         clff:'更换元件 Thay đổi nguyên liệu',    zrdw:'物料 Vật liệu',       qf:'坏件 liệu hỏng',       zmb:'无', wh:'U28', wldm:'2175500575', spec:'IC|NAND FLASH|F50D1G41LB',        blxx:'功率低 Công suất thấp',         stt:'YCFA346000243', bz:'',      time:'2025/12/30 19:43:58' },
+  { mo:'MY25B074', blyy:'反向 Ngược chiều', clff:'调整补焊 Diều chỉnh Bù thiếc',    zrdw:'SMT',                 qf:'方向反 lắp ngược liệu', zmb:'子板',wh:'D1',  wldm:'2506500204', spec:'LED|3.2*1.0|侧发光|红绿蓝三色',   blxx:'电源灯不亮 Đèn nguồn Không sáng',stt:'YCFB074000777', bz:'',      time:'2025/12/30 19:42:11' },
+];
+
+let rowCounter = GRID_ROWS.length;
+
+function renderGrid(rows) {
+  const tbody = $('grid-tbody');
+  tbody.innerHTML = '';
+  rows.forEach((r,i) => {
+    const tr = document.createElement('tr');
+    tr.className = i%2===1 ? 'alt' : '';
+    tr.dataset.rowid = 'frow'+i;
+    tr.innerHTML = `
+      <td class="td-del"><a class="del-btn" href="javascript:void(0)" onclick="deleteRow(${i})" title="删除 xóa bỏ">✕</a></td>
+      <td class="td-num">${i+1}</td>
+      <td class="td-mo">${esc(r.mo)}</td>
+      <td>${esc(r.blyy)}</td>
+      <td>${esc(r.clff)}</td>
+      <td>${esc(r.zrdw)}</td>
+      <td>${esc(r.qf)}</td>
+      <td>${esc(r.zmb)}</td>
+      <td>${esc(r.wh)}</td>
+      <td>${esc(r.wldm)}</td>
+      <td class="td-spec" title="${esc(r.spec)}">${esc(r.spec)}</td>
+      <td>${esc(r.blxx)}</td>
+      <td class="td-stt">${esc(r.stt)}</td>
+      <td>${esc(r.bz)}</td>
+      <td class="td-time">${esc(r.time)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function deleteRow(idx) {
+  if (!confirm('确定删除此记录？ Bạn có chắc chắn xóa bản ghi này không')) return;
+  GRID_ROWS.splice(idx,1);
+  renderGrid(GRID_ROWS);
+  log('dom', `[grid] Row ${idx+1} deleted`);
+}
+
+function collectCurrentRow() {
+  const g = n => {
+    const el = document.querySelector(`[name="ContentPanel2$${n}"]`);
+    return el ? el.value : '';
+  };
+  const g3 = n => {
+    const el = document.querySelector(`[name="ContentPanel3$${n}"]`);
+    return el ? el.value : '';
+  };
+  return {
+    mo:   (document.querySelector('[name="ContentPanel1$tbxmo"]') || {}).value || 'UNKNOWN',
+    blyy: g('ddlblyy'), clff: g('ddlclff'), zrdw: g('ddlzrdw'),
+    qf:   g('ddlqf'),   zmb:  g('ddlzmb'),  wh:   g('ddlwh'),
+    wldm: g('tbxwldm'), spec: g('ddlyjgg'), blxx: g('ddlblxx'),
+    stt:  g('tbxxlh'),  bz:   g('tbxnbz'),
+    time: new Date().toLocaleString('zh-CN').replace(',',''),
+  };
+}
+
+function addGridRow(row) {
+  GRID_ROWS.unshift(row);
+  renderGrid(GRID_ROWS);
+}
+
+renderGrid(GRID_ROWS);
+
+// ── Global event monitoring ────────────────────────────────────────────────────
+document.addEventListener('change', function(e) {
+  const t = e.target; if (!t.tagName) return;
+  if (t.type === 'hidden') return; // hidden tracked separately
+  const val = String(t.value).substring(0,50);
+  log('change', `[${t.tagName.toLowerCase()}] name="${t.name||''}" id="${t.id||''}" → "${val}"`);
+}, true);
+
+document.addEventListener('input', function(e) {
+  const t = e.target;
+  if (!t.tagName || t.type==='hidden') return;
+  log('input', `[${t.tagName.toLowerCase()}] name="${t.name||''}" → "${String(t.value).substring(0,30)}"`);
+}, true);
+
+// ── Form submit ────────────────────────────────────────────────────────────────
+document.getElementById('Form1').addEventListener('submit', function(e) {
+  e.preventDefault();
+  log('submit', 'Form1 submitted');
+
+  const out = {};
+  for (const [k,v] of new FormData(this).entries()) {
+    if (out[k]!==undefined) {
+      if (!Array.isArray(out[k])) out[k]=[out[k]];
+      out[k].push(v);
+    } else out[k]=v;
+  }
+
+  $('formOutput').textContent = JSON.stringify(out, null, 2);
+  log('submit', `✅ Payload: ${Object.keys(out).length} keys collected`);
+
+  try { window.parent.postMessage({ type:'iframe-submit', payload:out }, '*'); } catch(e2){}
+});
+
+log('dom', `Form1 ready — ${new Date().toLocaleString()}`);
+log('dom', `Fields: ContentPanel1(6) + ContentPanel2(17) + ContentPanel3(3 hidden) = 26 inputs`);
+log('dom', `ComboBoxes with $Value: ddlxb, ddlblyy, ddlclff, ddlzrdw, ddlqf, ddlcpzt, ddlblxx`);
+log('dom', `ComboBoxes WITHOUT $Value: ddlzmb, ddlwh, ddlyjgg, ddldgwh`);
+</script>
+</body>
+</html>

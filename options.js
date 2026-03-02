@@ -9,7 +9,7 @@
  * ──────╚══╝─╚╝──────────────────────────╚══╝
  * 
  * TypeLess - Auto Form Filler
- * v1.0.3 by TRONG.PRO
+ * v1.0.6 by TRONG.PRO
  */
 
 /**
@@ -137,6 +137,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const file = e.target.files[0];
             if (!file) return;
             try {
+                // Guard against memory exhaustion from huge files (max 5 MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(i18n.t('alert.error_import'));
+                    return;
+                }
                 const text = await file.text();
                 const importedData = JSON.parse(text);
                 const result = await StorageManager.restoreBackupData(importedData);
@@ -215,6 +220,17 @@ function initProfileManager() {
         renderProfileList(e.target.value.trim().toLowerCase());
     });
 
+    document.getElementById('btn-refresh-profiles-list')?.addEventListener('click', async () => {
+        await loadProfilesList();
+    });
+
+    document.getElementById('btn-delete-all-profiles')?.addEventListener('click', async () => {
+        if (!_allProfiles || _allProfiles.length === 0) return;
+        if (!confirm(i18n.t('options.confirm_delete_all') || `Xóa tất cả ${_allProfiles.length} profile? Thao tác này không thể hoàn tác.`)) return;
+        await StorageManager.clearAllProfiles();
+        await loadProfilesList();
+    });
+
     // Back buttons
     document.getElementById('editor-back-btn').addEventListener('click', showProfilesList);
     document.getElementById('editor-back-btn2').addEventListener('click', showProfilesList);
@@ -259,7 +275,7 @@ function renderProfileList(searchQuery) {
     if (profiles.length === 0) {
         // Safe: all user-supplied values are escaped via escHtml() before insertion
         const msg = searchQuery
-            ? `<div class="empty-profiles"><div style="font-size:36px">🔍</div><p>${i18n.t('options.profiles_no_match', { query: escHtml(searchQuery) })}</p></div>`
+            ? `<div class="empty-profiles"><div style="font-size:36px"><img src="icons/search.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[search]"></div><p>${i18n.t('options.profiles_no_match', { query: escHtml(searchQuery) })}</p></div>`
             : `<div class="empty-profiles"><div style="font-size:40px">📭</div><p>${i18n.t('options.profiles_empty')}</p></div>`;
         container.innerHTML = msg;
         return;
@@ -269,13 +285,16 @@ function renderProfileList(searchQuery) {
     profiles.forEach(profile => {
         const card = document.createElement('div');
         card.className = 'profile-card';
+        card.dataset.profileId = profile.id;
+        card.draggable = true;
         const fieldCount = profile.fields?.length || 0;
         const focusField = profile.fields?.find(f => f.focusAfterFill);
         const focusHint = focusField
-            ? `<span title="${i18n.t('options.col_focus')}" style="color:#3291B6;">🎯</span>`
+            ? `<span title="${i18n.t('options.col_focus')}" style="color:#3291B6;"><img src="icons/target.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[target]"></span>`
             : '';
 
         card.innerHTML = `
+            <span class="drag-handle" title="Kéo để sắp xếp thứ tự">⠿</span>
             <div class="profile-card-info">
                 <div class="profile-card-name">${escHtml(profile.name)}</div>
                 <div class="profile-card-meta" title="${escHtml(profile.url || '')}">
@@ -285,6 +304,10 @@ function renderProfileList(searchQuery) {
             <span class="profile-card-badge">${i18n.t('field.count', { count: fieldCount })}</span>
             ${focusHint}
             <button class="btn-edit-profile">${i18n.t('options.btn_edit')}</button>
+            <button class="btn-delete-profile" title="${i18n.t('btn.delete_profile')}" style="
+                background:#fff0f0; border:1px solid #fca5a5; color:#dc2626;
+                border-radius:6px; padding:4px 8px; font-size:16px; line-height:1;
+                cursor:pointer; flex-shrink:0; transition:background 0.15s;">×</button>
         `;
 
         card.querySelector('.btn-edit-profile').addEventListener('click', (e) => {
@@ -292,9 +315,56 @@ function renderProfileList(searchQuery) {
             openProfileEditor(profile);
         });
 
+        card.querySelector('.btn-delete-profile').addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (!confirm(i18n.t('confirm.delete', { name: profile.name }))) return;
+            await StorageManager.deleteProfile(profile.id);
+            await loadProfilesList();
+        });
+
         card.addEventListener('click', () => openProfileEditor(profile));
         container.appendChild(card);
     });
+
+    // ── Drag-and-drop reorder for options profile list ────────────────────
+    let _dndSrcId = null;
+    container.querySelectorAll('.profile-card').forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+            _dndSrcId = card.dataset.profileId;
+            card.classList.add('is-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        card.addEventListener('dragend', () => {
+            card.classList.remove('is-dragging');
+            container.querySelectorAll('.profile-card').forEach(c => c.classList.remove('drag-over-top', 'drag-over-bottom'));
+        });
+        card.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (card.dataset.profileId === _dndSrcId) return;
+            const rect = card.getBoundingClientRect();
+            container.querySelectorAll('.profile-card').forEach(c => c.classList.remove('drag-over-top', 'drag-over-bottom'));
+            card.classList.add(e.clientY < rect.top + rect.height / 2 ? 'drag-over-top' : 'drag-over-bottom');
+        });
+        card.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            if (!_dndSrcId || _dndSrcId === card.dataset.profileId) return;
+            container.querySelectorAll('.profile-card').forEach(c => c.classList.remove('drag-over-top', 'drag-over-bottom'));
+
+            const rect = card.getBoundingClientRect();
+            const insertBefore = e.clientY < rect.top + card.getBoundingClientRect().height / 2;
+
+            const globalIds = _allProfiles.map(p => p.id);
+            const srcIdx = globalIds.indexOf(_dndSrcId);
+            globalIds.splice(srcIdx, 1);
+            const dstIdx = globalIds.indexOf(card.dataset.profileId);
+            globalIds.splice(insertBefore ? dstIdx : dstIdx + 1, 0, _dndSrcId);
+
+            await StorageManager.reorderProfiles(globalIds);
+            _dndSrcId = null;
+            await loadProfilesList();
+        });
+    });
+    // ─────────────────────────────────────────────────────────────────────
 }
 
 function showProfilesList() {
@@ -571,6 +641,16 @@ function updateUI() {
     document.querySelectorAll('[data-i18n-title]').forEach(element => {
         const key = element.getAttribute('data-i18n-title');
         element.title = t(key);
+    });
+    // Re-translate dynamically rendered elements in profile list
+    document.querySelectorAll('.btn-edit-profile').forEach(btn => {
+        btn.textContent = t('options.btn_edit');
+    });
+    document.querySelectorAll('.btn-delete-profile').forEach(btn => {
+        btn.title = t('btn.delete_profile');
+    });
+    document.querySelectorAll('.profile-card .drag-handle').forEach(el => {
+        el.title = t('options.drag_to_reorder') || 'Kéo để sắp xếp thứ tự';
     });
 }
 

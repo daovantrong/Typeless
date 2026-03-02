@@ -411,6 +411,20 @@
             box-shadow: 0 2px 8px rgba(50,145,182,0.08);
         }
 
+        .profile-card.is-dragging { opacity: 0.4; }
+        .profile-card.drag-over-top    { border-top: 2px solid #3291B6; }
+        .profile-card.drag-over-bottom { border-bottom: 2px solid #3291B6; }
+
+        .profile-card .drag-handle {
+            cursor: grab;
+            color: #ccc;
+            font-size: 16px;
+            user-select: none;
+            flex-shrink: 0;
+            padding: 0 2px;
+        }
+        .profile-card .drag-handle:active { cursor: grabbing; }
+
         .profile-card-info { flex: 1; min-width: 0; }
         .profile-card-name {
             font-weight: 700;
@@ -555,8 +569,8 @@
 
         .focus-btn:hover { border-color: #3291B6; background: #e0f2f1; }
         .focus-btn.active { border-color: #3291B6; background: #3291B6; }
-        .focus-btn.active::after { content: '🎯'; filter: brightness(10); }
-        .focus-btn::after { content: '🎯'; }
+        .focus-btn::after { content: ''; display: inline-block; width: 1em; height: 1em; background: url('icons/target.svg') center/contain no-repeat; vertical-align: -0.15em; }
+        .focus-btn.active::after { content: ''; display: inline-block; width: 1em; height: 1em; background: url('icons/target.svg') center/contain no-repeat; vertical-align: -0.15em; filter: brightness(10); }
 
         .delete-field-btn {
             width: 28px;
@@ -1000,12 +1014,12 @@
 
                 <!-- ── Overview chips ────────────────────────────────── -->
                 <div class="guide-chips">
-                    <span class="chip chip-blue">🖥️ Toolbar</span>
-                    <span class="chip chip-green">💾 Save Profile</span>
-                    <span class="chip chip-purple">▶️ Apply Profile</span>
-                    <span class="chip chip-orange">⚡ Smart Fill</span>
-                    <span class="chip chip-teal">🎯 Focus Field</span>
-                    <span class="chip chip-red">📱 User-Agent</span>
+                    <span class="chip chip-blue"><img src="icons/monitor.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[screen]"> Toolbar</span>
+                    <span class="chip chip-green"><img src="icons/save.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[save]"> Save Profile</span>
+                    <span class="chip chip-purple"><img src="icons/play-arrow.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[play]"> Apply Profile</span>
+                    <span class="chip chip-orange"><img src="icons/lightning.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[fast]"> Smart Fill</span>
+                    <span class="chip chip-teal"><img src="icons/target.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[target]"> Focus Field</span>
+                    <span class="chip chip-red"><img src="icons/mobile.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[mobile]"> User-Agent</span>
                 </div>
 
                 <!-- ══════════════════════════════════════════════════════
@@ -1014,7 +1028,7 @@
                 <div class="guide-section">
                     <div class="guide-section-title">
                         <span class="guide-step-num">1</span>
-                        <span data-i18n="guide.s1_title">🖥️ Toolbar</span>
+                        <span data-i18n="guide.s1_title"><img src="icons/monitor.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[screen]"> Toolbar</span>
                     </div>
                     <p class="guide-desc" data-i18n="guide.s1_desc">
                         After installation, the TypeLess toolbar appears at the <strong>bottom of every web page</strong>. You can minimize, hide, or drag it to move.
@@ -1029,28 +1043,28 @@
 
                     <div class="guide-callout-grid">
                         <div class="callout callout-blue">
-                            <div class="callout-icon">💾</div>
+                            <div class="callout-icon"><img src="icons/save.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[save]"></div>
                             <div>
                                 <strong>Save</strong><br>
                                 <span data-i18n="guide.s1_save_desc">Save current form as a profile</span>
                             </div>
                         </div>
                         <div class="callout callout-purple">
-                            <div class="callout-icon">⚡</div>
+                            <div class="callout-icon"><img src="icons/lightning.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[fast]"></div>
                             <div>
                                 <strong>Smart Fill</strong><br>
                                 <span data-i18n="guide.s1_smartfill_desc">Auto-fill from personal info</span>
                             </div>
                         </div>
                         <div class="callout callout-green">
-                            <div class="callout-icon">📋</div>
+                            <div class="callout-icon"><img src="icons/clipboard.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[clip]"></div>
                             <div>
                                 <strong>Profile list</strong><br>
                                 <span data-i18n="guide.s1_profilelist_desc">Click profile name to fill instantly</span>
                             </div>
                         </div>
                         <div class="callout callout-orange">
-                            <div class="callout-icon">🔧</div>
+                            <div class="callout-icon"><img src="icons/settings.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[tool]"></div>
                             <div>
                                 <strong data-i18n="guide.s1_utils">Utilities</strong><br>
                                 <span data-i18n="guide.s1_utils_desc">Screenshot, save HTML, switch UA</span>
@@ -1065,7 +1079,7 @@
                 <div class="guide-section">
                     <div class="guide-section-title">
                         <span class="guide-step-num">2</span>
-                        <span data-i18n="guide.s2_title">💾 Save Profile</span>
+                        <span data-i18n="guide.s2_title"><img src="icons/save.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[save]"> Save Profile</span>
                     </div>
                     <p class="guide-desc" data-i18n="guide.s2_desc">
                         Fill in the form as usual, then click the <strong>Save</strong> button on the toolbar. A dialog will appear letting you choose which fields to save.
@@ -1104,16 +1118,16 @@
 
                         <!-- Focus field highlight -->
                         <div class="guide-highlight-box">
-                            <div class="highlight-header" data-i18n="guide.s2_focus_title">🎯 Choose Focus Field (optional)</div>
+                            <div class="highlight-header" data-i18n="guide.s2_focus_title"><img src="icons/target.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[target]"> Choose Focus Field (optional)</div>
                             <div class="highlight-body">
                                 <div class="screenshot-box" style="margin:0 0 10px;">
                                     <img src="guide/modal-focus-btn.png"
                                          alt="" data-i18n-alt="guide.alt_modal_focus_btn"
                                          class="screenshot-img screenshot-medium">
-                                    <div class="screenshot-caption" data-i18n="guide.s2_focus_caption">🎯 column — click to select the field focused after apply</div>
+                                    <div class="screenshot-caption" data-i18n="guide.s2_focus_caption"><img src="icons/target.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[target]"> column — click to select the field focused after apply</div>
                                 </div>
                                 <p style="margin:0; font-size:13px; color:#4a5568;" data-i18n="guide.s2_focus_desc">
-                                    Click the <strong>🎯</strong> button at the end of a row to mark that field for <strong>auto-focus</strong> (cursor jumps there) right after applying the profile. Handy for continuing to type after auto-fill.
+                                    Click the <strong><img src="icons/target.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[target]"></strong> button at the end of a row to mark that field for <strong>auto-focus</strong> (cursor jumps there) right after applying the profile. Handy for continuing to type after auto-fill.
                                 </p>
                             </div>
                         </div>
@@ -1126,7 +1140,7 @@
                 <div class="guide-section">
                     <div class="guide-section-title">
                         <span class="guide-step-num">3</span>
-                        <span data-i18n="guide.s3_title">▶️ Apply Profile</span>
+                        <span data-i18n="guide.s3_title"><img src="icons/play-arrow.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[play]"> Apply Profile</span>
                     </div>
                     <p class="guide-desc" data-i18n="guide.s3_desc">
                         Next time you visit a page with a form, just click the profile name on the toolbar — all fields will be filled instantly.
@@ -1140,7 +1154,7 @@
                     </div>
 
                     <div class="guide-tip">
-                        <span class="tip-icon">⚡</span>
+                        <span class="tip-icon"><img src="icons/lightning.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[fast]"></span>
                         <div data-i18n="guide.s3_tip">
                             Use <kbd>Ctrl+Shift+H</kbd> to quickly show/hide the toolbar, and <kbd>Ctrl+Shift+F</kbd> (if set) to apply the last profile.
                         </div>
@@ -1164,7 +1178,7 @@
                 <div class="guide-section">
                     <div class="guide-section-title">
                         <span class="guide-step-num">4</span>
-                        <span data-i18n="guide.s4_title">⚡ Smart Fill</span>
+                        <span data-i18n="guide.s4_title"><img src="icons/lightning.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[fast]"> Smart Fill</span>
                     </div>
                     <p class="guide-desc" data-i18n="guide.s4_desc">
                         Smart Fill automatically detects and fills common fields (full name, email, phone, address…) based on the <strong>Personal Info</strong> you saved in the <em>Personal Info</em> tab.
@@ -1172,7 +1186,7 @@
 
                     <div class="guide-two-col">
                         <div>
-                            <div class="substep-label" data-i18n="guide.s4_col1_label">Click ⚡ on the toolbar</div>
+                            <div class="substep-label" data-i18n="guide.s4_col1_label">Click <img src="icons/lightning.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[fast]"> on the toolbar</div>
                             <div class="screenshot-box">
                                 <img src="guide/toolbar-smart-fill.png"
                                      alt="" data-i18n-alt="guide.alt_toolbar_smart_fill"
@@ -1205,7 +1219,7 @@
                 <div class="guide-section">
                     <div class="guide-section-title">
                         <span class="guide-step-num">5</span>
-                        <span data-i18n="guide.s5_title">🗂️ Advanced Profile Management</span>
+                        <span data-i18n="guide.s5_title"><img src="icons/folder-tab.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[folder]"> Advanced Profile Management</span>
                     </div>
                     <p class="guide-desc" data-i18n="guide.s5_desc">
                         The <strong>Profiles</strong> tab in this settings page lets you edit each profile in detail: rename, change field values, fix CSS selectors, add/remove fields, reset the focus field.
@@ -1239,7 +1253,7 @@
                 <div class="guide-section guide-section-last">
                     <div class="guide-section-title">
                         <span class="guide-step-num">6</span>
-                        <span data-i18n="guide.s6_title">⌨️ Shortcuts & Tips</span>
+                        <span data-i18n="guide.s6_title"><img src="icons/keyboard.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[keyboard]"> Shortcuts & Tips</span>
                     </div>
 
                     <div class="shortcut-table">
@@ -1274,7 +1288,7 @@
                             </div>
                         </div>
                         <div class="tip-card">
-                            <div class="tip-card-icon">📱</div>
+                            <div class="tip-card-icon"><img src="icons/mobile.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[mobile]"></div>
                             <div class="tip-card-text">
                                 <strong data-i18n="guide.s6_tip2_title">Mobile simulation</strong><br>
                                 <span data-i18n="guide.s6_tip2_desc">The <em>User Agents</em> tab lets you switch UA to view pages as on a phone.</span>
@@ -1288,7 +1302,7 @@
                             </div>
                         </div>
                         <div class="tip-card">
-                            <div class="tip-card-icon">🔓</div>
+                            <div class="tip-card-icon"><img src="icons/unlock.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[unlock]"></div>
                             <div class="tip-card-text">
                                 <strong data-i18n="guide.s6_tip4_title">Unlock form</strong><br>
                                 <span data-i18n="guide.s6_tip4_desc">The Unlock Right Click button removes readonly/disabled from locked input fields.</span>
@@ -1306,14 +1320,33 @@
                 <!-- LIST VIEW -->
                 <div id="profiles-view" class="visible">
                     <div class="section-header">
-                        <h2>📋 <span data-i18n="options.menu_profiles">Profiles</span> <span id="profile-count-badge" class="profile-count-badge">0</span></h2>
+                        <h2><img src="icons/clipboard.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[clip]"> <span data-i18n="options.menu_profiles">Profiles</span> <span id="profile-count-badge" class="profile-count-badge">0</span></h2>
                         <p data-i18n="options.profiles_hint">Manage, edit and customise your saved profiles and their fields.</p>
                     </div>
 
-                    <div class="profile-search-bar">
-                        <input type="text" id="profile-search" class="form-control" data-i18n-placeholder="options.profiles_search" placeholder="🔍  Search profiles…" style="height:38px;">
+                    <div class="profile-search-bar" style="position:relative;">
+                        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:0.4;line-height:1;"><img src="icons/search.svg" style="width:14px;height:14px;vertical-align:middle;display:inline-block;" alt=""></span>
+                        <input type="text" id="profile-search" class="form-control" data-i18n-placeholder="options.profiles_search" placeholder="Search profiles…" style="height:38px;padding-left:30px;">
                     </div>
-
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0 2px; gap:8px;">
+                        <button id="btn-refresh-profiles-list" style="
+                            background:#f0f7ff; border:1px solid #93c5fd; color:#1d4ed8;
+                            border-radius:6px; padding:4px 12px; font-size:12px; font-weight:600;
+                            cursor:pointer; display:flex; align-items:center; gap:5px;
+                            transition: background 0.15s;">
+                            <img src="icons/refresh.svg" style="width:13px;height:13px;filter:invert(22%) sepia(93%) saturate(1352%) hue-rotate(201deg) brightness(97%) contrast(97%);">
+                            <span data-i18n="btn.refresh_list">Refresh List</span>
+                        </button>
+                        <button id="btn-delete-all-profiles" style="
+                            background:#fff0f0; border:1px solid #fca5a5; color:#dc2626;
+                            border-radius:6px; padding:4px 12px; font-size:12px; font-weight:600;
+                            cursor:pointer; display:flex; align-items:center; gap:5px;
+                            transition: background 0.15s;">
+                            <img src="icons/delete.svg" style="width:13px;height:13px;filter:invert(27%) sepia(89%) saturate(1956%) hue-rotate(337deg) brightness(90%) contrast(90%);">
+                            <span data-i18n="options.delete_all">Delete All</span>
+                        </button>
+                    </div>
+					
                     <div id="profiles-list" class="profile-list">
                         <div class="empty-profiles">
                             <div style="font-size:40px;">📭</div>
@@ -1352,7 +1385,7 @@
                                     <th class="col-value" data-i18n="options.col_value">Value</th>
                                     <th class="col-selector" data-i18n="options.col_selector">Selector</th>
                                     <th class="col-type" data-i18n="options.col_type">Type</th>
-                                    <th class="col-focus" data-i18n-title="options.col_focus" title="Focus after fill">🎯</th>
+                                    <th class="col-focus" data-i18n-title="options.col_focus" title="Focus after fill"><img src="icons/target.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[target]"></th>
                                     <th class="col-del">🗑</th>
                                 </tr>
                             </thead>
@@ -1380,12 +1413,12 @@
                         <button class="btn-add-field" id="btn-add-field" data-i18n="options.add_field_btn">Add</button>
                     </div>
                     <p class="tooltip-hint" style="margin-top:6px;">
-                        <span data-i18n="options.focus_tip">🎯 Click the target icon to mark a field that gets focused after the profile is applied.</span>
+                        <span data-i18n="options.focus_tip"><img src="icons/target.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[target]"> Click the target icon to mark a field that gets focused after the profile is applied.</span>
                     </p>
 
                     <!-- Actions -->
                     <div class="editor-actions">
-                        <button id="editor-save-btn" class="btn-save" data-i18n="btn.save_profile">💾 Save Profile</button>
+                        <button id="editor-save-btn" class="btn-save" data-i18n="btn.save_profile"><img src="icons/save.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[save]"> Save Profile</button>
                         <button id="editor-back-btn2" class="btn-secondary" data-i18n="btn.cancel">Cancel</button>
                         <button id="editor-delete-btn" class="btn-danger" style="margin-left:auto;" data-i18n="btn.delete_profile">🗑 Delete Profile</button>
                     </div>
@@ -1572,7 +1605,7 @@
                     <h2 data-i18n="privacy.page_title">Privacy Policy</h2>
                     <p style="font-size:13px;color:#64748b;margin-top:4px;">
                         <span data-i18n="privacy.last_updated">Last Updated</span>:
-                        <strong data-i18n="privacy.last_updated_date">February 13, 2026</strong>
+                        <strong data-i18n="privacy.last_updated_date">March 1, 2026</strong>
                     </p>
                 </div>
                 <div style="max-width:760px;padding-bottom:40px;">
@@ -1656,6 +1689,7 @@
                             <div class="perm-card"><div class="perm-name"><code>declarativeNetRequest</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_dnr_purpose">Modify request headers to support the User Agent Switching feature</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_dnr_privacy">No network traffic monitored or redirected; only specific headers overwritten on demand.</span></div></div>
                             <div class="perm-card"><div class="perm-name"><code>declarativeNetRequestWithHostAccess</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_dnrhost_purpose">Allow declarativeNetRequest rules to apply across all URLs</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_dnrhost_privacy">Only activates when user triggers UA switching; no background interception.</span></div></div>
                             <div class="perm-card"><div class="perm-name"><code>downloads</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_downloads_purpose">Download files generated by the extension</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_downloads_privacy">Only downloads files you explicitly request.</span></div></div>
+                            <div class="perm-card"><div class="perm-name"><code>webNavigation</code></div><div class="perm-row"><span class="perm-label" data-i18n="privacy.label_purpose">Purpose</span><span data-i18n="privacy.perm_webnav_purpose">Detect URL changes in Single-Page Apps (SPA) to automatically refresh the profile list</span></div><div class="perm-row perm-privacy"><span class="perm-label" data-i18n="privacy.label_privacy">Privacy</span><span data-i18n="privacy.perm_webnav_privacy">Only listens to internal browser navigation events; no browsing history or page data is collected.</span></div></div>
                         </div>
 
                         <h4 class="privacy-sub-title" data-i18n="privacy.perm_host_title">Host Permissions</h4>
@@ -1714,7 +1748,7 @@
                         <p class="privacy-text" data-i18n="privacy.consent_desc">By using TypeLess, you consent to this privacy policy.</p>
                         <div style="margin-top:16px;font-size:12px;color:#94a3b8;">
                             <span data-i18n="privacy.created_by">Created by</span>: <strong>TRONG.PRO</strong> &nbsp;|&nbsp;
-                            <span data-i18n="privacy.version">Version</span>: <strong>1.0.3</strong>
+                            <span data-i18n="privacy.version">Version</span>: <strong>1.0.6</strong>
                         </div>
                     </div>
                 </div>
@@ -1727,16 +1761,16 @@
     <!-- Footer -->
     <footer class="footer">
         <div style="margin-bottom: 8px;">
-            <a href="https://chromewebstore.google.com" target="_blank">⚡ TypeLess v1.0.3</a>
+            <a href="https://chromewebstore.google.com" target="_blank"><img src="icons/lightning.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[fast]"> TypeLess v1.0.6</a>
             <span style="color: #cbd5e0; margin: 0 10px;">©</span>
             <a href="https://trong.pro" target="_blank"><span data-i18n="footer.by">by</span> TRONG.PRO</a>
             <img src="icons/vn.svg" alt="Vietnam Flag" style="height: 18px; vertical-align: middle; margin-left: 4px;">
         </div>
         <div class="donate-links">
             <span data-i18n="footer.enjoy">Enjoy my work?</span>
-            <a href="https://buymeacoffee.com/trong" target="_blank"><span data-i18n="footer.buy">Buy me a 🍻</span></a>
+            <a href="https://buymeacoffee.com/trong" target="_blank"><span data-i18n="footer.buy">Buy me a <img src="icons/beer.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[beer]"></span></a>
             <span data-i18n="footer.tip" style="margin-left: 5px;">or tip via</span>
-            <a href="https://paypal.me/DaoVanTrong" target="_blank" style="margin-left: 5px;">❤️ PayPal</a>
+            <a href="https://paypal.me/DaoVanTrong" target="_blank" style="margin-left: 5px;"><img src="icons/heart.svg" style="width:1em;height:1em;vertical-align:-0.15em;display:inline-block;" alt="[heart]"> PayPal</a>
         </div>
     </footer>
 

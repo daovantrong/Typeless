@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TypeLess - Auto Form Filler",
-  "version": "1.0.3",
+  "version": "1.0.6",
   "minimum_chrome_version": "88",
   "description": "Auto-fill forms with pre-saved profiles",
   "permissions": [
@@ -13,7 +13,8 @@
     "contextMenus",
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
-    "downloads"
+    "downloads",
+    "webNavigation"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -53,33 +54,8 @@
         "demo-form.html",
         "mobile-override.js",
         "screenshot.js",
-        "icons/vn.svg",
-        "icons/uk.svg",
-        "icons/save.svg",
-        "icons/export.svg",
-        "icons/import.svg",
-        "icons/copy.svg",
-        "icons/paste.svg",
-        "icons/flash.svg",
-        "icons/reload.svg",
-        "icons/refresh.svg",
-        "icons/minimize.svg",
-        "icons/expand.svg",
-        "icons/close.svg",
-        "icons/eye.svg",
-        "icons/globe.svg",
-        "icons/delete.svg",
-        "icons/play.svg",
-        "icons/beer.svg",
-        "icons/heart.svg",
-        "icons/clipboard.svg",
-        "icons/calendar.svg",
-        "icons/link.svg",
-        "icons/description.svg",
-        "icons/check.svg",
-        "icons/warning.svg",
-        "icons/empty.svg",
-        "icons/empty.svg",
+        "default.json",
+        "icons/*",
         "fonts/*"
       ],
       "matches": [

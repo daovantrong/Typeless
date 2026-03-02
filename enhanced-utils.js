@@ -9,7 +9,7 @@ console.log(`%c
 ──────╚══╝─╚╝──────────────────────────╚══╝
 
 TypeLess - Auto Form Filler
-v1.0.3 by TRONG.PRO
+v1.0.6 by TRONG.PRO
 `, 'color: #667eea; font-weight: bold;');
 
 // Enhanced form filling utilities

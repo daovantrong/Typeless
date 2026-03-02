@@ -6,24 +6,43 @@ TypeLess - Auto Form Filler is the ultimate productivity extension that revoluti
 Fill entire web forms instantly with pre-saved profiles. No more repetitive typing or manual data entry. Simply select a profile and watch as TypeLess intelligently populates every field with perfect accuracy.
 
 **Unlimited Profile Management**
-Create and manage unlimited profiles for different scenarios - work, personal, shopping, testing, or any context you need. Switch between profiles effortlessly and keep your data organized. Rename profiles inline with a single click (✏️) directly from the popup — no need to delete and re-save. The new **Profile Manager** in the Options page gives you a searchable, centralized view of all your profiles.
+Create and manage unlimited profiles for different scenarios — work, personal, shopping, testing, or any context you need. Switch between profiles effortlessly and keep your data organized. Rename profiles inline with a single click (✏️) directly from the popup — no need to delete and re-save. The **Profile Manager** in the Options page gives you a searchable, centralized view of all your profiles, with inline editing, per-field delete, drag-to-reorder, and bulk delete.
 
 **Smart Fill Technology**
 Our revolutionary Smart Fill engine automatically detects form field types and generates realistic mock data on demand. Perfect for developers and testers who need placeholder data quickly. Generates unique names, emails, phone numbers, addresses, and more.
+
+## 🎛️ Redesigned Toolbar (v1.0.6)
+
+The floating toolbar has been fully redesigned for a more compact, distraction-free experience:
+
+- **Compact height** — reduced to 64 px, profile chips fit in a single line without wrapping
+- **Drag-and-drop reorder** — grab any profile chip and drag it left or right to reorder without going into settings
+- **Per-chip delete button** — each profile chip now has its own × button; click to delete with one confirmation
+- **Language-aware title** — the toolbar title ("TypeLess — Auto Form Filler") now updates instantly when you switch languages, without requiring a page reload
 
 ## 🌍 Global Accessibility
 
 **Multi-Language Support**
 - 🇺🇸 English
-- 🇻🇳 Vietnamese  
+- 🇻🇳 Vietnamese
 - 🇨🇳 Simplified Chinese
 - 🇹🇼 Traditional Chinese
 - 🇯🇵 Japanese
 - 🇰🇷 Korean
 
-The entire interface, including field labels and tooltips, dynamically translates to your preferred language, making TypeLess truly global.
+The entire interface — including field labels, tooltips, notification messages, and the restricted-page warning banner — dynamically translates to your preferred language the moment you change it, with no reload required.
 
 ## 🛠️ Advanced Toolkit
+
+**Profile Manager (Options Page)**
+The dedicated Profiles tab in Options lets you manage all saved profiles in one place:
+- Search across all profiles in real time
+- Edit any profile field (label, value, CSS selector, type, focus flag)
+- Add new fields manually with a CSS selector picker
+- **Drag to reorder** profiles (order syncs to the toolbar)
+- **Delete individual profiles** with a single × button
+- **Delete All** button with confirmation to wipe all profiles at once
+- **Refresh List** button to reload the profile list without leaving the page
 
 **Form Utilities**
 - Save HTML: Export current form state for debugging and documentation
@@ -39,7 +58,18 @@ The entire interface, including field labels and tooltips, dynamically translate
 - Export profiles to JSON for backup (v1.2 format with metadata: version, export date, count)
 - Import profiles from backup files — result shows added / updated / skipped counts separately
 - Copy/paste profiles between tabs or machines
-- Granular delete options
+
+## 🏢 Enterprise Deployment
+
+**Pre-configured Profiles**
+TypeLess supports automatic profile deployment for enterprise environments. System administrators can pre-populate the extension with default profiles by modifying the `default.json` configuration file before distribution. This feature enables:
+
+- **Bulk Deployment**: Pre-load standard profiles for all users in an organization
+- **Standardized Testing**: Deploy consistent test profiles across development teams
+- **Compliance Templates**: Include approved form-filling templates for regulatory workflows
+- **Offline Distribution**: Complete setup without requiring internet connectivity
+
+*Note: This feature is primarily designed for enterprise offline deployment scenarios. It requires modifying the extension files before distribution and works when installing from an extracted folder in developer mode. Individual users downloading from extension stores will typically start with an empty profile configuration and create their own profiles as needed.*
 
 ## ⌨️ Productivity Shortcuts
 
@@ -49,15 +79,28 @@ Speed up your workflow with keyboard shortcuts:
 ## 🎨 User Experience
 
 **Modern Interface**
-Clean, intuitive design with Material Design icons. The floating toolbar provides instant access without cluttering your workspace. Responsive design works perfectly on desktop and mobile browsers.
+Clean, intuitive design with Material Design icons. The compact floating toolbar provides instant access without cluttering your workspace. Responsive design works perfectly on desktop and mobile browsers.
 
 **Smart Detection**
-TypeLess intelligently identifies form fields - text inputs, dropdowns, checkboxes, radio buttons, and textareas. It also supports FineUI / ComboBox fields (inputs that look like text but behave as dropdowns), correctly saving both the display label and the hidden code value and restoring both on fill. It understands field context and matches them with the right data from your profiles.
+TypeLess intelligently identifies form fields — text inputs, dropdowns, checkboxes, radio buttons, and textareas. It also supports FineUI / ComboBox fields (inputs that look like text but behave as dropdowns), correctly saving both the display label and the hidden code value and restoring both on fill. It understands field context and matches them with the right data from your profiles.
+
+**Restricted Page Awareness**
+When you open the popup on a browser system page (chrome://, edge://, about:, brave://, etc.), TypeLess displays a clear warning banner explaining why it cannot operate on that page. The banner message is fully translated and updates live when you switch languages — just like the rest of the UI.
 
 ## 🔒 Privacy & Security
 
 **100% Local Storage**
 All your profiles and data are stored exclusively on your device using the browser's secure storage API. No cloud servers, no data mining, no tracking. Your information never leaves your browser.
+
+**Security Audited (v1.0.6)**
+This release includes a comprehensive internal security audit. Key findings and measures:
+- No `eval()` or `new Function()` usage anywhere in the codebase
+- No external `fetch()` calls — all network requests are extension-internal
+- All user-controlled strings rendered through `innerHTML` are escaped with `escapeHtml()`
+- `chrome.runtime.onMessage` validates `sender.id === chrome.runtime.id` in all listeners
+- `postMessage` iframe relay validates `event.source` against a known frame hierarchy
+- JSON import capped at 5 MB with structural validation before processing
+- Notification messages use `textContent` (never `innerHTML`) for user-facing text
 
 **Minimal Permissions**
 We only request permissions essential for functionality:
@@ -69,6 +112,7 @@ We only request permissions essential for functionality:
 - DeclarativeNetRequest: Modify network requests for user agent switching
 - DeclarativeNetRequestWithHostAccess: Extended network request handling
 - Downloads: Save HTML exports and screenshots
+- WebNavigation: Detect URL changes in Single-Page Apps (SPA) to auto-refresh the profile list without requiring a page reload
 
 **Transparent Operations**
 No background activity, no remote connections, no analytics. TypeLess only works when you explicitly interact with it.
@@ -104,7 +148,7 @@ No background activity, no remote connections, no analytics. TypeLess only works
 
 TypeLess transforms repetitive form filling into a fast, secure, and enjoyable experience. Join thousands of users who've reclaimed their time from tedious data entry. Compatible with Chrome 88+ and Microsoft Edge 88+.
 
-**Version 1.0.3** - Latest features include inline profile rename, FineUI/ComboBox support, screenshot toolbar fix, Profile Manager in Settings, and improved export/import format.
+**Version 1.0.6** — This release delivers a fully redesigned compact toolbar (64 px, single-line chips), drag-and-drop profile reordering directly from the toolbar, per-chip delete buttons, a Refresh List button in the Profile Manager, and a Delete All option with confirmation. Bug fixes include: Options page not opening automatically after installation, false restricted-page warnings on the extension's own pages, toolbar title not updating when switching language, "Extension context invalidated" console errors after extension reload, and the restricted-page warning banner now being fully translated and live-updating with language changes. A comprehensive security audit was also completed with no critical findings.
 
 ---
 Privacy: No personal data collected. Your profiles remain securely stored on your device and are never transmitted to external servers.
